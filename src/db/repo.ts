@@ -4,6 +4,7 @@
 // are computed by `domain/selectors.ts` from these reads, or by SQL in the DuckDB repo.
 
 import type { Analysis, Exchange, Lp, LpRole, PrepFile, Question, Report, Session, Settings, Story, TranscriptEvent } from '../domain/types.ts';
+import type { MockBackup } from './backup.ts';
 
 export type RepoMode = 'memory' | 'duckdb' | 'none';
 
@@ -61,6 +62,8 @@ export interface Repo {
   reset(): Promise<void>;
   /** Dev only: load the sample library. */
   loadSample(): Promise<void>;
+  /** Replace every table with the backup's, in one go. Secrets are untouched. */
+  importBackup(b: MockBackup): Promise<void>;
 
   // ---- blobs (recordings, clips, uploads)
   putBlob(key: string, blob: Blob): Promise<boolean>;

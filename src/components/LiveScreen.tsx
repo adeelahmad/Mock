@@ -9,9 +9,9 @@
 //            with the analysis card on the right; keys Space · R · N · H · Esc.
 import React, { useEffect, useRef, useState } from 'react';
 import Viz, { type VizAccent, type VizWho } from './Viz.tsx';
-import AnalysisCard from './AnalysisCard.tsx';
+import AnalysisCard, { type AnalysisCardData } from './AnalysisCard.tsx';
 import { Icon, Sheet, VerdictChip, fmt } from './ui.tsx';
-import type { Interviewer, MissedNumber, Mode, StarSplit, UiPrefs, Verdict, VerdictCode } from '../domain/types.ts';
+import type { Interviewer, Mode, UiPrefs, Verdict } from '../domain/types.ts';
 import type { Speaker } from '../domain/session-machine.ts';
 import '../styles/screens/live.css';
 
@@ -25,13 +25,8 @@ export interface LiveNote { t: string; n: string }
 export interface LiveRecapRow { mono: string; name: string; role: string; lp: string; verdict: Verdict | null }
 export interface LiveRecap { headline: string; durationSec: number; questions: number; fixes: number; rows: LiveRecapRow[]; focus: string }
 
-/** The analysis card's data contract (AnalysisCard.dc.html). */
-export interface AnalysisCardData {
-  q: string; question: string; lp: string; story: string; verdict: VerdictCode;
-  better: string; reason: string; missed: MissedNumber[]; star: StarSplit; iPct: number;
-  pace: number; paceNote: string; fillers: number; length: string; lengthNote: string;
-  strength: string; fixes: string[];
-}
+/** The analysis card's data contract — one definition, owned by AnalysisCard.tsx. */
+export type { AnalysisCardData };
 
 export interface LiveCoaching {
   /** null until the analysis lands. */
@@ -200,7 +195,7 @@ export default function LiveScreen(p: LiveScreenProps) {
     </div>
   );
   const card = (compact = false) => c.card
-    ? <AnalysisCard data={c.card} compact={compact} onPlay={p.onPlay} onSaveBest={p.onSaveBest} onDrill={p.onDrill} style={undefined} />
+    ? <AnalysisCard data={c.card} compact={compact} onPlay={p.onPlay} onSaveBest={p.onSaveBest} onDrill={p.onDrill} />
     : <div className="card pad sub live-card-wait"><span className="spinner cool" />Writing the analysis…</div>;
 
   const rootClass = ['live', accent === 'cool' ? 'cool' : '', p.demo ? 'demo' : '', desktop ? 'desk' : '', desktop && isCoaching ? 'wide' : '', desktop && (isConnecting || isEnd) ? 'single' : ''].filter(Boolean).join(' ');

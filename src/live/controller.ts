@@ -30,13 +30,18 @@ export interface StartOptions {
 }
 
 export type Listener = (s: SessionState, meta: ControllerMeta) => void;
-export interface ControllerMeta { sessionId: string | null; sessionNumber: number; storyNotes: boolean; notes: { t: string; n: string }[]; demo: boolean }
+export interface ControllerMeta {
+  sessionId: string | null; sessionNumber: number; storyNotes: boolean; notes: { t: string; n: string }[]; demo: boolean;
+  /** Who is about to speak first (for the connecting copy) — the Bar Raiser unless the mode says otherwise. */
+  interviewer: Interviewer | null;
+  mode: Mode;
+}
 
 const SPEECH_ON = 0.05, SPEECH_OFF = 0.025; // mic level hysteresis
 
 export class SessionController {
   state: SessionState = initialState(0);
-  meta: ControllerMeta = { sessionId: null, sessionNumber: 0, storyNotes: true, notes: [], demo: false };
+  meta: ControllerMeta = { sessionId: null, sessionNumber: 0, storyNotes: true, notes: [], demo: false, interviewer: null, mode: 'loop' };
   private listeners = new Set<Listener>();
   private off: (() => void) | null = null;
   private tick: ReturnType<typeof setInterval> | null = null;
@@ -69,7 +74,8 @@ export class SessionController {
       startedAt: new Date(this.now()).toISOString(), endedAt: null, recordingKey: null, recordingMime: null, report: null,
     };
     this.session = session;
-    this.meta = { ...this.meta, sessionId: session.id, sessionNumber: number, storyNotes: opts.storyNotes, notes: [] };
+    const first = opts.interviewers.find((i) => i.role === 'Bar Raiser') ?? opts.interviewers[0] ?? null;
+    this.meta = { ...this.meta, sessionId: session.id, sessionNumber: number, storyNotes: opts.storyNotes, notes: [], interviewer: first, mode: opts.mode };
     await this.repo.insertSession(session);
     this.dispatch({ type: 'CONNECT', now: this.now() });
     this.off = this.transport.on((e) => this.onTransport(e));
@@ -147,6 +153,7 @@ export class SessionController {
       case 'goAway': this.dispatch({ type: 'DISCONNECTED', now, reason: 'goAway' }); break;
       case 'resumption': this.resumptionHandle = e.handle; break;
       case 'closed': if (!this.ended) this.dispatch({ type: 'DISCONNECTED', now, reason: e.reason }); break;
+      case 'sessionEnd': void this.end(e.focus ?? ''); break;
       case 'error': this.dispatch({ type: 'ERROR', now, message: e.message }); break;
       case 'turnComplete': break;
       case 'toolCallCancellation': break;
@@ -245,6 +252,7 @@ export class SessionController {
     return s ? 'Try the ' + s.title + ' story — ' + s.numbers.slice(0, 2).map((n) => n.value).join(', ') + '.' : 'Pick your clearest story and lead with its number.';
   }
   private notesFor(lp: string): { t: string; n: string }[] {
-    return this.storiesFor(lp).slice(0, 3).map((s) => ({ t: s.title, n: s.numbers.slice(0, 3).map((n) => n.value).join(' · ') }));
+    // Short form, as the board shows: the first two numbers, label-less.
+    return this.storiesFor(lp).slice(0, 3).map((s) => ({ t: s.title, n: s.numbers.slice(0, 2).map((n) => n.value).join(' · ') }));
   }
 }

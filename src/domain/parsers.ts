@@ -109,13 +109,16 @@ const BEHAVIOURAL = /tell me about a time|describe a (time|situation)|give me an
  * wins. 'high' when it scores at least 2 and beats the runner-up; 'low' otherwise (the review
  * screen then asks). Alternatives are the other LPs that scored, best first.
  */
+/** A keyword hits at the start of a word (stems like "persua" still match "persuade"; "big" no longer matches "ambiguity"). */
+const hits = (low: string, k: string): boolean => { const at = low.indexOf(k); return at >= 0 && (at === 0 || !/[a-z]/.test(low[at - 1]) || low.includes(' ' + k)); };
+
 export function guessLp(text: string, lps: LpRef[] = DEFAULT_LPS): LpGuess {
   const low = ' ' + text.toLowerCase().replace(/\s+/g, ' ') + ' ';
   const score = new Map<string, number>();
   const order: string[] = [];
   const bump = (lp: string, w: number) => { if (!score.has(lp)) order.push(lp); score.set(lp, (score.get(lp) ?? 0) + w); };
-  for (const [k, lp] of KW) if (low.includes(k)) bump(lp, k.includes(' ') || k.length >= 7 ? 2 : 1);
-  for (const [k, lp] of KW_WEAK) if (low.includes(k)) bump(lp, 1);
+  for (const [k, lp] of KW) if (hits(low, k)) bump(lp, k.includes(' ') || k.length >= 7 ? 2 : 1);
+  for (const [k, lp] of KW_WEAK) if (hits(low, k)) bump(lp, 1);
   const known = new Set(lps.map((l) => l.id));
   const ranked = order.filter((lp) => known.has(lp)).sort((a, b) => (score.get(b) ?? 0) - (score.get(a) ?? 0));
   if (!ranked.length) return { lpId: '', confidence: 'low', alternatives: [] };

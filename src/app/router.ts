@@ -47,6 +47,9 @@ export const paths = {
   grid: '/library/stories/grid',
   file: (id: string) => '/library/files/' + id,
   history: '/history', session: (id: string) => '/history/' + id,
+  /** A session detail opened on one answer (0-based position in the session). */
+  answer: (sessionId: string, index: number) => '/history/' + sessionId + '?q=' + index,
+  importFile: (fileId: string) => '/library/questions?import=' + fileId,
   progress: '/progress',
   live: '/live',
 };

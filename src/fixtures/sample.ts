@@ -148,14 +148,14 @@ function build(): { sessions: Session[]; exchanges: Exchange[]; transcript: Tran
       const st = storyFor(lp.id);
       const qq = questionFor(lp.id);
       const iv = INTERVIEWERS[index % INTERVIEWERS.length];
-      const startMs = index * 8 * 60000 + 30000;
+      const startMs = Math.round(mins * 60000 * (index + 0.1) / lpsAsked.length);
       const exId = id + '-e' + index;
       const full = FULL_ANALYSES[lp.id + '@' + n];
       exchanges.push({
         id: exId, sessionId: id, index, questionId: qq?.id ?? null, questionText: qq?.text ?? 'Tell me about a time that tested ' + lp.name + '.',
         interviewer: iv, lpId: lp.id, storyId: st?.id ?? null, storyTitle: st?.title ?? null,
-        startedAt: new Date(Date.parse(startedAt) + startMs).toISOString(), endedAt: new Date(Date.parse(startedAt) + startMs + 6 * 60000).toISOString(),
-        startMs, endMs: startMs + 6 * 60000, clipKey: null,
+        startedAt: new Date(Date.parse(startedAt) + startMs).toISOString(), endedAt: new Date(Date.parse(startedAt) + Math.round(mins * 60000 * (index + 0.95) / lpsAsked.length)).toISOString(),
+        startMs, endMs: Math.round(mins * 60000 * (index + 0.95) / lpsAsked.length), clipKey: null,
         analysis: full ?? analysisFor(lp.name, verdict, endedAt), verdict, isBest: n === 12 && lp.id === 'deep',
       });
       index++;

@@ -1,0 +1,47 @@
+/* The recording player (History board). Phone first; desktop (≥ 900 px) grows the waveform,
+   shows the LP in the chapter labels and moves "Skip my answers" next to the speed chip. */
+
+.pl { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.pl-wave { position: relative; height: 56px; display: flex; align-items: center; gap: 2px; cursor: pointer; border-radius: 4px; }
+.pl-wave:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+.pl-bar { flex: 1; min-width: 1px; border-radius: 1px; background: var(--m-line2); transition: background var(--dur-fast); }
+.pl-bar.played { background: var(--m-fg); }
+.pl-head { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--m-warm-fill); pointer-events: none; transform: translateX(-1px); transition: left var(--dur-fast) linear; }
+.pl-chapters { position: relative; height: 16px; }
+.pl-ch { position: absolute; top: 0; min-width: 18px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border: none; background: transparent; padding: 0; cursor: pointer; color: var(--m-fg3); font: 700 9px/1 var(--font-sans); letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-align: left; transition: color var(--dur-fast); }
+.pl-ch-text { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-ch::before { content: ''; width: 1px; height: 6px; background: var(--m-line2); }
+.pl-ch.on, .pl-ch:hover { color: var(--m-fg); }
+.pl-ch:focus-visible { outline: none; box-shadow: var(--ring-focus); border-radius: 3px; }
+.pl-ch-lp { display: none; }
+.pl-ctl { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.pl-pos { font: 500 13px/1 var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pl-total { color: var(--m-fg3); }
+.pl-btns { display: flex; align-items: center; gap: 10px; }
+.pl-skip { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--m-line); background: transparent; color: var(--m-fg); font: 700 10px/1 var(--font-sans); cursor: pointer; display: grid; place-items: center; padding: 0; transition: background var(--dur-fast); }
+.pl-skip:hover { background: var(--m-elev); }
+.pl-play { width: 48px; height: 48px; border-radius: 50%; border: none; background: var(--m-fg); color: var(--m-card); display: grid; place-items: center; cursor: pointer; padding: 0; transition: transform var(--dur-fast); }
+.pl-play:active { transform: scale(.96); }
+.pl-chips { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+.pl-chip { height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--m-line); background: transparent; color: var(--m-fg); display: inline-flex; align-items: center; font: 700 12px/1 var(--font-mono); font-variant-numeric: tabular-nums; cursor: pointer; white-space: nowrap; transition: background var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast); }
+.pl-chip:hover { background: var(--m-elev); }
+.pl-chip.text { font: 500 12px/1 var(--font-sans); color: var(--m-fg2); }
+.pl-chip.on { background: var(--m-fg); color: var(--m-card); border-color: var(--m-fg); }
+.pl-chip.on:hover { background: var(--m-fg); }
+.pl-chip.desk { display: none; }
+.pl-row2 { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.pl-now { font: 700 10px/1.2 var(--font-sans); color: var(--m-fg2); letter-spacing: .06em; text-transform: uppercase; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pl-note { font: 400 12px/1.3 var(--font-sans); color: var(--m-fg3); }
+.pl audio { display: none; }
+
+@media (min-width: 900px) {
+  .pl-wave { height: 72px; gap: 3px; }
+  .pl-head { top: -6px; bottom: -6px; }
+  .pl-chapters { height: 18px; }
+  .pl-ch { font-size: 10px; gap: 3px; }
+  .pl-ch-lp { display: inline; }
+  .pl-pos { font-size: 14px; }
+  .pl-btns { gap: 12px; }
+  .pl-chip.desk { display: inline-flex; }
+  .pl-row2 { display: none; }
+}

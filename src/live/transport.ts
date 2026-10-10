@@ -38,6 +38,8 @@ export type TransportEvent =
   | { type: 'turnComplete' }
   | { type: 'goAway'; timeLeftMs: number }
   | { type: 'resumption'; handle: string | null; resumable: boolean }
+  /** The recap has been spoken: the session is over (simulated; M3 derives it after [END]). */
+  | { type: 'sessionEnd'; focus?: string }
   | { type: 'closed'; code?: number; reason?: string }
   | { type: 'error'; message: string };
 

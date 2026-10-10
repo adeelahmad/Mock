@@ -115,6 +115,9 @@ svg.ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-wid
 .seg > button.on { background: var(--m-card); color: var(--m-fg); box-shadow: var(--shadow-1); }
 .seg.tall > button { height: 40px; }
 .seg.h34 > button { height: 34px; }
+.seg.h36 > button { height: 36px; }
+.seg.sm > button { height: 30px; flex: none; padding: 0 14px; font: 500 12px/1 var(--font-sans); }
+.seg.sm > button.on { font-weight: 700; }
 .filter-row { display: flex; gap: 6px; overflow: auto; flex: none; padding-bottom: 2px; scrollbar-width: none; }
 .filter-row::-webkit-scrollbar { display: none; }
 .filter { flex: none; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--m-line); background: transparent; color: var(--m-fg); font: 500 13px/1 var(--font-sans); cursor: pointer; }
@@ -170,7 +173,7 @@ input[type="number"].seed { width: 84px; background: var(--m-card); font-family:
   .screen-body { padding: 16px 32px 32px; }
   .screen-foot { padding: 12px 32px 24px; }
   .screen-body > .list, .screen-body > .card, .screen-body > .stack, .screen-body > .tint, .screen-body > .seg, .screen-body > .filter-row, .screen-body > .dropzone, .screen-body > .readiness, .screen-body > .h2, .screen-body > .hstack, .screen-body > .field, .screen-body > .sub { max-width: 760px; width: 100%; }
-  .master-detail { display: grid; grid-template-columns: 340px 1fr; flex: 1; min-height: 0; }
+  .master-detail { display: grid; grid-template-columns: 440px 1fr; flex: 1; min-height: 0; }
   .master-detail > .master { border-right: 1px solid var(--m-line); display: flex; flex-direction: column; min-height: 0; }
   .master-detail > .master > .screen-body { padding: 0; gap: 0; }
   .master-detail > .master .list { border: none; border-radius: 0; }

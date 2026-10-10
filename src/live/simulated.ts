@@ -22,6 +22,8 @@ export class SimulatedTransport implements LiveTransport {
   private speed: number;
   private open = false;
   private muted = false;
+  private paused = false;
+  private resumeWaiters: (() => void)[] = [];
   private speaking = false;
   private qi = -1;
   private coachingNow = false;
@@ -57,11 +59,15 @@ export class SimulatedTransport implements LiveTransport {
     else if (tag === 'FEEDBACK') this.feedback();
     else if (tag === 'HINT') this.hint();
     else if (tag === 'END') this.end();
-    else if (tag === 'PAUSE') { const g = this.bump(); void this.say('Paused.', g); }
+    else if (tag === 'PAUSE') { this.paused = true; this.setSpeaking(false); }
   }
 
   sendToolResponse(responses: ToolResponse[]): void { this.toolResponses.push(...responses); }
-  setMuted(m: boolean): void { this.muted = m; }
+  setMuted(m: boolean): void {
+    this.muted = m;
+    // Unmuting after a pause resumes the suspended flow.
+    if (!m && this.paused) { this.paused = false; const w = this.resumeWaiters; this.resumeWaiters = []; w.forEach((r) => r()); }
+  }
   stopPlayback(): void { this.setSpeaking(false); }
   isSpeaking(): boolean { return this.speaking; }
   close(): void { if (!this.open) return; this.open = false; this.bump(); this.setSpeaking(false); this.em.emit({ type: 'closed', code: 1000, reason: 'closed' }); }
@@ -152,14 +158,14 @@ export class SimulatedTransport implements LiveTransport {
     if (this.alive(g)) this.next();
   }
 
+  /** A hint is a side remark: it speaks without abandoning the running question flow. */
   private hint(): void {
     if (!this.q) return;
-    const g = this.bump();
-    void this.say(this.q.hint, g);
+    void this.say(this.q.hint, this.gen);
   }
 
   private end(): void { this.endWith(this.bump()); }
-  private endWith(g: number): void { void this.say(this.script.recap, g); }
+  private endWith(g: number): void { void (async () => { await this.say(this.script.recap, g); if (this.alive(g)) this.em.emit({ type: 'sessionEnd', focus: this.script.focus }); })(); }
 
   /** Speak text: aiSpeaking on, transcript in word chunks, aiSpeaking off, turnComplete. */
   private async say(text: string, g: number): Promise<void> {
@@ -202,7 +208,11 @@ export class SimulatedTransport implements LiveTransport {
 
   private wait(ms: number): Promise<void> {
     return new Promise((res) => {
-      const t = setTimeout(() => { this.timers.delete(t); res(); }, Math.max(0, ms * this.speed));
+      const t = setTimeout(() => {
+        this.timers.delete(t);
+        // Paused: hold here until the mic is unmuted.
+        if (this.paused) this.resumeWaiters.push(res); else res();
+      }, Math.max(0, ms * this.speed));
       this.timers.add(t);
     });
   }

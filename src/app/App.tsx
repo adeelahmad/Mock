@@ -77,12 +77,13 @@ function Screen() {
 }
 
 export default function App() {
-  const { ready, status, toastText, live, route, sheet, closeSheets } = useApp();
+  const { ready, status, toastText, live, route, sheet, closeSheets, data } = useApp();
   const inLive = route.path === paths.live && live.state;
+  const firstRun = !data.settings.onboarded || route.path === paths.onboarding;
   const showTabs = !inLive && ['practice', 'library', 'history', 'progress'].includes(route.tab) && route.parts.length <= 2 && route.path !== paths.settings && route.path !== paths.onboarding;
   return (
     <div className="app">
-      {!inLive && <Sidebar />}
+      {!inLive && !firstRun && <Sidebar />}
       <div className="shell">
         {inLive ? <Live /> : <Screen />}
         {showTabs && <TabBar />}

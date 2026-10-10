@@ -114,7 +114,7 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
       case 'loop': return { mode: 'loop', coaching };
       case 'lp': return lpPick ? { mode: 'lp', focus: lpPick.id, focusLabel: lpPick.name, coaching } : null;
       case 'story': return storyPick ? { mode: 'story', focus: storyPick.id, focusLabel: storyPick.title, coaching } : null;
-      case 'set': return { mode: 'question_set', focus: setPickObj.key, focusLabel: setPickObj.label, coaching };
+      case 'set': return setPickObj.count > 0 ? { mode: 'question_set', focus: setPickObj.key, focusLabel: setPickObj.label, coaching } : null;
       case 'replay': return filePick ? { mode: 'replay', focus: filePick.file.id, focusLabel: filePick.title, coaching } : null;
       case 'deep': return focus ? { mode: 'deep_dive', focus: focus.id, focusLabel: focus.name, coaching } : null;
       case 'bar': return { mode: 'bar_raiser', focus: null, focusLabel: 'Bar raiser · ' + barRaiser.name, coaching };
@@ -122,7 +122,7 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
   };
   const start = () => {
     const o = startOptions();
-    if (!o) { toast(pick === 'replay' ? 'Drop your past-loop notes in Library · Files first.' : 'Add a Leadership Principle in the Library first.'); return; }
+    if (!o) { toast(pick === 'replay' ? 'Drop your past-loop notes in Library · Files first.' : pick === 'set' ? 'That set is empty — add questions in Library · Questions first.' : 'Add a Leadership Principle in the Library first.'); return; }
     void live.start(o);
   };
 
@@ -156,7 +156,7 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
             <div className="opt-text"><span className="opt-title">Full loop</span><span className="opt-sub">{settings.loopSize} interviewers · ~{settings.loopSize * 10} min</span></div>
             {pick === 'loop' && <span className="opt-check" aria-hidden="true">✓</span>}
           </button>
-          <button type="button" className={'opt' + (elseLabel() ? ' on' : '')} onClick={() => setPage(2)} aria-haspopup="true">
+          <button type="button" className={'opt' + (elseLabel() ? ' on' : '')} onClick={() => setPage(2)}>
             <Tile plain>…</Tile>
             <div className="opt-text"><span className="opt-title">Something else</span><span className="opt-sub">{elseLabel() ?? 'One LP · one story · question set · replay · bar raiser'}</span></div>
             <Icon.Forward size={16} style={{ color: 'var(--m-fg3)' }} />

@@ -61,7 +61,7 @@ for (const theme of ['light', 'dark']) {
     };
     await trySheet('sheet-setup', () => page.getByRole('button', { name: /^Change$/ }).first().click());
     await trySheet('sheet-answer', async () => { await page.goto(BASE + '/#/library/questions'); await settle(page); await page.getByRole('button', { name: /Model answer/ }).first().click(); });
-    await trySheet('sheet-add-question', async () => { await page.goto(BASE + '/#/library/questions'); await settle(page); await page.getByRole('button', { name: /^\+ Add$/ }).first().click(); });
+    await trySheet('sheet-add-question', async () => { await page.goto(BASE + '/#/library/questions'); await settle(page); await page.getByRole('button', { name: /^\+ (Add|Question)$/ }).first().click(); });
 
     // The live session: start the suggested drill and capture states as the demo plays.
     if (!ONLY || ONLY.test('live')) {

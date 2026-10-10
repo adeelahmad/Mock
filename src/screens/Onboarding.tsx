@@ -1,59 +1,224 @@
-// First run — drop → say hello → start. Three steps, choices remembered, never re-asked.
-import React from 'react';
-import { Input, Select, Dropzone } from '../components/ui.tsx';
+// First run (board 5) — three steps: drop, say hello, start. One drop zone takes everything
+// (files or a whole folder) and sorts it by content: stories, questions, the JD, notes from
+// past loops. Mic, level and voice are one screen. Only the last step is required: Mock works
+// with the LPs and the common bank, it just coaches less precisely. The choice is remembered
+// in settings.onboarded and never re-asked ("Run first-run setup again" lives in Settings).
 
-export default function Onboarding(p) {
-  const { step, lps, importInfo, gem, gemStatus, models, voices, nextN, focusLp, covered, questionCount, dbBadge, gemBadge } = p;
-  const dot = (on, color) => <span style={{ width: 8, height: 8, borderRadius: '50%', background: on ? color : 'var(--m-line2)' }} />;
+import React, { useEffect, useMemo, useState } from 'react';
+import { useApp } from '../app/store.tsx';
+import { paths } from '../app/router.ts';
+import { Icon } from '../components/ui.tsx';
+import Viz from '../components/Viz.tsx';
+import { latestSessionNumber, type LpRow } from '../domain/selectors.ts';
+import { practiceQueue } from '../domain/readiness.ts';
+import { KeyField, ModelField, VOICES, personaFor, previewToast, importPrepFiles, importSummary, typeLabel, useHelloTest, keyClick, fmtPause, plural, type PrepImport } from './Settings.tsx';
+import '../styles/screens/settings.css';
+
+type Step = 1 | 2 | 3;
+
+// ---------- Dropped folders: walk the directory entries (Chromium/Safari), else take the files ----------
+function filesFromDrop(dt: DataTransfer): Promise<File[]> {
+  const items = Array.from(dt.items ?? []);
+  const entries = items.map((i) => (typeof i.webkitGetAsEntry === 'function' ? i.webkitGetAsEntry() : null));
+  const plain = Array.from(dt.files ?? []);
+  if (!entries.some((e) => e && e.isDirectory)) return Promise.resolve(plain);
+  const out: File[] = [];
+  const walk = async (e: FileSystemEntry): Promise<void> => {
+    if (e.isFile) {
+      const f = await new Promise<File>((res, rej) => (e as FileSystemFileEntry).file(res, rej)).catch(() => null);
+      if (f) out.push(f);
+    } else if (e.isDirectory) {
+      const reader = (e as FileSystemDirectoryEntry).createReader();
+      for (;;) {
+        const batch = await new Promise<FileSystemEntry[]>((res, rej) => reader.readEntries(res, rej)).catch(() => []);
+        if (!batch.length) break;
+        for (const c of batch) if (!c.name.startsWith('.')) await walk(c);
+      }
+    }
+  };
+  return (async () => { for (const e of entries) if (e) await walk(e); return out; })();
+}
+
+function PrepDrop({ busy, onFiles }: { busy: boolean; onFiles: (files: File[]) => void }) {
+  const [over, setOver] = useState(false);
+  const take = (list: File[]) => { if (list.length) onFiles(list); };
+  const dirAttr = { webkitdirectory: '' } as Record<string, string>;
   return (
-    <div className="screen">
-      <div className="screen-head" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 24px)' }}>
+    <div className={'dropzone ob-drop' + (over ? ' over' : '')}
+      onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
+      onDrop={(e) => { e.preventDefault(); setOver(false); void filesFromDrop(e.dataTransfer).then(take); }}>
+      <label htmlFor="ob-files" className="ob-drop-main" role="button" tabIndex={0} onKeyDown={keyClick}>
+        <span className="ob-drop-title">{busy ? 'Sorting…' : 'Drop files or a folder'}</span>
+        <span className="ob-drop-sub">.md · .txt · .csv · .docx — anything, mixed</span>
+        <input id="ob-files" type="file" multiple accept=".md,.markdown,.txt,.csv,.json,.docx,.zst" hidden disabled={busy} onChange={(e) => { take(Array.from(e.target.files ?? [])); e.target.value = ''; }} />
+      </label>
+      <label htmlFor="ob-folder" className="ob-drop-link" role="button" tabIndex={0} onKeyDown={keyClick}>or pick a folder
+        <input id="ob-folder" type="file" hidden disabled={busy} {...dirAttr} onChange={(e) => { take(Array.from(e.target.files ?? [])); e.target.value = ''; }} />
+      </label>
+    </div>
+  );
+}
+
+const WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+const words = (n: number): string => WORDS[n] ?? String(n);
+const joinAnd = (xs: string[]): string => (xs.length <= 1 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1]);
+
+export default function Onboarding() {
+  const { data, repo, refresh, go, toast, gemini, setGemini, live, dbMode } = useApp();
+  const { lps, lpRows, stories, questions, sessions, settings, covered } = data;
+  const [step, setStep] = useState<Step>(1);
+  const [info, setInfo] = useState<PrepImport | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [keyDraft, setKeyDraft] = useState(gemini.key);
+  useEffect(() => { setKeyDraft(gemini.key); }, [gemini.key]);
+  const commitKey = () => { const k = keyDraft.trim(); if (k !== gemini.key) void setGemini({ key: k }); };
+  const hello = useHelloTest();
+
+  const nextN = latestSessionNumber(sessions) + 1;
+  const persona = personaFor(gemini.voice) ?? VOICES[0];
+
+  // The suggested drill: the top of the practice queue; on a fresh install, the first LP (in order) with a story and a question.
+  const focus: LpRow | null = useMemo(() => {
+    if (!lpRows.length) return null;
+    if (!sessions.length) return lpRows.find((r) => r.storyCount && r.questionCount) ?? lpRows.find((r) => r.questionCount) ?? lpRows[0];
+    const list = lpRows.map((r) => ({ lpId: r.id, readiness: r.readiness, latest: r.verdict, lastSessionNumber: r.lastSessionNumber, lastAt: r.lastAt, samples: r.readiness == null ? 0 : 1 }));
+    const top = practiceQueue(list, new Date(), { limit: 1 })[0];
+    return lpRows.find((r) => r.id === top?.lpId) ?? lpRows[0];
+  }, [lpRows, sessions.length]);
+
+  const yours = questions.filter((q) => q.source === 'custom' || q.source === 'previous').length;
+  const untagged = questions.filter((q) => !q.lpIds.length).length;
+  const gaps = Math.max(0, lps.length - covered.size);
+  const laterParts = ['Interview date'];
+  if (untagged) laterParts.push('the ' + (untagged === 1 ? 'one unchecked question tag' : words(untagged) + ' unchecked question tags'));
+  if (gaps) laterParts.push('the ' + (gaps === 1 ? 'one LP gap' : words(gaps) + ' LP gaps'));
+  const laterText = joinAnd(laterParts) + (laterParts.length > 1 ? ' are' : ' is') + ' waiting on the home tab — ' + (laterParts.length > 1 ? 'none of them block' : 'it does not block') + ' session ' + nextN + '.';
+  const dbBadge = dbMode === 'duckdb' ? 'DuckDB-WASM ✓' : dbMode === 'memory' ? 'in-memory library' : 'starting';
+  const gemBadge = gemini.hasKey ? 'Gemini Live configured · ' + gemini.model + ' · ' + persona.name : 'no Gemini key — the live screen runs the scripted demo';
+
+  const onFiles = async (list: File[]) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const r = await importPrepFiles(list, { repo, lps, stories, files: data.files });
+      await refresh();
+      setInfo((prev) => (prev ? {
+        files: prev.files + r.files, skipped: [...prev.skipped, ...r.skipped], restored: prev.restored + r.restored,
+        stories: { count: prev.stories.count + r.stories.count, lps: Math.max(prev.stories.lps, r.stories.lps), numbers: prev.stories.numbers + r.stories.numbers },
+        questions: { count: prev.questions.count + r.questions.count, tagged: prev.questions.tagged + r.questions.tagged, toCheck: prev.questions.toCheck + r.questions.toCheck },
+        types: [...prev.types, ...r.types],
+      } : r));
+      toast(importSummary(r));
+    } finally { setBusy(false); }
+  };
+  const pickVoice = (p: typeof VOICES[number]) => { void setGemini({ voice: p.voice }); toast(previewToast(gemini.hasKey, p)); };
+  const finish = async () => { await repo.setSettings({ onboarded: true }); await refresh(); };
+  const start = async () => {
+    await finish();
+    if (focus) await live.start({ mode: 'lp', focus: focus.id, focusLabel: focus.name });
+    else go(paths.practice);
+  };
+  const explore = async () => { await finish(); go(paths.practice); };
+  // "Later" leaves the setup unfinished: the home tab shows it again next time.
+  const later = () => go(paths.library('lps'));
+
+  return (
+    <div className="screen onboarding">
+      {step === 3 && <div className="ob-edge" aria-hidden="true" />}
+      <div className="screen-head ob-head">
         <span className="wordmark">Mock</span>
-        <div className="hstack" style={{ gap: 6 }}>{dot(true, 'var(--m-fg)')}{dot(step >= 2, 'var(--m-fg)')}{dot(step >= 3, 'var(--m-warm-fill)')}</div>
+        <div className="ob-dots" aria-label={'Step ' + step + ' of 3'} role="img">
+          <span className="ob-dot on" /><span className={'ob-dot' + (step >= 2 ? ' on' : '')} /><span className={'ob-dot' + (step >= 3 ? ' warm' : '')} />
+        </div>
       </div>
-      <div className="screen-body" style={{ paddingTop: 28, gap: 18 }}>
+
+      <div className="screen-body ob-body">
         {step === 1 && (
           <>
-            <div className="stack g8"><span style={{ font: '800 34px/1.05 var(--font-sans)', letterSpacing: '-.03em' }}>Your 16 LPs are ready.</span><span className="sub pretty" style={{ fontSize: 15, lineHeight: 1.5 }}>Now drop whatever prep you have. Mock sorts it — stories, questions, your JD, notes from past loops.</span></div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8,1fr)', gap: 4 }}>{lps.map((l) => <span key={l.id} title={l.name} style={{ height: 30, borderRadius: 7, background: 'var(--m-card)', border: '1px solid var(--m-line)', display: 'grid', placeItems: 'center', font: '800 10px/1 var(--font-sans)' }}>{l.short}</span>)}</div>
-            <Dropzone id="mock-files-ob" title="Drop files, or tap to browse" sub=".md · .txt · .csv — anything, mixed" accept=".md,.txt,.csv,.json,.zst" onFiles={p.onBankFiles} />
-            {importInfo && (
-              <div className="list r12">
-                <div className="row label" style={{ justifyContent: 'space-between', padding: '10px 14px' }}><span>Found in {importInfo.files} files</span><span style={{ color: 'var(--m-green)', textTransform: 'none', letterSpacing: 0 }}>sorted automatically</span></div>
-                <div className="row" style={{ justifyContent: 'space-between', padding: '10px 14px' }}><span style={{ font: '600 14px/1.2 var(--font-sans)' }}>{importInfo.questions} questions</span><span className="sub" style={{ fontSize: 12 }}>tagged by keyword · fix any in Library</span></div>
-                <div className="row" style={{ justifyContent: 'space-between', padding: '10px 14px' }}><span style={{ font: '600 14px/1.2 var(--font-sans)' }}>{importInfo.types}</span><span className="sub" style={{ fontSize: 12 }}>included in prep</span></div>
+            <div className="stack g8"><span className="ob-title">Your {lps.length} LPs are ready.</span><span className="ob-sub">Now drop whatever prep you have. Mock sorts it — stories, questions, your JD, notes from past loops.</span></div>
+            <div className="ob-tiles">{lps.map((l) => <span key={l.id} className="ob-tile" title={l.name}>{l.short}</span>)}</div>
+            <PrepDrop busy={busy} onFiles={(l) => void onFiles(l)} />
+            {info && (
+              <div className="list r12" aria-live="polite">
+                <div className="ob-found-head"><span>Found in {plural(info.files, 'file')}</span><span className="ok">sorted automatically</span></div>
+                {info.stories.count > 0 && <div className="ob-found-row"><span className="k">{plural(info.stories.count, 'story', 'stories')}</span><span className="v">mapped to {plural(info.stories.lps, 'LP')} · {plural(info.stories.numbers, 'number')}</span></div>}
+                <div className="ob-found-row"><span className="k">{plural(info.questions.count, 'question')}</span><span className="v">{info.questions.count ? info.questions.tagged + ' tagged · ' + (info.questions.toCheck ? info.questions.toCheck + ' to check later' : 'by keyword, fix any in Library') : 'none found · the common bank still applies'}</span></div>
+                {info.types.map((t, i) => <div key={t.name + i} className="ob-found-row"><span className="k">{typeLabel(t.type)}</span><span className="v">{t.sub}</span></div>)}
+                {info.restored > 0 && <div className="ob-found-row"><span className="k">Mock export</span><span className="v">restored · library, sessions, settings</span></div>}
+                {info.skipped.length > 0 && <div className="ob-found-row"><span className="k">{plural(info.skipped.length, 'file')} skipped</span><span className="v">.docx and .zst land in M2</span></div>}
               </div>
             )}
           </>
         )}
+
         {step === 2 && (
           <>
-            <div className="stack g8"><span style={{ font: '800 34px/1.05 var(--font-sans)', letterSpacing: '-.03em' }}>Connect your interviewer.</span><span className="sub pretty" style={{ fontSize: 15, lineHeight: 1.5 }}>Mock talks to you through Gemini Live. Paste a key from Google AI Studio, pick a voice, and say hello once — that grants the microphone for good.</span></div>
-            <div className="card pad stack g12">
-              <Input label="Gemini API key" type="password" placeholder="AIza…" defaultValue={gem.key} onChange={(e) => p.setGem('key', e.target.value.trim())} hint="Kept in this browser only." autoComplete="off" />
-              <Select label="Live model" options={models} value={gem.model} onChange={(v) => p.setGem('model', v)} />
-              <Select label="Voice" options={voices} value={gem.voice} onChange={(v) => p.setGem('voice', v)} />
-              <button className="btn cool" style={{ fontSize: 15 }} onClick={p.onTestGemini}>Say hello · test the connection</button>
-              <span className="sub" style={{ font: '500 12px/1.4 var(--font-sans)', textAlign: 'center' }}>{gemStatus}</span>
+            <div className="stack g8"><span className="ob-title">Say hello.</span><span className="ob-sub">Talk for a few seconds. This grants the microphone once, checks your earbuds and sets your level — sessions never ask again.</span></div>
+            <div className="card ob-hello">
+              <Viz kind="orb" who={hello.state === 'connecting' || hello.state === 'ok' ? 'me' : 'none'} size={120} />
+              {hello.state === 'ok' ? (
+                <div className="ob-hello-text">
+                  <span className="ob-hello-title"><span style={{ color: 'var(--m-green)' }}>✓</span>Heard you</span>
+                  {/* M3: the level and the measured pause come from the real "say hello" turn. */}
+                  <span className="ob-hello-sub">Earbuds · level ok · pause length set to {fmtPause(settings.pauseMs)} from how you speak</span>
+                </div>
+              ) : (
+                <div className="ob-hello-text">
+                  <button className="btn cool block" style={{ height: 48, fontSize: 15 }} disabled={hello.state === 'connecting'} onClick={() => hello.run(keyDraft)}>
+                    {hello.state === 'connecting' ? 'Connecting…' : 'Say hello · test the connection'}
+                  </button>
+                  <span className="ob-hello-sub" role="status">{hello.text || 'One short turn with ' + persona.name + ' — mic, level and voice in one go.'}</span>
+                </div>
+              )}
             </div>
-            <span className="muted" style={{ font: '400 12px/1.4 var(--font-sans)', textAlign: 'center' }}>No key? Skip — the live screen runs a scripted demo until you add one.</span>
+            <div className="card pad stack g12">
+              <KeyField label="Gemini API key" value={keyDraft} onChange={setKeyDraft} onCommit={commitKey} hint="Kept in this browser only. Restrict the key to the Gemini API in Google AI Studio." />
+              <ModelField />
+              <span className="ob-nokey">No key? Skip — the live screen runs a scripted demo until you add one.</span>
+            </div>
+            <div className="stack g8"><span className="label">Who interviews you · tap to hear</span>
+              <div className="ob-personas" role="radiogroup" aria-label="Who interviews you">
+                {VOICES.map((p) => {
+                  const on = p.voice === gemini.voice;
+                  return (
+                    <button key={p.voice} type="button" role="radio" aria-checked={on} className={'ob-persona' + (on ? ' on' : '')} onClick={() => pickVoice(p)}>
+                      <span className="ob-persona-mono">{p.mono}</span><span className="ob-persona-name">{p.name}</span><span className="ob-persona-desc">{p.short}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </>
         )}
+
         {step === 3 && (
           <>
-            <div className="stack g8"><span style={{ font: '800 34px/1.05 var(--font-sans)', letterSpacing: '-.03em' }}>That’s it.</span><span className="sub pretty" style={{ fontSize: 15, lineHeight: 1.5 }}>Session {nextN} is short: up to three {focusLp.name} questions, coaching after each. Put your earbuds in.</span></div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <div className="card stack g2" style={{ padding: '12px 14px', borderRadius: 12 }}><span className="mono" style={{ font: '500 22px/1 var(--font-mono)' }}>16</span><span className="sub" style={{ fontSize: 11 }}>LPs · {covered} with a story</span></div>
-              <div className="card stack g2" style={{ padding: '12px 14px', borderRadius: 12 }}><span className="mono" style={{ font: '500 22px/1 var(--font-mono)' }}>{questionCount}</span><span className="sub" style={{ fontSize: 11 }}>questions in the bank</span></div>
+            <div className="stack g8"><span className="ob-title">That’s it.</span><span className="ob-sub">Session {nextN} is short: up to three {focus?.name ?? 'LP'} questions, coaching after each. {persona.name} is ready when you are.</span></div>
+            <div className="ob-stats">
+              <div className="ob-stat"><span className="n">{lps.length}</span><span className="l">LPs · {covered.size} with a story</span></div>
+              <div className="ob-stat"><span className="n">{questions.length}</span><span className="l">questions · {yours} yours</span></div>
             </div>
-            <div className="tint cool hstack start" style={{ gap: 10, padding: '14px 16px' }}><span className="label cool" style={{ fontSize: 10, paddingTop: 2, whiteSpace: 'nowrap' }}>Status</span><span style={{ font: '400 13px/1.45 var(--font-sans)' }}>{dbBadge} · {gemBadge}</span></div>
+            <div className="ob-box tint cool"><span className="label cool">Later</span><span className="t">{laterText}</span></div>
+            <div className="ob-box tint cool"><span className="label cool">Status</span><span className="t">{dbBadge} · {gemBadge}</span></div>
           </>
         )}
       </div>
-      <div className="screen-foot">
-        {step === 1 && <button className="btn lg ink" style={{ maxWidth: 760 }} onClick={p.onNext}>{importInfo ? 'Looks right' : 'Skip — start with the sample library'}</button>}
-        {step === 2 && <button className="btn lg ink" style={{ maxWidth: 760 }} onClick={p.onNext}>Next</button>}
-        {step === 3 && <><button className="btn xl primary" style={{ maxWidth: 760 }} onClick={p.onStart}>Start session {nextN}</button><button className="btn ghost" style={{ height: 44, maxWidth: 760 }} onClick={p.onDone}>Explore first</button></>}
+
+      <div className="screen-foot ob-foot">
+        {step === 1 && (
+          <>
+            <button className="btn lg ink" disabled={busy} onClick={() => setStep(2)}>Looks right</button>
+            {!info && <button className="btn ghost" disabled={busy} onClick={() => setStep(2)}>Skip — start with the LPs and the question bank</button>}
+          </>
+        )}
+        {step === 2 && <button className="btn lg ink" onClick={() => setStep(3)}>Next</button>}
+        {step === 3 && (
+          <>
+            <button className="btn xl primary" onClick={() => void start()}><Icon.Mic size={22} style={{ strokeWidth: 2.2 }} />Start session {nextN}</button>
+            <button className="btn ghost" onClick={() => void explore()}>Explore first</button>
+            <button className="btn link later" onClick={later}>Later</button>
+          </>
+        )}
       </div>
     </div>
   );

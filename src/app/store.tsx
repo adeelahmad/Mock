@@ -121,6 +121,7 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     toastTimer.current = setTimeout(() => setToastText(''), 5000);
   }, []);
 
+  const transcript = useCallback((id: string) => repo.transcript(id), [repo]);
   const setPref = useCallback(<K extends keyof UiPrefs>(k: K, v: UiPrefs[K]) => setPrefs((p) => ({ ...p, [k]: v })), []);
 
   const setGemini = useCallback(async (patch: Partial<Pick<GeminiConfig, 'key' | 'model' | 'voice'>>) => {
@@ -168,11 +169,11 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
   const value: AppStore = useMemo(() => ({
     ready, status, dbMode, repo, data, refresh, prefs, setPref, route, go: routerGo, back: routerBack, toast, toastText, gemini, setGemini,
     live: { state: liveState, meta: liveMeta, controller: controller.current, lastStart, start: startLive, exit: exitLive },
-    transcript: (id: string) => repo.transcript(id),
+    transcript,
     sheet,
     openSheet: (name, v) => setSheet((x) => ({ ...x, [name]: name === 'answer' ? (v as QuestionRow) : true })),
     closeSheets: () => setSheet({ setup: false, answer: null, addQuestion: false, addStory: false }),
-  }), [ready, status, dbMode, repo, data, refresh, prefs, setPref, route, toast, toastText, gemini, setGemini, liveState, liveMeta, lastStart, startLive, exitLive, sheet]);
+  }), [ready, status, dbMode, repo, data, refresh, prefs, setPref, route, toast, toastText, gemini, setGemini, liveState, liveMeta, lastStart, startLive, exitLive, sheet, transcript]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

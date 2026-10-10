@@ -29,6 +29,8 @@ export const Icon = {
   Upload: (p: IconProps) => <I {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></I>,
   Search: (p: IconProps) => <I {...p}><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></I>,
   Check: (p: IconProps) => <I {...p}><path d="M20 6 9 17l-5-5" /></I>,
+  File: (p: IconProps) => <I {...p}><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></I>,
+  PlayOutline: (p: IconProps) => <I {...p}><polygon points="6 3 20 12 6 21 6 3" /></I>,
 };
 
 // ---------- Verdicts ----------
@@ -100,7 +102,8 @@ export function Dropzone({ id, title, sub, accept, multiple = true, onFiles, sty
   const take = (files: FileList | null) => { const list = Array.from(files ?? []); if (list.length) onFiles(list); };
   const extra = directory ? ({ webkitdirectory: '' } as Record<string, string>) : {};
   return (
-    <label htmlFor={id} className={'dropzone' + (over ? ' over' : '')} style={style}
+    <label htmlFor={id} className={'dropzone' + (over ? ' over' : '')} style={style} tabIndex={0} role="button"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); (document.getElementById(id) as HTMLInputElement | null)?.click(); } }}
       onDragOver={(e) => { e.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)}
       onDrop={(e) => { e.preventDefault(); setOver(false); take(e.dataTransfer.files); }}>
       <span style={{ font: '700 14px/1.2 var(--font-sans)' }}>{title}</span>

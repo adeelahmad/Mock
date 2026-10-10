@@ -99,7 +99,8 @@ function appendTurn(turns: Turn[], speaker: Turn['speaker'], text: string, tMs: 
   // Transcript chunks arrive in pieces; merge consecutive pieces from the same speaker within 5 s.
   if (last && last.speaker === speaker && tMs - last.tMs < 5000) {
     const merged = turns.slice(0, -1);
-    merged.push({ ...last, text: last.text + text, tMs });
+    const glue = /\s$/.test(last.text) || /^[\s,.;:!?)]/.test(text) || !last.text ? '' : ' ';
+    merged.push({ ...last, text: last.text + glue + text, tMs });
     return merged;
   }
   return [...turns, { speaker, text, tMs }].slice(-MAX_TURNS);
@@ -190,8 +191,9 @@ export function reduce(s: SessionState, e: SessionEvent): SessionState {
 
     case 'COACHING_END': {
       if (s.phase !== 'coaching' && s.pausedFrom !== 'coaching') return s;
-      if (s.pausedFrom) return { ...s, pausedFrom: 'interviewer' };
-      return { ...s, phase: 'interviewer' };
+      // The coached question is finished: clear its answer clock so the next AI pause does not reopen it.
+      if (s.pausedFrom) return { ...s, pausedFrom: 'interviewer', qAskedAt: null };
+      return { ...s, phase: 'interviewer', qAskedAt: null };
     }
 
     case 'ANALYSIS': {

@@ -15,6 +15,8 @@ export interface LpRow extends Lp {
   lastAt: string | null;
   /** "last session" · "session 12" · "never" */
   lastLabel: string;
+  /** Verdicts in the readiness window. */
+  samples: number;
 }
 
 export interface StoryRow extends Story {
@@ -58,7 +60,7 @@ export function lpRows(lps: Lp[], stories: Story[], questions: Question[], sessi
       ...l,
       storyCount: stories.filter((s) => s.links.some((k) => k.lpId === l.id)).length,
       questionCount: questions.filter((q) => q.lpIds.includes(l.id)).length,
-      verdict: r.latest, readiness: r.readiness, lastSessionNumber: r.lastSessionNumber, lastAt: r.lastAt,
+      verdict: r.latest, readiness: r.readiness, lastSessionNumber: r.lastSessionNumber, lastAt: r.lastAt, samples: r.samples,
       lastLabel: r.lastSessionNumber == null ? 'never' : r.lastSessionNumber === latest ? 'last session' : 'session ' + r.lastSessionNumber,
     };
   });
@@ -81,7 +83,7 @@ export function questionRows(questions: Question[], lps: Lp[]): QuestionRow[] {
   const lp = new Map(lps.map((l) => [l.id, l]));
   return questions.map((q) => {
     const first = q.lpIds[0] ? lp.get(q.lpIds[0]) : undefined;
-    const askedLabel = q.timesAsked ? 'asked ' + q.timesAsked + '×' : 'not asked';
+    const askedLabel = q.timesAsked ? 'Asked ' + q.timesAsked + '×' : 'Not asked';
     const sourceLabel = SOURCE_LABEL[q.source];
     return { ...q, lpName: first?.name ?? 'Untagged', lpShort: first?.short ?? '—', sourceLabel, diffLabel: DIFF_LABEL[q.difficulty], askedLabel, meta: [sourceLabel, q.tags, askedLabel].filter(Boolean).join(' · ') };
   });
@@ -132,7 +134,9 @@ export function verdictCounts(rows: LpRow[]): { strong: number; inclined: number
 /** Weakest LPs: lowest readiness first, never-tested in between (see readiness.ts). */
 export function weakestLps(rows: LpRow[], n = 3): LpRow[] {
   const key = (r: LpRow) => (r.readiness ?? 0.35);
-  return rows.slice().sort((a, b) => key(a) - key(b) || (b.lastAt ?? '').localeCompare(a.lastAt ?? '') === 0 ? 0 : (a.lastAt ?? '') < (b.lastAt ?? '') ? -1 : 1).slice(0, n);
+  // Lowest readiness first; among equals the stalest (oldest lastAt, never-tested last) first.
+  const stale = (a: LpRow, b: LpRow) => (a.lastAt ?? '~').localeCompare(b.lastAt ?? '~');
+  return rows.slice().sort((a, b) => key(a) - key(b) || stale(a, b) || a.order - b.order).slice(0, n);
 }
 
 /** The weakest answer of the latest session (the "Fix your weakest answer" card). */
@@ -153,16 +157,27 @@ export const fmtDuration = (session: Session): string => {
 
 export const fmtSessionDate = (session: Session): string => new Date(session.startedAt).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
 
-export function sessionModeLabel(session: Session, lps: Lp[], stories: Story[]): string {
+export const QUESTION_SET_LABEL: Record<string, string> = { previous: 'Previous interviews', common: 'Common', custom: 'Custom', ai: 'AI', notAsked: 'Not yet asked', 'Not yet asked': 'Not yet asked', Common: 'Common', Custom: 'Custom' };
+
+/** "Full loop" · "One LP · Dive Deep" · "One question · Dive Deep" · "Question set · Previous interviews" … */
+export function sessionModeLabel(session: Session, lps: Lp[], stories: Story[], questions: Question[] = [], files: { id: string; name: string }[] = []): string {
   const lp = session.focus ? lps.find((l) => l.id === session.focus) : null;
   const st = session.focus ? stories.find((s) => s.id === session.focus) : null;
+  const lpName = (id: string | undefined) => (id ? lps.find((l) => l.id === id)?.name : undefined);
   switch (session.mode) {
     case 'loop': return 'Full loop';
     case 'lp': return 'One LP · ' + (lp?.name ?? session.focus ?? '');
     case 'story': return 'Pressure-test · ' + (st?.title ?? session.focus ?? '');
-    case 'question_set': return 'Question set · ' + (session.focus === 'previous' ? 'Previous interviews' : session.focus ?? '');
-    case 'replay': return 'Replay · ' + (session.focus ?? '');
-    case 'deep_dive': return 'Deep dive';
+    case 'question_set': {
+      if (!session.focus) return 'Question set';
+      const set = QUESTION_SET_LABEL[session.focus];
+      if (set) return 'Question set · ' + set;
+      const q = questions.find((x) => x.id === session.focus);
+      if (q) return 'One question · ' + (lpName(q.lpIds[0]) ?? 'Untagged');
+      return 'One question' + (lp ? ' · ' + lp.name : '');
+    }
+    case 'replay': { const f = files.find((x) => x.id === session.focus); return 'Replay · ' + (f?.name.replace(/\.(md|txt)$/i, '') ?? session.focus ?? ''); }
+    case 'deep_dive': return 'Deep dive' + (lp ? ' · ' + lp.name : '');
     case 'bar_raiser': return 'Bar raiser';
   }
 }

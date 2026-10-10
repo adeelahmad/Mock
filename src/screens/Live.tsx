@@ -58,8 +58,26 @@ function useReveal(qText: string, target: number, stepMs: number): number {
 
 const lcFirst = (s: string): string => (s ? s[0].toLowerCase() + s.slice(1) : s);
 
-function cardOf(a: Analysis, qLabel: string, qText: string, lpName: string): AnalysisCardData {
+/**
+ * The phase the screen draws, from the machine's visible phase:
+ *  - idle/connecting, and the opening line before the first question → connecting
+ *  - coaching, and everything after the analysis landed until the next question (the machine
+ *    re-opens the answer clock when the coach's audio drains — the screen keeps the coaching view
+ *    with the "auto in N s" beat instead) → coaching
+ */
+export function uiPhaseOf(s: SessionState | null): LivePhase {
+  if (!s) return 'connecting';
+  const vp = visiblePhase(s);
+  if (vp === 'idle' || vp === 'connecting') return 'connecting';
+  if (vp === 'ended') return 'end';
+  if (vp === 'interviewer' && !s.qText) return 'connecting';
+  if (vp === 'coaching' || s.analysis) return 'coaching';
+  return vp;
+}
+
+function cardOf(a: Analysis, qLabel: string, qText: string, lpName: string, isBest?: boolean): AnalysisCardData {
   return {
+    isBest,
     q: qLabel, question: qText, lp: a.lp || lpName, story: a.storyUsed ?? '—', verdict: verdictCode(a.verdict),
     better: a.betterStory?.title ?? '', reason: a.betterStory?.reason ?? '', missed: a.numbersMissed, star: a.star,
     iPct: Math.round(a.iWeRatio * 100), pace: a.delivery.paceWpm, paceNote: a.delivery.paceNote, fillers: a.delivery.fillers,
@@ -77,12 +95,7 @@ export default function Live() {
 
   // ---- the phase the screen draws
   const vp = state ? visiblePhase(state) : 'idle';
-  const greeting = vp === 'interviewer' && !!state && !state.qText;          // the opening line, before the first question
-  const afterCoaching = vp === 'interviewer' && !!state?.analysis;           // "Back to the interview" said; the next question has not arrived
-  const phase: LivePhase = !state || vp === 'idle' || vp === 'connecting' || greeting ? 'connecting'
-    : vp === 'ended' ? 'end'
-    : vp === 'coaching' || afterCoaching ? 'coaching'
-    : vp;
+  const phase = uiPhaseOf(state);
   const paused = !!state && isPaused(state);
 
   // ---- the question reveal (from the transcript; time-based fallback when the transcript does not match — M3 real voices)
@@ -93,10 +106,17 @@ export default function Live() {
   const target = phase !== 'interviewer' ? totalWords : matched > 0 ? matched : timed;
   const revealedWords = useReveal(qText, target, matched > 0 ? 130 : 320);
 
+  // ---- the session this screen belongs to (for the recap's focus and the card's footer)
+  const session = useMemo(() => data.sessions.find((s) => s.id === meta?.sessionId) ?? null, [data.sessions, meta?.sessionId]);
+  const exchanges = useMemo(() => data.exchanges.filter((e) => e.sessionId === meta?.sessionId), [data.exchanges, meta?.sessionId]);
+  const current: Exchange | null = useMemo(() => exchanges.filter((e) => e.questionText === qText).sort((a, b) => b.index - a.index)[0] ?? null, [exchanges, qText]);
+  const isBest = !!current?.isBest;
+
   // ---- coaching: strength, fixes and the verdict arrive as the coach says them
-  const coachDone = phase === 'coaching' && vp === 'interviewer';
+  const coachDone = phase === 'coaching' && vp !== 'coaching';   // "Back to the interview" said; the next question has not arrived
+  const coachQuiet = coachDone && state?.speaker !== 'ai';       // …and its audio has drained: the beat before the next question starts now
   const [doneAt, setDoneAt] = useState<number | null>(null);
-  useEffect(() => { setDoneAt(coachDone ? Date.now() : null); }, [coachDone]);
+  useEffect(() => { setDoneAt(coachQuiet ? Date.now() : null); }, [coachQuiet]);
   const shownRef = useRef({ q: -1, fixes: 0, verdict: false });
   const coaching: LiveCoaching = useMemo(() => {
     const a = state?.analysis ?? null;
@@ -110,7 +130,7 @@ export default function Live() {
     shownRef.current.verdict = shownRef.current.verdict || verdictNow;
     const cd = doneAt == null ? AUTO_NEXT_SEC : Math.max(0, AUTO_NEXT_SEC - Math.floor((now - doneAt) / 1000));
     // M3: the Gemini transport paces the next question itself; the countdown mirrors the simulated transport's 5 s beat.
-    const nextAuto = coachDone ? (cd > 0 ? 'auto in ' + cd + ' s · say “redo” to retry' : 'or just say “next”') : 'auto after coaching';
+    const nextAuto = doneAt != null ? (cd > 0 ? 'auto in ' + cd + ' s · say “redo” to retry' : 'or just say “next”') : 'auto after coaching';
     const mismatch = a && a.spokenVerdict && a.spokenVerdict !== a.verdict
       ? 'The coach said “' + VERDICT_LABEL[a.spokenVerdict] + '” aloud; the written card says “' + VERDICT_LABEL[a.verdict] + '” — the card is what History keeps.'
       : null;
@@ -121,16 +141,11 @@ export default function Live() {
       verdict: a?.verdict ?? null,
       verdictShown: !!a && shownRef.current.verdict,
       speaking: phase === 'coaching' && state?.speaker === 'ai',
-      card: a && state ? cardOf(a, state.qLabel, state.qText, state.lpName) : null,
+      card: a && state ? cardOf(a, state.qLabel, state.qText, state.lpName, isBest) : null,
       mismatchNote: mismatch,
       nextAuto,
     };
-  }, [state, coachDone, doneAt, now, phase]);
-
-  // ---- the session this screen belongs to (for the recap's focus and the card's footer)
-  const session = useMemo(() => data.sessions.find((s) => s.id === meta?.sessionId) ?? null, [data.sessions, meta?.sessionId]);
-  const exchanges = useMemo(() => data.exchanges.filter((e) => e.sessionId === meta?.sessionId), [data.exchanges, meta?.sessionId]);
-  const current: Exchange | null = useMemo(() => exchanges.filter((e) => e.questionText === qText).sort((a, b) => b.index - a.index)[0] ?? null, [exchanges, qText]);
+  }, [state, coachDone, doneAt, now, phase, isBest]);
 
   const mode: Mode = lastStart?.mode ?? 'loop';
   const focusLabel = lastStart?.focusLabel ?? data.lps.find((l) => l.id === lastStart?.focus)?.name ?? data.stories.find((s) => s.id === lastStart?.focus)?.title ?? lastStart?.questionText ?? '';
@@ -224,7 +239,7 @@ export default function Live() {
       sessionNumber={meta.sessionNumber}
       loopSize={data.settings.loopSize}
       elapsedSec={Math.max(0, Math.round(((state.endedAt ?? now) - state.startedAt) / 1000))}
-      interviewer={state.interviewer ?? NO_ONE}
+      interviewer={state.interviewer && state.interviewer.n > 0 ? state.interviewer : (meta?.interviewer ?? NO_ONE)}
       qLabel={state.qLabel}
       qText={qText}
       revealedWords={revealedWords}

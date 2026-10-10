@@ -5,6 +5,7 @@
 import type { Analysis, Exchange, Lp, LpRole, PrepFile, Question, Report, Session, Settings, Story, TranscriptEvent } from '../domain/types.ts';
 import * as SAMPLE from '../fixtures/sample.ts';
 import type { QuestionFilter, Repo, RepoMode } from './repo.ts';
+import type { MockBackup } from './backup.ts';
 
 export interface MemoryData {
   lps: Lp[]; stories: Story[]; questions: Question[]; files: PrepFile[]; sessions: Session[]; exchanges: Exchange[]; transcript: TranscriptEvent[]; settings: Settings;
@@ -103,6 +104,11 @@ export class MemoryRepo implements Repo {
   async nextSessionNumber(): Promise<number> { return this.d.sessions.reduce((m, s) => Math.max(m, s.number), 0) + 1; }
   async reset(): Promise<void> { this.d = emptyData(); this.blobs.clear(); this.changed(); }
   async loadSample(): Promise<void> { this.d = sampleData(); this.changed(); }
+  async importBackup(b: MockBackup): Promise<void> {
+    const t = b.tables;
+    this.d = { lps: this.clone(t.lps.length ? t.lps : SAMPLE.LPS), stories: this.clone(t.stories), questions: this.clone(t.questions), files: this.clone(t.files), sessions: this.clone(t.sessions), exchanges: this.clone(t.exchanges), transcript: this.clone(t.transcript), settings: { ...this.clone(SAMPLE.EMPTY_SETTINGS), ...this.clone(t.settings), onboarded: true } };
+    this.changed();
+  }
 
   async putBlob(key: string, blob: Blob): Promise<boolean> { this.blobs.set(key, blob); return true; }
   async getBlob(key: string): Promise<Blob | null> { return this.blobs.get(key) ?? null; }
