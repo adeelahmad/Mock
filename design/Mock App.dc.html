@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/colors.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/typography.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/effects.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/styles.css">
+<script src="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:var(--m-canvas);font-family:var(--font-sans)}
+:root{--m-canvas:#FFFFFF;--m-bg:#F8F9FA;--m-card:#FFFFFF;--m-elev:#F1F3F4;--m-line:#DADCE0;--m-line2:#BDC1C6;--m-fg:#202124;--m-fg2:#5F6368;--m-fg3:#80868B;--m-warm:#B06000;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:#FEF7E0;--m-warm-line:#FDE293;--m-cool:#1A73E8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:#E8F0FE;--m-cool-line:#A8C7FA;--m-green:#1E7E43;--m-green-fill:#34A853;--m-green-tint:#E6F4EA;--m-green-line:#A8DAB5;--m-blue:#1558B0;--m-blue-fill:#1A73E8;--m-blue-tint:#E8F0FE;--m-blue-line:#A8C7FA;--m-gold:#B06000;--m-gold-fill:#F9AB00;--m-gold-tint:#FEF7E0;--m-gold-line:#FDE293;--m-red:#C5221F;--m-red-fill:#EA4335;--m-red-tint:#FCE8E6;--m-red-line:#F6AEA9;--m-scrim:rgba(32,33,36,.32)}
+[data-theme="dark"]{--m-canvas:#18191B;--m-bg:#202124;--m-card:#292A2D;--m-elev:#303134;--m-line:#3C4043;--m-line2:#5F6368;--m-fg:#E8EAED;--m-fg2:#9AA0A6;--m-fg3:#80868B;--m-warm:#FDD663;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:rgba(249,171,0,.14);--m-warm-line:rgba(253,214,99,.45);--m-cool:#8AB4F8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:rgba(138,180,248,.14);--m-cool-line:rgba(138,180,248,.45);--m-green:#81C995;--m-green-fill:#34A853;--m-green-tint:rgba(52,168,83,.18);--m-green-line:rgba(129,201,149,.5);--m-blue:#8AB4F8;--m-blue-fill:#1A73E8;--m-blue-tint:rgba(138,180,248,.14);--m-blue-line:rgba(138,180,248,.45);--m-gold:#FDD663;--m-gold-fill:#F9AB00;--m-gold-tint:rgba(249,171,0,.18);--m-gold-line:rgba(253,214,99,.5);--m-red:#F28B82;--m-red-fill:#EA4335;--m-red-tint:rgba(234,67,53,.18);--m-red-line:rgba(242,139,130,.5);--m-scrim:rgba(0,0,0,.55);--background:#202124;--surface:#292A2D;--surface-neutral:#303134;--border:#3C4043;--text-primary:#E8EAED;--text-strong:#E8EAED;--text-secondary:#9AA0A6;--text-muted:#80868B;--aladdin-blue:#8AB4F8;--blue-dark:#A8C7FA;--intent-surface:rgba(138,180,248,.14);--intent-border:rgba(138,180,248,.45);--green-surface:rgba(52,168,83,.18);--green-border:rgba(129,201,149,.5);--green-dark:#81C995;--red-surface:rgba(234,67,53,.18);--red-border:rgba(242,139,130,.5);--red-dark:#F28B82;--gate-surface:rgba(249,171,0,.18);--gate-border:rgba(253,214,99,.5);--gold-dark:#FDD663;--shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 2px 6px rgba(0,0,0,.45);--shadow-3:0 8px 28px rgba(0,0,0,.5)}
+a{color:var(--m-cool);text-decoration:none}a:hover{text-decoration:underline}
+@keyframes mock-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes mock-spin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="min-height:100vh;background:var(--m-canvas);color:var(--m-fg);font-family:var(--font-sans);display:flex;justify-content:center;align-items:flex-start;gap:36px;flex-wrap:wrap;padding:32px 16px 64px;box-sizing:border-box">
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+    <div data-screen-label="Mock app" style="height:100%;position:relative;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans);display:flex;flex-direction:column;overflow:hidden">
+
+      <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div style="padding:58px 20px 0;display:flex;align-items:center;justify-content:space-between">
+            <span style="display:inline-flex;align-items:baseline;font:800 22px/1 var(--font-sans);letter-spacing:-.03em">Mock<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--m-warm-fill);margin-left:3px"></span></span>
+            <div style="display:flex;align-items:center;gap:8px"><span style="height:32px;padding:0 12px;border-radius:999px;background:var(--m-warm-tint);border:1px solid var(--m-warm-line);color:var(--m-warm);display:inline-flex;align-items:center;font:500 12px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ daysLeft }} days</span><button onClick="{{ openSettings }}" aria-label="Settings" style="width:40px;height:40px;border-radius:50%;border:none;background:transparent;color:var(--m-fg2);display:grid;place-items:center;cursor:pointer" style-hover="background:var(--m-elev)"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button></div>
+          </div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:18px 20px 20px;display:flex;flex-direction:column;gap:14px">
+            <div style="padding:20px;border-radius:20px;background:var(--m-card);border:1.5px solid var(--m-warm-line);display:flex;flex-direction:column;gap:14px">
+              <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-warm)">Session {{ nextN }} · chosen for you</span>
+              <div style="display:flex;flex-direction:column;gap:6px"><span style="font:800 30px/1.1 var(--font-sans);letter-spacing:-.025em">{{ focusName }} drill</span><span style="font:400 14px/1.45 var(--font-sans);color:var(--m-fg2)">{{ focusWhy }} · up to 3 questions · coaching after each.</span></div>
+              <button onClick="{{ startFocus }}" style="height:64px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 18px/1 var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:12px" style-active="transform:scale(.98)"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>Start</button>
+              <div style="display:flex;justify-content:center;gap:16px;font:700 13px/1 var(--font-sans);color:var(--m-fg2)"><button onClick="{{ openSheet }}" style="border:none;background:transparent;color:inherit;font:inherit;cursor:pointer">Change</button><span style="color:var(--m-line2)">·</span><button onClick="{{ startLoop }}" style="border:none;background:transparent;color:inherit;font:inherit;cursor:pointer">Full loop</button></div>
+              <span style="text-align:center;font:400 11px/1.3 var(--font-sans);color:var(--m-fg3)">{{ liveHint }}</span>
+            </div>
+            <sc-if value="{{ hasWeak }}" hint-placeholder-val="{{ true }}">
+              <div style="padding:14px 16px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Fix your weakest answer</span><span style="display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;background:{{ weak.vBg }};color:{{ weak.vFg }};border:{{ weak.vBorder }};font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap"><span>{{ weak.vGlyph }}</span>{{ weak.vLabel }}</span></div>
+                <span style="font:600 14px/1.35 var(--font-sans);text-wrap:pretty">{{ weak.question }}</span>
+                <button onClick="{{ startWeak }}" style="height:48px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 14px/1 var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--m-elev)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>Redo · {{ weak.lp_name }}</button>
+              </div>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Readiness</span><button onClick="{{ openGrid }}" style="border:none;background:transparent;font:500 12px/1 var(--font-sans);color:var(--m-fg2);cursor:pointer"><span style="font-family:var(--font-mono)">{{ covered }}/16</span> covered · <span style="color:var(--m-gold)">{{ gaps }} gaps</span></button></div>
+              <div style="display:grid;grid-template-columns:repeat(16,1fr);gap:3px"><sc-for list="{{ lps }}" as="c" hint-placeholder-count="16"><button onClick="{{ c.onOpen }}" title="{{ c.name }}" style="height:22px;border:none;padding:0;border-radius:4px;background:{{ c.vFill }};cursor:pointer"></button></sc-for></div>
+              <div style="display:flex;justify-content:space-between;font:500 10px/1 var(--font-sans);color:var(--m-fg3);letter-spacing:.04em"><sc-for list="{{ lps }}" as="c" hint-placeholder-count="16"><span>{{ c.short }}</span></sc-for></div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLibrary }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">Library</span><span style="font:500 12px/1 var(--font-sans);color:var(--m-fg3)">{{ dbBadge }}<sc-if value="{{ importing }}" hint-placeholder-val="{{ false }}"> · importing bank {{ importPct }}%</sc-if></span></div>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--m-elev)">
+              <button onClick="{{ libLps }}" style="flex:1;height:32px;border:none;border-radius:999px;background:{{ libBg.lps }};box-shadow:{{ libSh.lps }};font:700 13px/1 var(--font-sans);color:{{ libFg.lps }};cursor:pointer">LPs</button>
+              <button onClick="{{ libStories }}" style="flex:1;height:32px;border:none;border-radius:999px;background:{{ libBg.stories }};box-shadow:{{ libSh.stories }};font:700 13px/1 var(--font-sans);color:{{ libFg.stories }};cursor:pointer">Stories</button>
+              <button onClick="{{ libQuestions }}" style="flex:1;height:32px;border:none;border-radius:999px;background:{{ libBg.questions }};box-shadow:{{ libSh.questions }};font:700 13px/1 var(--font-sans);color:{{ libFg.questions }};cursor:pointer">Questions</button>
+              <button onClick="{{ libFiles }}" style="flex:1;height:32px;border:none;border-radius:999px;background:{{ libBg.files }};box-shadow:{{ libSh.files }};font:700 13px/1 var(--font-sans);color:{{ libFg.files }};cursor:pointer">Files</button>
+            </div>
+          </div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:14px 20px 20px;display:flex;flex-direction:column;gap:12px">
+            <sc-if value="{{ isLibLps }}" hint-placeholder-val="{{ true }}">
+              <div style="border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <sc-for list="{{ lps }}" as="l" hint-placeholder-count="8">
+                  <button onClick="{{ l.onOpen }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:11px 14px;border:none;border-bottom:1px solid var(--m-line);background:transparent;text-align:left;cursor:pointer;color:var(--m-fg)" style-hover="background:var(--m-elev)">
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:700 14px/1.2 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">{{ l.stories }} stories · {{ l.questions }} questions · {{ l.last }}</span></div>
+                    <span style="flex:none;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;background:{{ l.vBg }};color:{{ l.vFg }};border:{{ l.vBorder }};font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap"><span>{{ l.vGlyph }}</span>{{ l.vLabel }}</span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isLibStories }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:500 12px/1 var(--font-sans);color:var(--m-fg2)">{{ storyCount }} stories · <span style="font-family:var(--font-mono)">{{ covered }}/16</span> LPs covered</span><button onClick="{{ openGrid }}" style="height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 12px/1 var(--font-sans);cursor:pointer">Story × LP grid</button></div>
+              <sc-for list="{{ stories }}" as="s" hint-placeholder-count="3">
+                <button onClick="{{ s.onOpen }}" style="padding:14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px;text-align:left;cursor:pointer;color:var(--m-fg);width:100%" style-hover="background:var(--m-elev)">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%"><span style="font:700 15px/1.2 var(--font-sans)">{{ s.title }}</span><span style="flex:none;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;background:{{ s.vBg }};color:{{ s.vFg }};border:{{ s.vBorder }};font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap"><span>{{ s.vGlyph }}</span>{{ s.vLabel }}</span></div>
+                  <span style="font:400 13px/1.4 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">{{ s.summary }}</span>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ s.numbers }}" as="n" hint-placeholder-count="3"><span style="display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;background:var(--m-elev);font:500 11px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ n }}</span></sc-for></div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;width:100%"><sc-for list="{{ s.lpShorts }}" as="t" hint-placeholder-count="3"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;border:1px solid var(--m-line);font:700 10px/1 var(--font-sans);letter-spacing:.06em;color:var(--m-fg2)">{{ t }}</span></sc-for><span style="font:400 11px/1 var(--font-sans);color:{{ s.usesColor }};margin-left:auto">used {{ s.uses }}×</span></div>
+                </button>
+              </sc-for>
+            </sc-if>
+            <sc-if value="{{ isLibQuestions }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:6px;overflow:auto;flex:none;padding-bottom:2px"><sc-for list="{{ qFilters }}" as="f" hint-placeholder-count="5"><button onClick="{{ f.onPick }}" style="flex:none;height:32px;padding:0 12px;border-radius:999px;border:{{ f.border }};background:{{ f.bg }};color:{{ f.fg }};font:500 13px/1 var(--font-sans);cursor:pointer">{{ f.label }}</button></sc-for></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none"><span style="font:500 12px/1.3 var(--font-sans);color:var(--m-fg2)">{{ questionShown }} of {{ questionCount }} · tap to ask it now · ✦ model answer</span><div style="display:flex;gap:6px"><label for="mock-bank" style="height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;font:700 12px/1 var(--font-sans);cursor:pointer;color:var(--m-fg)">Import file<input id="mock-bank" type="file" accept=".zst,.json,.md,.txt,.csv" onChange="{{ onBankFile }}" style="display:none"></label><button onClick="{{ importBundled }}" style="height:30px;padding:0 12px;border-radius:999px;border:none;background:var(--m-fg);color:var(--m-card);font:700 12px/1 var(--font-sans);cursor:pointer">Load full Exponent export</button></div></div>
+              <sc-if value="{{ importing }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:6px;padding:10px 12px;border-radius:12px;background:var(--m-cool-tint);border:1px solid var(--m-cool-line);flex:none"><div style="display:flex;justify-content:space-between;font:500 12px/1.2 var(--font-sans);color:var(--m-cool)"><span>{{ importMsg }}</span><span style="font-family:var(--font-mono)">{{ importPct }}%</span></div><div style="height:4px;border-radius:2px;background:var(--m-card);overflow:hidden"><span style="display:block;height:100%;width:{{ importPct }}%;background:var(--m-cool-fill)"></span></div></div></sc-if>
+              <div style="border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <sc-for list="{{ questions }}" as="q" hint-placeholder-count="6">
+                  <div style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-bottom:1px solid var(--m-line)">
+                    <button onClick="{{ q.onAsk }}" style="border:none;background:transparent;padding:0;text-align:left;cursor:pointer;color:var(--m-fg);font:600 14px/1.35 var(--font-sans);text-wrap:pretty">{{ q.text }}</button>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;border:1px solid {{ q.lpBorder }};font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;color:{{ q.lpColor }}">{{ q.lpName }}</span><span style="font:400 11px/1 var(--font-sans);color:var(--m-fg3)">{{ q.meta }}</span><button onClick="{{ q.onAnswer }}" style="margin-left:auto;height:26px;padding:0 10px;border-radius:999px;border:1px solid var(--m-cool-line);background:var(--m-cool-tint);color:var(--m-cool);font:700 11px/1 var(--font-sans);cursor:pointer">✦ Model answer</button></div>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ moreQuestions }}" hint-placeholder-val="{{ false }}"><button onClick="{{ showMore }}" style="width:100%;padding:12px;border:none;background:transparent;font:700 13px/1 var(--font-sans);color:var(--m-cool);cursor:pointer">Show more</button></sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isLibFiles }}" hint-placeholder-val="{{ false }}">
+              <label for="mock-files" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 16px;border-radius:16px;border:1.5px dashed var(--m-line2);background:var(--m-card);text-align:center;cursor:pointer"><span style="font:700 14px/1.2 var(--font-sans)">Drop markdown here, or tap to browse</span><span style="font:400 12px/1.4 var(--font-sans);color:var(--m-fg2)">Type is detected from content; questions inside are added to the bank.</span><input id="mock-files" type="file" multiple="{{ true }}" accept=".md,.txt,.csv,.json,.zst" onChange="{{ onBankFile }}" style="display:none"></label>
+              <div style="border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <sc-for list="{{ files }}" as="f" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--m-line)">
+                    <button onClick="{{ f.onOpen }}" style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;border:none;background:transparent;text-align:left;cursor:pointer;color:var(--m-fg);padding:0"><span style="font:500 13px/1.2 var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">{{ f.name }}</span><div style="display:flex;align-items:center;gap:6px"><span style="display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:999px;background:var(--m-elev);font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;color:var(--m-fg2)">{{ f.type }}</span><span style="font:400 11px/1 var(--font-sans);color:var(--m-fg3)">{{ f.size }} · {{ f.updated }}</span></div></button>
+                    <x-import component-from-global-scope="AladdinDesignSystem_34d902.Switch" checked="{{ f.included }}" on-change="{{ f.onToggle }}" hint-size="36px,20px"></x-import>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLp }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between"><button onClick="{{ backLibrary }}" style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>LPs</button></div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:6px 20px 20px;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span style="font:800 26px/1.1 var(--font-sans);letter-spacing:-.025em">{{ lp.name }}</span><span style="flex:none;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:{{ lp.vBg }};color:{{ lp.vFg }};border:{{ lp.vBorder }};font:700 11px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase"><span>{{ lp.vGlyph }}</span>{{ lp.vLabel }}</span></div>
+              <span style="font:400 14px/1.5 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">{{ lp.descr }}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Mapped stories · {{ lpStoryCount }}</span>
+              <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <sc-for list="{{ lpStories }}" as="s" hint-placeholder-count="2"><button onClick="{{ s.onOpen }}" style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:none;border-bottom:1px solid var(--m-line);background:transparent;text-align:left;cursor:pointer;color:var(--m-fg)"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:700 13px/1.2 var(--font-sans)">{{ s.title }}</span><span style="font:500 11px/1.2 var(--font-mono);color:var(--m-fg2)">{{ s.num0 }}</span></div><span style="height:22px;padding:0 8px;border-radius:999px;background:{{ s.roleBg }};color:{{ s.roleFg }};border:{{ s.roleBorder }};display:inline-flex;align-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase">{{ s.role }}</span></button></sc-for>
+                <button onClick="{{ openGrid }}" style="width:100%;padding:10px 12px;border:none;background:transparent;text-align:left;font:700 12px/1 var(--font-sans);color:var(--m-cool);cursor:pointer">Map a story in the grid →</button>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Question bank · {{ lpQCount }}</span>
+              <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <sc-for list="{{ lpQs }}" as="q" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--m-line)"><button onClick="{{ q.onAsk }}" style="flex:1;border:none;background:transparent;padding:0;text-align:left;cursor:pointer;color:var(--m-fg);font:400 13px/1.35 var(--font-sans);text-wrap:pretty">{{ q.text }}</button><button onClick="{{ q.onAnswer }}" aria-label="Model answer" style="flex:none;width:28px;height:28px;border-radius:50%;border:1px solid var(--m-cool-line);background:var(--m-cool-tint);color:var(--m-cool);font:700 13px/1 var(--font-sans);cursor:pointer">✦</button><span style="flex:none;font:700 11px/1 var(--font-sans);color:{{ q.vFg }}">{{ q.vGlyph }}</span></div></sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Verdict history</span>
+              <div style="padding:12px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:grid;grid-template-columns:repeat(8,1fr);gap:4px"><sc-for list="{{ lpHist }}" as="c" hint-placeholder-count="8"><span title="Session {{ c.session_n }}" style="height:26px;border-radius:6px;background:{{ c.vFill }};color:{{ c.vOnFill }};display:grid;place-items:center;font:700 11px/1 var(--font-sans)">{{ c.vGlyph }}</span></sc-for></div>
+            </div>
+          </div>
+          <div style="padding:12px 20px 34px"><button onClick="{{ startLp }}" style="width:100%;height:56px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 16px/1 var(--font-sans);cursor:pointer" style-active="transform:scale(.98)">Practise this LP</button></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isStory }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between"><button onClick="{{ backStories }}" style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Stories</button></div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:6px 20px 20px;display:flex;flex-direction:column;gap:14px">
+            <span style="font:800 26px/1.1 var(--font-sans);letter-spacing:-.025em">{{ story.title }}</span>
+            <x-import component-from-global-scope="AladdinDesignSystem_34d902.Input" label="Situation" multiline="{{ true }}" default-value="{{ story.situation }}" hint-size="100%,112px"></x-import>
+            <x-import component-from-global-scope="AladdinDesignSystem_34d902.Input" label="Task" multiline="{{ true }}" default-value="{{ story.task }}" hint-size="100%,112px"></x-import>
+            <x-import component-from-global-scope="AladdinDesignSystem_34d902.Input" label="Action" multiline="{{ true }}" default-value="{{ story.action }}" hint-size="100%,112px"></x-import>
+            <x-import component-from-global-scope="AladdinDesignSystem_34d902.Input" label="Result" multiline="{{ true }}" default-value="{{ story.result }}" hint-size="100%,112px"></x-import>
+            <x-import component-from-global-scope="AladdinDesignSystem_34d902.Input" label="Learning" multiline="{{ true }}" default-value="{{ story.learning }}" hint-size="100%,88px"></x-import>
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 13px/1.2 var(--font-sans)">Key numbers</span><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ story.numbers }}" as="n" hint-placeholder-count="3"><span style="display:inline-flex;align-items:center;height:30px;padding:0 12px;border-radius:999px;background:var(--m-elev);font:500 12px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ n }}</span></sc-for></div></div>
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 13px/1.2 var(--font-sans)">LP mapping · tap the grid to change</span><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ storyMaps }}" as="m" hint-placeholder-count="3"><span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:999px;background:{{ m.bg }};color:{{ m.fg }};border:{{ m.border }};font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase">{{ m.name }} · {{ m.role }}</span></sc-for></div></div>
+          </div>
+          <div style="padding:12px 20px 34px"><button onClick="{{ startStory }}" style="width:100%;height:56px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 16px/1 var(--font-sans);cursor:pointer" style-active="transform:scale(.98)">Pressure-test this story</button></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isGrid }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between"><button onClick="{{ backStories }}" style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Stories</button></div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:6px 16px 24px;display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px"><span style="font:800 26px/1.1 var(--font-sans);letter-spacing:-.025em">Story × LP</span><div style="display:flex;align-items:center;justify-content:space-between"><span style="font:500 13px/1 var(--font-sans);color:var(--m-fg2)"><span style="font:500 15px/1 var(--font-mono);color:var(--m-fg)">{{ covered }}</span> of 16 LPs covered · one tap cycles none → primary → secondary</span></div><div style="display:flex;height:6px;border-radius:3px;background:var(--m-elev);overflow:hidden"><span style="width:{{ coveredPct }}%;background:var(--m-fg)"></span></div></div>
+            <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);padding:10px 8px;display:flex;flex-direction:column;gap:4px">
+              <div style="display:grid;grid-template-columns:88px repeat(16,1fr);gap:2px;align-items:end"><span></span><sc-for list="{{ gridCols }}" as="c" hint-placeholder-count="16"><span style="font:700 8px/1 var(--font-sans);color:{{ c.color }};text-align:center;padding-bottom:3px">{{ c.short }}</span></sc-for></div>
+              <sc-for list="{{ grid }}" as="r" hint-placeholder-count="8">
+                <div style="display:grid;grid-template-columns:88px repeat(16,1fr);gap:2px;align-items:center">
+                  <span style="font:600 10px/1.1 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px">{{ r.title }}</span>
+                  <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="16"><button onClick="{{ c.onTap }}" title="{{ c.title }}" style="aspect-ratio:1;border:none;padding:0;border-radius:3px;background:{{ c.bg }};box-shadow:{{ c.ring }};cursor:pointer"></button></sc-for>
+                </div>
+              </sc-for>
+              <div style="display:grid;grid-template-columns:88px repeat(16,1fr);gap:2px;margin-top:2px"><span style="font:700 8px/1 var(--font-sans);color:var(--m-fg3);text-transform:uppercase;letter-spacing:.06em">gap</span><sc-for list="{{ gridCols }}" as="c" hint-placeholder-count="16"><span style="height:4px;border-radius:2px;background:{{ c.gapBg }}"></span></sc-for></div>
+            </div>
+            <div style="display:flex;gap:14px;font:500 11px/1.2 var(--font-sans);color:var(--m-fg2);padding:0 4px"><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:var(--m-fg)"></span>Primary</span><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;box-shadow:inset 0 0 0 2px var(--m-fg2)"></span>Secondary</span><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:4px;border-radius:2px;background:var(--m-gold-fill)"></span>No story yet</span></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isFile }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between"><button onClick="{{ backFiles }}" style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Files</button><span style="display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:999px;background:var(--m-elev);font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;color:var(--m-fg2);margin-right:8px">{{ file.type }}</span></div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:8px 20px 24px;display:flex;flex-direction:column;gap:12px">
+            <span style="font:500 13px/1.2 var(--font-mono)">{{ file.name }}</span>
+            <div style="padding:16px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);font:400 13px/1.7 var(--font-mono);white-space:pre-wrap;min-height:200px">{{ fileText }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isHistory }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div style="padding:58px 20px 0;display:flex;align-items:center;justify-content:space-between"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">History</span><span style="font:500 12px/1 var(--font-sans);color:var(--m-fg3)">{{ sessionCount }} sessions</span></div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:14px 20px 20px">
+            <div style="border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+              <sc-for list="{{ sessions }}" as="s" hint-placeholder-count="6">
+                <button onClick="{{ s.onOpen }}" style="width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border:none;border-bottom:1px solid var(--m-line);background:transparent;text-align:left;cursor:pointer;color:var(--m-fg)" style-hover="background:var(--m-elev)">
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><div style="display:flex;align-items:baseline;gap:8px"><span style="font:700 14px/1.2 var(--font-sans)">Session {{ s.n }}</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">{{ s.date }}</span></div><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.mode }} · <span style="font-family:var(--font-mono)">{{ s.duration }}</span></span></div>
+                  <div style="display:flex;gap:3px"><sc-for list="{{ s.chips }}" as="c" hint-placeholder-count="4"><span style="width:16px;height:16px;border-radius:4px;background:{{ c.vFill }};color:{{ c.vOnFill }};display:grid;place-items:center;font:700 9px/1 var(--font-sans)">{{ c.vGlyph }}</span></sc-for></div>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSession }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between"><button onClick="{{ backHistory }}" style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>History</button><button onClick="{{ exportData }}" style="height:36px;padding:0 14px;margin-right:8px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 13px/1 var(--font-sans);cursor:pointer">Export</button></div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:6px 20px 20px;display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;flex-direction:column;gap:3px"><span style="font:800 26px/1.1 var(--font-sans);letter-spacing:-.025em">Session {{ sess.n }}</span><span style="font:400 13px/1.3 var(--font-sans);color:var(--m-fg2)">{{ sess.date }} · {{ sess.mode }} · <span style="font-family:var(--font-mono)">{{ sess.duration }}</span> · {{ answerCount }} answers</span></div>
+            <div style="padding:12px 14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;gap:6px"><sc-for list="{{ answers }}" as="r" hint-placeholder-count="3"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><span style="width:100%;height:30px;border-radius:8px;background:{{ r.vFill }};color:{{ r.vOnFill }};display:grid;place-items:center;font:700 13px/1 var(--font-sans)">{{ r.vGlyph }}</span><span style="font:700 10px/1 var(--font-sans);color:var(--m-fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">{{ r.lpShort }}</span></div></sc-for></div>
+              <sc-if value="{{ sess.hasFocus }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:10px;align-items:flex-start;padding-top:10px;border-top:1px solid var(--m-line)"><span style="font:700 10px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-cool);padding-top:2px;white-space:nowrap">Focus next</span><span style="font:500 13px/1.35 var(--font-sans)">{{ sess.focus }}</span></div></sc-if>
+            </div>
+            <sc-if value="{{ hasRecording }}" hint-placeholder-val="{{ false }}"><div style="padding:12px 14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:center;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Your recording</span><button onClick="{{ downloadRec }}" style="border:none;background:transparent;font:700 12px/1 var(--font-sans);color:var(--m-cool);cursor:pointer">Download</button></div><audio controls="{{ true }}" src="{{ recUrl }}" style="width:100%"></audio></div></sc-if>
+            <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--m-elev)"><button onClick="{{ histTranscript }}" style="flex:1;height:34px;border:none;border-radius:999px;background:{{ histBg.transcript }};box-shadow:{{ histSh.transcript }};font:700 13px/1 var(--font-sans);color:{{ histFg.transcript }};cursor:pointer">Transcript</button><button onClick="{{ histAnalysis }}" style="flex:1;height:34px;border:none;border-radius:999px;background:{{ histBg.analysis }};box-shadow:{{ histSh.analysis }};font:700 13px/1 var(--font-sans);color:{{ histFg.analysis }};cursor:pointer">Analysis · {{ answerCount }}</button></div>
+            <sc-if value="{{ isHistTranscript }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ sessTurns }}" as="t" hint-placeholder-count="4"><div style="display:flex;gap:10px;padding:10px 12px;border-radius:12px;background:var(--m-card);border-left:3px solid {{ t.edge }}"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 10px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:{{ t.whoColor }}">{{ t.who }}</span><span style="font:400 13px/1.45 var(--font-sans);text-wrap:pretty">{{ t.text }}</span></div></div></sc-for>
+                <sc-if value="{{ noTurns }}" hint-placeholder-val="{{ false }}"><span style="font:400 13px/1.4 var(--font-sans);color:var(--m-fg3);text-align:center;padding:12px">No transcript stored for this session.</span></sc-if>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isHistAnalysis }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:12px"><sc-for list="{{ answers }}" as="a" hint-placeholder-count="2"><dc-import name="AnalysisCard" data="{{ a.card }}" compact="{{ a.compact }}" hint-size="100%,400px"></dc-import></sc-for></div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isProgress }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:4px"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">Progress</span><span style="font:400 13px/1.3 var(--font-sans);color:var(--m-fg2)">{{ sessionCount }} sessions · {{ daysLeft }} days to go</span></div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:14px 20px 20px;display:flex;flex-direction:column;gap:12px">
+            <div style="padding:12px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:4px">
+              <div style="display:grid;grid-template-columns:96px repeat(8,1fr) 28px;gap:3px;align-items:center;padding-bottom:4px"><span></span><sc-for list="{{ cols }}" as="c" hint-placeholder-count="8"><span style="font:500 9px/1 var(--font-mono);color:var(--m-fg3);text-align:center">{{ c }}</span></sc-for><span style="font:700 9px/1 var(--font-sans);text-align:center;letter-spacing:.04em">NOW</span></div>
+              <sc-for list="{{ heatRows }}" as="r" hint-placeholder-count="16">
+                <div style="display:grid;grid-template-columns:96px repeat(8,1fr) 28px;gap:3px;align-items:center">
+                  <span style="font:600 10px/1.1 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px">{{ r.name }}</span>
+                  <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="8"><span style="height:22px;border-radius:4px;background:{{ c.vFill }}"></span></sc-for>
+                  <span style="height:22px;border-radius:4px;background:{{ r.vFill }};color:{{ r.vOnFill }};display:grid;place-items:center;font:700 10px/1 var(--font-sans)">{{ r.vGlyph }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="padding:14px;border-radius:16px;background:var(--m-gold-tint);border:1px solid var(--m-gold-line);display:flex;flex-direction:column;gap:10px">
+              <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-gold)">Weakest LPs</span>
+              <sc-for list="{{ weakest }}" as="l" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font:600 13px/1.2 var(--font-sans)">{{ l.name }}</span><span style="font:400 11px/1 var(--font-sans);color:var(--m-fg2)">{{ l.vLabel }} · {{ l.last }}</span><button onClick="{{ l.onDrill }}" style="height:30px;padding:0 12px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 12px/1 var(--font-sans);cursor:pointer">Drill</button></div></sc-for>
+            </div>
+            <div style="padding:14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+              <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Readiness · now</span>
+              <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px"><span style="width:{{ pct.s }}%;background:var(--m-green-fill)"></span><span style="width:{{ pct.i }}%;background:var(--m-blue-fill)"></span><span style="width:{{ pct.n }}%;background:var(--m-gold-fill)"></span><span style="width:{{ pct.x }}%;background:var(--m-red-fill)"></span><span style="width:{{ pct.z }}%;background:var(--m-line2)"></span></div>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-variant-numeric:tabular-nums"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 20px/1 var(--font-mono);color:var(--m-green)">{{ cnt.s }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">✓ strong</span></div><div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 20px/1 var(--font-mono);color:var(--m-blue)">{{ cnt.i }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">◆ inclined</span></div><div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 20px/1 var(--font-mono);color:var(--m-gold)">{{ cnt.n }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">● not incl.</span></div><div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 20px/1 var(--font-mono);color:var(--m-fg3)">{{ cnt.z }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">○ never</span></div></div>
+            </div>
+            <div style="padding:14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+              <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Trend · average verdict per session</span>
+              <svg viewBox="0 0 320 110" style="width:100%;height:110px;display:block;overflow:visible"><line x1="0" y1="20" x2="320" y2="20" style="stroke:var(--m-line);stroke-width:1"></line><line x1="0" y1="50" x2="320" y2="50" style="stroke:var(--m-line);stroke-width:1"></line><line x1="0" y1="80" x2="320" y2="80" style="stroke:var(--m-line);stroke-width:1"></line><text x="0" y="16" style="font:500 9px var(--font-sans);fill:var(--m-fg3)">Strong hire</text><text x="0" y="46" style="font:500 9px var(--font-sans);fill:var(--m-fg3)">Inclined</text><text x="0" y="76" style="font:500 9px var(--font-sans);fill:var(--m-fg3)">Not inclined</text><polyline points="{{ trendPoints }}" style="fill:none;stroke:var(--m-cool-fill);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round"></polyline><sc-for list="{{ trendDots }}" as="d" hint-placeholder-count="8"><circle cx="{{ d.x }}" cy="{{ d.y }}" r="4" style="fill:var(--m-card);stroke:var(--m-cool-fill);stroke-width:2.5"></circle></sc-for><sc-for list="{{ trendDots }}" as="d" hint-placeholder-count="8"><text x="{{ d.x }}" y="106" text-anchor="middle" style="font:500 9px var(--font-mono);fill:var(--m-fg3)">{{ d.label }}</text></sc-for></svg>
+            </div>
+            <div style="padding:14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+              <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Story usage</span>
+              <sc-for list="{{ usage }}" as="u" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:130px 1fr 28px;gap:10px;align-items:center"><span style="font:600 12px/1.2 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:{{ u.color }}">{{ u.title }}</span><div style="height:8px;border-radius:4px;background:var(--m-elev);overflow:hidden"><span style="display:block;height:100%;width:{{ u.pct }}%;background:{{ u.bar }}"></span></div><span style="font:500 11px/1 var(--font-mono);color:var(--m-fg2);text-align:right">{{ u.uses }}</span></div></sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between"><button onClick="{{ goHome }}" style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Practice</button></div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:6px 20px 40px;display:flex;flex-direction:column;gap:18px">
+            <span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">Settings</span>
+            <div style="display:flex;flex-direction:column;gap:10px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Gemini Live</span>
+              <div style="padding:14px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:12px">
+                <x-import component-from-global-scope="AladdinDesignSystem_34d902.Input" label="API key" type="password" placeholder="AIza…" default-value="{{ gem.key }}" on-change="{{ onKey }}" hint="Stored only in this browser. Get one at aistudio.google.com." hint-size="100%,84px"></x-import>
+                <x-import component-from-global-scope="AladdinDesignSystem_34d902.Select" label="Live model" options="{{ models }}" value="{{ gem.model }}" on-change="{{ onModel }}" hint-size="100%,66px"></x-import>
+                <x-import component-from-global-scope="AladdinDesignSystem_34d902.Select" label="Interviewer voice" options="{{ voices }}" value="{{ gem.voice }}" on-change="{{ onVoice }}" hint-size="100%,66px"></x-import>
+                <div style="display:flex;align-items:center;gap:10px"><button onClick="{{ testGemini }}" style="height:40px;padding:0 16px;border-radius:999px;border:none;background:var(--m-cool-fill);color:var(--m-on-cool);font:700 13px/1 var(--font-sans);cursor:pointer">Test · say hello</button><span style="font:500 12px/1.3 var(--font-sans);color:var(--m-fg2)">{{ gemStatus }}</span></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Interview</span>
+              <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--m-line);gap:12px"><span style="font:500 14px/1.2 var(--font-sans)">Interview date</span><input type="date" value="{{ interviewDate }}" onChange="{{ onDate }}" style="height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--m-line);background:var(--m-bg);color:var(--m-fg);font:500 14px var(--font-sans)"></div>
+                <div style="display:flex;flex-direction:column;gap:8px;padding:12px 14px"><div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:500 14px/1.2 var(--font-sans)">Pause before my turn ends</span><span style="font:500 15px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ pauseLabel }}</span></div><input type="range" min="1000" max="4000" step="250" value="{{ pauseMs }}" onChange="{{ onPause }}" style="width:100%;accent-color:#202124"><span style="font:400 12px/1.45 var(--font-sans);color:var(--m-fg2)">How long Mock waits in silence before it treats your answer as finished and shows “still listening”. The model’s own turn detection decides when the coach speaks.</span></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px"><div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">System instruction</span><button onClick="{{ resetSystem }}" style="border:none;background:transparent;font:700 12px/1 var(--font-sans);color:var(--m-cool);cursor:pointer">Reset</button></div>
+              <x-import component-from-global-scope="AladdinDesignSystem_34d902.Input" multiline="{{ true }}" mono="{{ true }}" default-value="{{ systemText }}" on-blur="{{ onSystem }}" hint="Sent to the interviewer and the coach on every session, after your stories and files. Saved on blur." hint-size="100%,160px"></x-import>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Library &amp; data · {{ dbBadge }}</span>
+              <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <button onClick="{{ exportData }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:none;border-bottom:1px solid var(--m-line);background:transparent;text-align:left;cursor:pointer;color:var(--m-fg)"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 14px/1.2 var(--font-sans)">Back up everything</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">All tables + settings as one JSON · {{ storageNote }}</span></div><span style="font:700 12px/1 var(--font-sans);color:var(--m-cool)">Download</span></button>
+                <label for="mock-restore" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--m-line);cursor:pointer;color:var(--m-fg);box-sizing:border-box"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 14px/1.2 var(--font-sans)">Restore a backup</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">A Mock JSON export · replaces the database</span></div><span style="font:700 12px/1 var(--font-sans);color:var(--m-cool)">Choose file</span><input id="mock-restore" type="file" accept=".json" onChange="{{ onRestore }}" style="display:none"></label>
+                <button onClick="{{ exportRecordings }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:none;border-bottom:1px solid var(--m-line);background:transparent;text-align:left;cursor:pointer;color:var(--m-fg)"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 14px/1.2 var(--font-sans)">Download recordings</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">{{ recCount }} session recordings kept in IndexedDB</span></div><span style="font:700 12px/1 var(--font-sans);color:var(--m-cool)">Download</span></button>
+                <button onClick="{{ replayOnboarding }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:none;border-bottom:1px solid var(--m-line);background:transparent;text-align:left;cursor:pointer;color:var(--m-fg)"><span style="font:500 14px/1.2 var(--font-sans)">Run first-run setup again</span><span style="font:700 12px/1 var(--font-sans);color:var(--m-cool)">Open</span></button>
+                <button onClick="{{ resetAll }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:none;background:transparent;text-align:left;cursor:pointer;color:var(--m-red)"><span style="font:500 14px/1.2 var(--font-sans)">Reset to sample data</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg3)">reloads</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;min-height:0;display:flex;flex-direction:column">
+          <div style="padding:64px 20px 0;display:flex;align-items:center;justify-content:space-between"><span style="display:inline-flex;align-items:baseline;font:800 22px/1 var(--font-sans);letter-spacing:-.03em">Mock<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--m-warm-fill);margin-left:3px"></span></span><div style="display:flex;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:{{ dot.a }}"></span><span style="width:8px;height:8px;border-radius:50%;background:{{ dot.b }}"></span><span style="width:8px;height:8px;border-radius:50%;background:{{ dot.c }}"></span></div></div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:28px 20px 20px;display:flex;flex-direction:column;gap:18px">
+            <sc-if value="{{ step1 }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:800 34px/1.05 var(--font-sans);letter-spacing:-.03em">Your 16 LPs are ready.</span><span style="font:400 15px/1.5 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">Now drop whatever prep you have. Mock sorts it — stories, questions, your JD, notes from past loops.</span></div>
+              <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px"><sc-for list="{{ lps }}" as="l" hint-placeholder-count="16"><span title="{{ l.name }}" style="height:30px;border-radius:7px;background:var(--m-card);border:1px solid var(--m-line);display:grid;place-items:center;font:800 10px/1 var(--font-sans)">{{ l.short }}</span></sc-for></div>
+              <label for="mock-files-ob" style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 16px;border-radius:16px;border:1.5px dashed var(--m-line2);background:var(--m-card);text-align:center;cursor:pointer"><span style="font:700 15px/1.2 var(--font-sans)">Drop files, or tap to browse</span><span style="font:400 12px/1.4 var(--font-sans);color:var(--m-fg2)">.md · .txt · .csv — anything, mixed</span><input id="mock-files-ob" type="file" multiple="{{ true }}" accept=".md,.txt,.csv,.json,.zst" onChange="{{ onBankFile }}" style="display:none"></label>
+              <sc-if value="{{ hasImport }}" hint-placeholder-val="{{ false }}"><div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden"><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--m-line);font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)"><span>Found in {{ importInfo.files }} files</span><span style="color:var(--m-green);text-transform:none;letter-spacing:0">sorted automatically</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--m-line)"><span style="font:600 14px/1.2 var(--font-sans)">{{ importInfo.questions }} questions</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">tagged by keyword · fix any in Library</span></div><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px"><span style="font:600 14px/1.2 var(--font-sans)">{{ importInfo.types }}</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">included in prep</span></div></div></sc-if>
+            </sc-if>
+            <sc-if value="{{ step2 }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:800 34px/1.05 var(--font-sans);letter-spacing:-.03em">Connect your interviewer.</span><span style="font:400 15px/1.5 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">Mock talks to you through Gemini Live. Paste a key from Google AI Studio, pick a voice, and say hello once — that grants the microphone for good.</span></div>
+              <div style="padding:14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:12px">
+                <x-import component-from-global-scope="AladdinDesignSystem_34d902.Input" label="Gemini API key" type="password" placeholder="AIza…" default-value="{{ gem.key }}" on-change="{{ onKey }}" hint="Kept in this browser only." hint-size="100%,84px"></x-import>
+                <x-import component-from-global-scope="AladdinDesignSystem_34d902.Select" label="Live model" options="{{ models }}" value="{{ gem.model }}" on-change="{{ onModel }}" hint-size="100%,66px"></x-import>
+                <x-import component-from-global-scope="AladdinDesignSystem_34d902.Select" label="Voice" options="{{ voices }}" value="{{ gem.voice }}" on-change="{{ onVoice }}" hint-size="100%,66px"></x-import>
+                <button onClick="{{ testGemini }}" style="height:48px;border-radius:999px;border:none;background:var(--m-cool-fill);color:var(--m-on-cool);font:700 15px/1 var(--font-sans);cursor:pointer">Say hello · test the connection</button>
+                <span style="font:500 12px/1.4 var(--font-sans);color:var(--m-fg2);text-align:center">{{ gemStatus }}</span>
+              </div>
+              <span style="font:400 12px/1.4 var(--font-sans);color:var(--m-fg3);text-align:center">No key? Skip — the live screen runs a scripted demo until you add one.</span>
+            </sc-if>
+            <sc-if value="{{ step3 }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:800 34px/1.05 var(--font-sans);letter-spacing:-.03em">That’s it.</span><span style="font:400 15px/1.5 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">Session {{ nextN }} is short: up to three {{ focusName }} questions, coaching after each. Put your earbuds in.</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><div style="padding:12px 14px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:2px"><span style="font:500 22px/1 var(--font-mono)">16</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">LPs · {{ covered }} with a story</span></div><div style="padding:12px 14px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:2px"><span style="font:500 22px/1 var(--font-mono)">{{ questionCount }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">questions in the bank</span></div></div>
+              <div style="padding:14px 16px;border-radius:12px;background:var(--m-cool-tint);border:1px solid var(--m-cool-line);display:flex;gap:10px;align-items:flex-start"><span style="font:700 10px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-cool);padding-top:2px;white-space:nowrap">Status</span><span style="font:400 13px/1.45 var(--font-sans)">{{ dbBadge }} · {{ gemBadge }}</span></div>
+            </sc-if>
+          </div>
+          <div style="padding:12px 20px 34px;display:flex;flex-direction:column;gap:10px">
+            <sc-if value="{{ step1 }}" hint-placeholder-val="{{ true }}"><button onClick="{{ obNext }}" style="height:56px;border-radius:999px;border:none;background:var(--m-fg);color:var(--m-card);font:700 16px/1 var(--font-sans);cursor:pointer">{{ step1Label }}</button></sc-if>
+            <sc-if value="{{ step2 }}" hint-placeholder-val="{{ false }}"><button onClick="{{ obNext }}" style="height:56px;border-radius:999px;border:none;background:var(--m-fg);color:var(--m-card);font:700 16px/1 var(--font-sans);cursor:pointer">Next</button></sc-if>
+            <sc-if value="{{ step3 }}" hint-placeholder-val="{{ false }}"><button onClick="{{ obStart }}" style="height:64px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 18px/1 var(--font-sans);cursor:pointer" style-active="transform:scale(.98)">Start session {{ nextN }}</button><button onClick="{{ obDone }}" style="height:44px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:700 14px/1 var(--font-sans);cursor:pointer">Explore first</button></sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;justify-content:space-around;align-items:flex-start;padding:10px 8px 28px;border-top:1px solid var(--m-line);background:var(--m-card)">
+          <button onClick="{{ goHome }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;border:none;background:transparent;cursor:pointer;color:{{ tabColor.practice }}"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg><span style="font:600 11px/1 var(--font-sans)">Practice</span></button>
+          <button onClick="{{ goLibrary }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;border:none;background:transparent;cursor:pointer;color:{{ tabColor.library }}"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg><span style="font:600 11px/1 var(--font-sans)">Library</span></button>
+          <button onClick="{{ goHistory }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;border:none;background:transparent;cursor:pointer;color:{{ tabColor.history }}"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span style="font:600 11px/1 var(--font-sans)">History</span></button>
+          <button onClick="{{ goProgress }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;border:none;background:transparent;cursor:pointer;color:{{ tabColor.progress }}"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span style="font:600 11px/1 var(--font-sans)">Progress</span></button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ sheet }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;background:var(--m-scrim);z-index:10" onClick="{{ closeSheet }}"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;top:150px;background:var(--m-card);border-radius:24px 24px 0 0;box-shadow:var(--shadow-3);display:flex;flex-direction:column;z-index:11;animation:mock-in .32s var(--ease-standard)">
+          <div style="display:flex;justify-content:center;padding:8px 0 0"><span style="width:36px;height:5px;border-radius:3px;background:var(--m-line2)"></span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px 0"><span style="font:800 24px/1.1 var(--font-sans);letter-spacing:-.025em">Session {{ nextN }}</span><button onClick="{{ closeSheet }}" aria-label="Close" style="width:36px;height:36px;border-radius:50%;border:none;background:var(--m-elev);color:var(--m-fg2);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:18px 20px 0;display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">1 · What</span>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ sheetOptions }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.onPick }}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:{{ o.border }};background:{{ o.bg }};text-align:left;cursor:pointer;color:var(--m-fg);width:100%"><span style="width:28px;height:28px;border-radius:8px;background:{{ o.iconBg }};color:{{ o.iconFg }};display:grid;place-items:center;font:700 12px/1 var(--font-sans)">{{ o.icon }}</span><div style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font:700 14px/1.2 var(--font-sans)">{{ o.title }}</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">{{ o.sub }}</span></div><span style="font:700 14px/1 var(--font-sans)">{{ o.check }}</span></button></sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">2 · Coaching</span>
+              <div style="display:grid;grid-template-columns:1fr 1fr;padding:3px;border-radius:999px;background:var(--m-elev)"><button onClick="{{ coachEach }}" style="height:40px;border:none;border-radius:999px;background:{{ coachBg.each }};box-shadow:{{ coachSh.each }};font:700 13px/1 var(--font-sans);color:{{ coachFg.each }};cursor:pointer">After each answer</button><button onClick="{{ coachRecap }}" style="height:40px;border:none;border-radius:999px;background:{{ coachBg.recap }};box-shadow:{{ coachSh.recap }};font:700 13px/1 var(--font-sans);color:{{ coachFg.recap }};cursor:pointer">Recap only</button></div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:12px;background:var(--m-bg);border:1px solid var(--m-line)"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 12px/1.2 var(--font-sans);color:var(--m-fg2)">Session seed</span><span style="font:400 12px/1.3 var(--font-sans);color:var(--m-fg3)">Decides which questions come up and the model’s take. Same seed, same session.</span></div><div style="display:flex;align-items:center;gap:6px"><input type="number" value="{{ seedVal }}" onChange="{{ onSeed }}" style="width:84px;height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--m-line);background:var(--m-card);color:var(--m-fg);font:500 14px var(--font-mono)"><button onClick="{{ newSeed }}" aria-label="New seed" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 16px/1 var(--font-sans);cursor:pointer">↻</button></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:12px;background:var(--m-bg);border:1px solid var(--m-line)"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 12px/1.2 var(--font-sans);color:var(--m-fg2)">Remembered</span><span style="font:400 12px/1.3 var(--font-sans);color:var(--m-fg3)">Voice {{ gem.voice }} · {{ gem.model }}</span></div><button onClick="{{ openSettings }}" style="border:none;background:transparent;font:700 12px/1 var(--font-sans);color:var(--m-cool);cursor:pointer">Change</button></div>
+          </div>
+          <div style="padding:14px 20px 34px;border-top:1px solid var(--m-line);display:flex;flex-direction:column;gap:6px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">3 · Go</span><button onClick="{{ startPicked }}" style="height:60px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 17px/1 var(--font-sans);cursor:pointer" style-active="transform:scale(.98)">Start</button></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ answerOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;background:var(--m-scrim);z-index:12" onClick="{{ closeAnswer }}"></div>
+        <div style="position:absolute;left:0;right:0;bottom:0;top:110px;background:var(--m-card);border-radius:24px 24px 0 0;box-shadow:var(--shadow-3);display:flex;flex-direction:column;z-index:13;animation:mock-in .32s var(--ease-standard)">
+          <div style="display:flex;justify-content:center;padding:8px 0 0"><span style="width:36px;height:5px;border-radius:3px;background:var(--m-line2)"></span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px 0"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-cool)">✦ Model answer · seed {{ ans.seed }}</span><span style="font:800 20px/1.1 var(--font-sans);letter-spacing:-.02em">From your own stories</span></div><button onClick="{{ closeAnswer }}" aria-label="Close" style="width:36px;height:36px;border-radius:50%;border:none;background:var(--m-elev);color:var(--m-fg2);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+          <div style="flex:1;min-height:0;overflow:auto;padding:16px 20px 20px;display:flex;flex-direction:column;gap:14px">
+            <div style="padding:12px 14px;border-radius:12px;background:var(--m-bg);border-left:3px solid var(--m-cool-fill);font:600 14px/1.35 var(--font-sans);text-wrap:pretty">{{ ans.question }}</div>
+            <sc-if value="{{ ans.loading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:10px;font:500 13px/1.3 var(--font-sans);color:var(--m-fg2)"><span style="width:16px;height:16px;border-radius:50%;border:2px solid var(--m-cool);border-right-color:transparent;animation:mock-spin 1s linear infinite"></span>Writing a STAR answer from your stories…</div></sc-if>
+            <sc-if value="{{ ans.hasText }}" hint-placeholder-val="{{ false }}"><div style="font:400 14px/1.6 var(--font-sans);white-space:pre-wrap;text-wrap:pretty">{{ ans.text }}</div></sc-if>
+            <sc-if value="{{ ans.hasSample }}" hint-placeholder-val="{{ false }}"><div style="padding:12px 14px;border-radius:12px;background:var(--m-bg);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:4px"><span style="font:700 10px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Top community answer · Exponent</span><span style="font:400 12px/1.5 var(--font-sans);color:var(--m-fg2)">{{ ans.sample }}</span></div></sc-if>
+          </div>
+          <div style="padding:12px 20px 34px;border-top:1px solid var(--m-line);display:flex;gap:8px"><button onClick="{{ regenAnswer }}" style="flex:1;height:48px;border-radius:999px;border:none;background:var(--m-cool-fill);color:var(--m-on-cool);font:700 14px/1 var(--font-sans);cursor:pointer">Another take · new seed</button><button onClick="{{ askThisNow }}" style="flex:1;height:48px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 14px/1 var(--font-sans);cursor:pointer">Ask me this live</button></div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isDriven }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;z-index:20;background:var(--m-bg)"><dc-import name="LiveScreen" driven="{{ true }}" state="{{ L.state }}" prev-state="{{ L.prevState }}" mode="{{ liveMode }}" q-label="{{ L.qLabel }}" q-text="{{ L.qText }}" lp-name="{{ L.lpName }}" iv-name="{{ L.ivName }}" iv-role="{{ L.ivRole }}" iv-n="{{ L.ivN }}" iv-mono="{{ L.ivMono }}" sec="{{ L.sec }}" speaker="{{ L.speaker }}" turns="{{ L.turns }}" analysis="{{ L.analysis }}" show-hint="{{ L.showHint }}" hint-text="{{ L.hintText }}" notes-data="{{ liveNotes }}" recon="{{ L.recon }}" coach-typing="{{ L.coachTyping }}" session-no="{{ L.n }}" recap="{{ liveRecap }}" recap-duration="{{ L.duration }}" recap-count="{{ liveCount }}" recap-fixes="{{ liveFixes }}" next-auto="or say “next”" voice="{{ voice }}" on-action="{{ onAction }}" style="height:100%;display:block" hint-size="100%,100%"></dc-import></div>
+      </sc-if>
+      <sc-if value="{{ isDemo }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;inset:0;z-index:20;background:var(--m-bg)"><dc-import name="LiveScreen" live="{{ true }}" mode="{{ liveMode }}" voice="{{ voice }}" on-review="{{ exitDemo }}" style="height:100%;display:block" hint-size="100%,100%"></dc-import><span style="position:absolute;top:3px;left:0;right:0;height:18px;background:var(--m-gold-tint);border-bottom:1px solid var(--m-gold-line);color:var(--m-gold);font:700 9px/1 var(--font-sans);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;justify-content:center;z-index:21">Demo · add a Gemini key in Settings to go live</span></div>
+      </sc-if>
+
+      <sc-if value="{{ hasToast }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:16px;right:16px;top:60px;z-index:40;padding:12px 14px;border-radius:12px;background:var(--m-fg);color:var(--m-canvas);font:500 13px/1.4 var(--font-sans);box-shadow:var(--shadow-3);animation:mock-in .3s var(--ease-standard)">{{ toast }}</div></sc-if>
+      <sc-if value="{{ notReady }}" hint-placeholder-val="{{ true }}"><div style="position:absolute;inset:0;z-index:50;background:var(--m-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px"><span style="display:inline-flex;align-items:baseline;font:800 40px/1 var(--font-sans);letter-spacing:-.03em">Mock<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--m-warm-fill);margin-left:4px"></span></span><span style="width:18px;height:18px;border-radius:50%;border:2px solid var(--m-fg3);border-right-color:transparent;animation:mock-spin 1s linear infinite"></span><span style="font:400 13px/1.3 var(--font-sans);color:var(--m-fg2)">{{ status }}</span></div></sc-if>
+    </div>
+  </x-import>
+
+  <div style="max-width:340px;display:flex;flex-direction:column;gap:14px;padding-top:8px;font:400 14px/1.55 var(--font-sans);color:var(--m-fg2)">
+    <span style="font:800 24px/1.1 var(--font-sans);letter-spacing:-.025em;color:var(--m-fg)">Mock — the app</span>
+    <p style="margin:0">One working screen set: Practice, Library, History, Progress, Settings and first run, with the live session on top. Everything you see is read from the database; sessions you run are written back.</p>
+    <div style="display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;border:1px solid var(--m-line)"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Status</span><span><strong style="color:var(--m-fg)">Database:</strong> {{ dbBadge }}</span><span><strong style="color:var(--m-fg)">Gemini Live:</strong> {{ gemBadge }}</span></div>
+    <p style="margin:0"><strong style="color:var(--m-fg)">Database.</strong> DuckDB-WASM runs in the page (loaded from jsDelivr). Tables: lps, stories, story_lps, questions, files, sessions, answers, settings — seeded with the sample content on first load, snapshotted to localStorage after every write. If the WASM can’t load here, the same queries run over in-memory tables and the badge says so.</p>
+    <p style="margin:0"><strong style="color:var(--m-fg)">Voice.</strong> Settings → Gemini Live takes an AI Studio key, a Live model and a voice. The interviewer and coach are one Gemini Live session with three tools — <span style="font-family:var(--font-mono);font-size:12px">ask_question</span>, <span style="font-family:var(--font-mono);font-size:12px">coach_feedback</span>, <span style="font-family:var(--font-mono);font-size:12px">end_session</span> — so the screen knows the question, the LP and the structured verdict, and History gets a real analysis card. Without a key the live screen plays the scripted demo.</p>
+    <p style="margin:0"><strong style="color:var(--m-fg)">Question bank.</strong> Seeded from your Exponent export: 233 behavioural questions (98 asked at Amazon), auto-tagged to LPs by keyword — untagged ones are flagged gold. Every question has <strong style="color:var(--m-fg)">✦ Model answer</strong>: Gemini writes a STAR answer from your own stories, reproducible by the <strong style="color:var(--m-fg)">session seed</strong> (set it in the setup sheet; ↻ rolls a new one). The same seed orders the questions a live session draws from.</p>
+    <p style="margin:0"><strong style="color:var(--m-fg)">Backup.</strong> Snapshots and session recordings live in IndexedDB (localStorage if that’s blocked). Settings → Library &amp; data: download one JSON backup, restore it, or download the recordings; each session page also has its own Download.</p>
+    <p style="margin:0;font:400 12px/1.5 var(--font-sans);color:var(--m-fg3)">Tweaks: theme · firstRun (forces the setup flow) · voice visual. The default bank came from the first (4 MB) upload; Library → Questions → “Load full Exponent export” streams the complete 18 MB .zst in the browser and adds everything new.</p>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;firstRun&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behaviour&quot;},&quot;voice&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;orb&quot;,&quot;options&quot;:[&quot;orb&quot;,&quot;wave&quot;,&quot;ring&quot;],&quot;tsType&quot;:&quot;'orb'|'wave'|'ring'&quot;,&quot;section&quot;:&quot;Live screen&quot;}}">
+class Component extends DCLogic {
+  state = { ready:false, dbMode:'', status:'Starting…', tab:'practice', screen:'home', lib:'lps', sheet:false, pick:'focus', coaching:'each', selLp:'deep', selStory:'payments', selSession:null, selFile:null, histTab:'transcript', step:1, onboarded: !!localStorage.getItem('mock.onboarded'), live:null, demo:false, qFilter:'all', qLimit:40, ans:null, recKeys:[], lps:[], stories:[], questions:[], files:[], sessions:[], answers:[], heat:[], settings:{}, gem:{ key: localStorage.getItem('mock.gemini.key')||'', model: localStorage.getItem('mock.gemini.model')||'gemini-2.0-flash-live-001', voice: localStorage.getItem('mock.gemini.voice')||'Aoede' }, gemStatus:'', toast:'', recSession:null, importInfo:null };
+  turnsBySession = {};
+  async componentDidMount(){
+    try {
+      [this.DB, this.LIVE, this.SEED] = await Promise.all([import('./mock-db.js'), import('./mock-live.js'), import('./mock-data.js')]);
+      const mode = await this.DB.init(s => this.setState({status:s}));
+      this.setState({dbMode:mode});
+      await this.refresh();
+      if (!localStorage.getItem('mock.bank.full')) { this.importBank('./uploads/exponent_new_qa.json-a408b1cb.zst', 'the full Exponent export').then(()=>localStorage.setItem('mock.bank.full','1')); }
+    } catch(e) { console.error(e); this.setState({status:'Could not start: '+e.message}); }
+    this.setState({ready:true});
+  }
+  componentWillUnmount(){ this.endLive(true); clearTimeout(this.tt); }
+  async refresh(){ const DB=this.DB; const [lps,stories,questions,files,sessions,heat,settings,recKeys] = await Promise.all([DB.lps(),DB.stories(),DB.questions(),DB.files(),DB.sessions(),DB.heat(),DB.settings(),DB.listBlobs()]); const sel = this.state.selSession || (sessions[0] && sessions[0].n) || null; const answers = sel ? await DB.answers(sel) : []; this.setState({lps,stories,questions,files,sessions,heat,settings,answers,selSession:sel,recKeys}); }
+  async openSession(n){ const answers = await this.DB.answers(n); const blob = await this.DB.getBlob('rec-'+n); if (this.recUrl) { URL.revokeObjectURL(this.recUrl); this.recUrl=null; } if (blob) { this.recUrl = URL.createObjectURL(blob); this.recBlob = blob; } this.setState({tab:'history', screen:'session', selSession:n, answers, histTab:'transcript', recSession: blob ? n : null}); }
+  rng(seed){ let a = (seed>>>0) || 1; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  shuffle(arr, seed){ const r=this.rng(seed), a=arr.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  seed(){ return +(this.state.settings.seed || 12345); }
+  async download(name, blob){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000); }
+  async onRestore(e){ const f=(e.target.files||[])[0]; if(!f) return; try { await this.DB.importBackup(await f.text()); await this.refresh(); this.toast('Backup restored from '+f.name); } catch(err){ this.toast('Restore failed: '+err.message); } e.target.value=''; }
+  async exportRecordings(){ const keys = await this.DB.listBlobs(); if(!keys.length) return this.toast('No recordings yet — run a live session first.'); for (const k of keys) { const b = await this.DB.getBlob(k); if (b) await this.download('mock-'+k+'.webm', b); } }
+  async answerQ(q, seed){
+    const g=this.state.gem; const useSeed = seed || this.seed();
+    const base = {question:q.text, lpName:(this.state.lps.find(l=>l.id===q.lp_id)||{}).name||'Untagged', sample:q.sample||'', q, seed:useSeed};
+    if (!g.key) { this.setState({ans:{...base, loading:false, text:'Add a Gemini API key in Settings and Mock will write a model answer from your own stories, with their real numbers.'}}); return; }
+    this.setState({ans:{...base, loading:true, text:''}});
+    const S=this.state; const stories=S.stories.map(s=>'- '+s.title+': '+s.summary+' Numbers: '+s.numbers.join(' · ')+(s.situation?' Situation: '+s.situation:'')+(s.result?' Result: '+s.result:'')).join('\n');
+    try { const text = await this.LIVE.generateText({apiKey:g.key, model:S.settings.text_model||'gemini-2.5-flash', seed:useSeed, temperature:0.9, system:'You write model interview answers for one specific candidate, strictly from their own stories below. Never invent numbers; quote theirs. Format: four short labelled paragraphs — Situation, Task, Action, Result — then one line "Why this works for '+base.lpName+'". Under 220 words, first person, spoken register.\n\nStories:\n'+stories, prompt:'Question ('+base.lpName+'): '+q.text+'\nSeed: '+useSeed+' — vary which story and angle you pick with the seed.'}); this.setState({ans:{...base, loading:false, text}}); }
+    catch(e){ this.setState({ans:{...base, loading:false, text:'Could not get an answer: '+e.message}}); }
+  }
+  v(code){ return this.SEED ? this.SEED.v(code||0) : {vLabel:'',vGlyph:'',vBg:'transparent',vFg:'inherit',vBorder:'none',vFill:'transparent',vOnFill:'inherit'}; }
+  toast(msg){ this.setState({toast:msg}); clearTimeout(this.tt); this.tt = setTimeout(()=>this.setState({toast:''}), 5000); }
+  go(tab, screen, extra){ this.setState({tab, screen: screen||tab, sheet:false, ...(extra||{})}); }
+  fmt(s){ s=Math.max(0,s|0); return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+  lpName(id){ const l=this.state.lps.find(l=>l.id===id); return l ? l.name : id; }
+  lpId(name){ if(!name) return 'deep'; const n=String(name).toLowerCase(); const l=this.state.lps.find(l=>l.name.toLowerCase()===n) || this.state.lps.find(l=>n.includes(l.name.toLowerCase().split(' ')[0]) && l.name.length>4); return l ? l.id : 'deep'; }
+  hintFor(lpName){ const id=this.lpId(lpName); const s=this.state.stories.find(s=>s.primary.includes(id)) || this.state.stories.find(s=>s.secondary.includes(id)); return s ? 'Try the '+s.title+' story — '+s.numbers.slice(0,2).join(', ')+'.' : 'Pick your clearest story and lead with its number.'; }
+  setGem(k,v){ const gem={...this.state.gem,[k]:v}; localStorage.setItem('mock.gemini.'+k, v); this.setState({gem}); }
+  async testGemini(){
+    const g=this.state.gem; if(!g.key){ this.setState({gemStatus:'Paste an API key first.'}); return; }
+    this.setState({gemStatus:'Connecting…'});
+    const gl = new this.LIVE.GeminiLive((ev,data)=>{ if(ev==='turnComplete'){ this.setState({gemStatus:'✓ Connected — you should hear '+g.voice+'. Microphone granted.'}); setTimeout(()=>gl.close(), 4000); } if(ev==='error') this.setState({gemStatus:'Error: '+data.message}); });
+    try { await gl.connect({apiKey:g.key, model:g.model, voice:g.voice, system:'You are a friendly interview coach called Mock. Keep it to one sentence.'}); this.setState({gemStatus:'Connected · asking for the microphone…'}); await gl.startMic(); gl.muted = true; gl.sendText('Say hello in one short sentence and tell me you are ready to interview me.'); this.setState({gemStatus:'Connected · waiting for a reply…'}); }
+    catch(e){ this.setState({gemStatus:'Failed: '+e.message}); gl.close(); }
+  }
+  tools(){ return [
+    {name:'ask_question', description:'Call this immediately BEFORE you speak each new main interview question (not for short follow-ups). The app shows the question on screen.', parameters:{type:'OBJECT', properties:{lp:{type:'STRING', description:'The Leadership Principle being tested, by its full name'}, question:{type:'STRING', description:'The exact question text you will ask'}}, required:['lp','question']}},
+    {name:'coach_feedback', description:'Call this once the candidate has finished an answer, BEFORE you speak your coaching. The app records it and shows the verdict.', parameters:{type:'OBJECT', properties:{verdict:{type:'STRING', enum:['strong_hire','inclined','not_inclined','strong_no_hire']}, strength:{type:'STRING'}, fixes:{type:'ARRAY', items:{type:'STRING'}, description:'Up to three concrete fixes'}, better_story:{type:'STRING', description:'A better story from the candidate’s own list, or empty'}, reason:{type:'STRING'}, missed_numbers:{type:'ARRAY', items:{type:'OBJECT', properties:{notes:{type:'STRING'}, said:{type:'STRING'}}}}, star:{type:'OBJECT', properties:{s:{type:'INTEGER'}, t:{type:'INTEGER'}, a:{type:'INTEGER'}, r:{type:'INTEGER'}}, description:'Estimated percentage of the answer spent on Situation, Task, Action, Result'}, i_pct:{type:'INTEGER', description:'Percentage of first-person singular versus we'}, pace_wpm:{type:'INTEGER'}, fillers:{type:'INTEGER'}, story_used:{type:'STRING'}}, required:['verdict','strength','fixes']}},
+    {name:'end_session', description:'Call when all questions have been asked and coached, before saying goodbye.', parameters:{type:'OBJECT', properties:{suggested_focus:{type:'STRING', description:'One line: what to focus on next session'}}}},
+  ]; }
+  buildSystem(mode, focus, qText){
+    const S=this.state, sys=S.settings.system||'';
+    const stories = S.stories.map(s=>'- '+s.title+': '+s.summary+' Numbers: '+s.numbers.join(' · ')+'. LPs: '+[...s.primary,...s.secondary].map(id=>this.lpName(id)).join(', ')).join('\n');
+    const files = S.files.filter(f=>f.included && f.content).map(f=>'### '+f.name+' ('+f.type+')\n'+String(f.content).slice(0,3000)).join('\n\n');
+    const qs = this.shuffle(S.questions.filter(q=>mode!=='lp'||q.lp_id===focus), this.seed()).slice(0,12).map(q=>'- ('+this.lpName(q.lp_id)+') '+q.text).join('\n');
+    const scope = mode==='lp' ? 'This session focuses on ONE Leadership Principle: '+this.lpName(focus)+'. Ask up to 3 questions for it.' : mode==='question' ? 'This session is a single question: "'+qText+'" ('+this.lpName(focus)+'). Ask exactly that, coach it, then end the session.' : 'Run a short loop: 3 questions across different Leadership Principles.';
+    return sys+'\n\nYou are Dana Whitfield, Bar Raiser, interviewer 3 of 5 in a mock Amazon-style loop. Speak naturally and briefly, like a phone call. '+scope+' Session seed: '+this.seed()+' — prefer the questions in the listed order.\n\nPROTOCOL (strict):\n1. Before you speak each new main question, call ask_question(lp, question). Follow-ups do not need the tool.\n2. Let the candidate answer fully. When they stop, ask at most two short follow-ups.\n3. Then switch to coach mode: FIRST call coach_feedback with the structured analysis, THEN say the strength, the fixes and the verdict out loud in under 25 seconds.\n4. If the candidate says "redo", call ask_question again with the same question. If they say "next", move on. If they say "hint", name their best story for the LP.\n5. After the last question has been coached, call end_session, then say goodbye in one sentence.\n\nThe candidate\'s own stories (judge against these; quote exact numbers they miss):\n'+stories+'\n\nQuestion bank you may draw from:\n'+qs+(files ? '\n\nCandidate files:\n'+files : '');
+  }
+  async startLive(opts){
+    opts = opts||{}; const mode=opts.mode||'lp', focus=opts.lp||'deep';
+    if (!this.state.gem.key) { this.setState({demo:true, live:{mode}, sheet:false}); return; }
+    const n = await this.DB.nextSessionNo();
+    const L = { mode, focus, n, state:'connecting', qLabel:'Q1', qText:'', lpName: mode==='loop' ? '' : this.lpName(focus), ivName:'Dana Whitfield', ivRole:'Bar Raiser', ivN:3, ivMono:'DW', sec:0, speaker:'none', turns:[], analysis:null, showHint:false, hintText:'', qIndex:0, answers:[], prevState:null, startedAt:Date.now(), coachTyping:false, recon:false, duration:'00:00' };
+    this.setState({live:L, demo:false, sheet:false});
+    const gl = new this.LIVE.GeminiLive((ev,data)=>this.onLive(ev,data)); this.gl = gl;
+    try { await gl.connect({apiKey:this.state.gem.key, model:this.state.gem.model, voice:this.state.gem.voice, system:this.buildSystem(mode, focus, opts.qText), tools:this.tools(), seed:this.seed()}); await gl.startMic(); }
+    catch(e){ this.toast('Live failed: '+e.message); gl.close(); this.gl=null; this.setState({live:null}); return; }
+    this.tick = setInterval(()=>this.onTick(), 400);
+    gl.sendText('Start the session now. Greet me in one sentence, then ask the first question. Call ask_question first.');
+  }
+  upd(patch){ this.setState(s => s.live ? ({live:{...s.live, ...(typeof patch==='function' ? patch(s.live) : patch)}}) : null); }
+  onTick(){
+    const L=this.state.live, gl=this.gl; if(!L||!gl||L.state==='end'||L.state==='paused') return;
+    const now=Date.now(), ai=gl.isSpeaking(), me=gl.level>0.025; if (me) this.lastVoice = now;
+    const patch = {speaker: ai ? 'ai' : me ? 'me' : 'none'};
+    if (L.state==='interviewer' && !ai && L.qText && now-(L.qAskedAt||now)>1200 && !this.aiTurnOpen) { patch.state='answering'; patch.answerStart=now; this.lastVoice=now; }
+    if (L.state==='answering' || L.state==='thinking') { patch.sec=Math.floor((now-(L.answerStart||now))/1000); const pause=+(this.state.settings.pause_ms||2500); patch.state = me ? 'answering' : (now-(this.lastVoice||now) > pause ? 'thinking' : L.state); }
+    if (L.state==='coaching') { patch.coachTyping = ai || this.aiTurnOpen; }
+    this.upd(patch);
+  }
+  onLive(ev, data){
+    if (ev==='error') { this.toast(data && data.message || 'Live error'); return; }
+    if (!this.state.live) return;
+    if (ev==='outputText') { this.aiTurnOpen=true; this.appendTurn(true, data); }
+    else if (ev==='inputText') this.appendTurn(false, data);
+    else if (ev==='turnComplete') this.aiTurnOpen=false;
+    else if (ev==='toolCall') this.onTools(data);
+    else if (ev==='close') { if (this.state.live.state!=='end') { this.upd({recon:true}); this.toast('The Live connection closed ('+(data.reason||data.code)+'). End the session to save it.'); } }
+  }
+  appendTurn(ai, text){ this.upd(L => { const turns=L.turns.slice(); const last=turns[turns.length-1]; if (last && last.ai===ai && Date.now()-last.t<5000) turns[turns.length-1]={...last, text:last.text+text, t:Date.now()}; else turns.push({ai, text, t:Date.now()}); return {turns: turns.slice(-14)}; }); }
+  async onTools(calls){
+    const res=[];
+    for (const c of calls) { const a=c.args||{};
+      if (c.name==='ask_question') { this.upd(L => ({state:'interviewer', qText:a.question||'', lpName:a.lp||L.lpName, qLabel:'Q'+(L.qIndex+1), qAskedAt:Date.now(), analysis:null, showHint:false, sec:0, hintText:this.hintFor(a.lp||L.lpName)})); res.push({id:c.id, name:c.name, response:{ok:true}}); }
+      else if (c.name==='coach_feedback') {
+        const L=this.state.live; const verdict={strong_hire:1,inclined:2,not_inclined:3,strong_no_hire:4}[a.verdict]||3; const star=a.star||{};
+        const row={id:'a'+L.n+'_'+L.qIndex, session_n:L.n, q_index:L.qIndex, lp_id:this.lpId(L.lpName), question:L.qText, story:a.story_used||'', verdict, strength:a.strength||'', fixes:(a.fixes||[]).slice(0,3), better:a.better_story||'', reason:a.reason||'', missed:(a.missed_numbers||[]).map(m=>({notes:m.notes||'', said:m.said||''})), star_s:star.s||25, star_t:star.t||20, star_a:star.a||35, star_r:star.r||20, i_pct:a.i_pct||50, pace:a.pace_wpm||150, fillers:a.fillers||0, length:this.fmt(L.sec)};
+        try { await this.DB.insertAnswer(row); } catch(e){ console.warn(e); }
+        this.upd(L => ({state:'coaching', analysis:{verdict, strength:row.strength, fixes:row.fixes}, answers:[...L.answers, row], qIndex:L.qIndex+1, coachTyping:true}));
+        res.push({id:c.id, name:c.name, response:{ok:true, saved:true}});
+      }
+      else if (c.name==='end_session') { res.push({id:c.id, name:c.name, response:{ok:true}}); setTimeout(()=>this.finishSession(a.suggested_focus||''), 6000); }
+      else res.push({id:c.id, name:c.name, response:{ok:false, error:'unknown tool'}});
+    }
+    this.gl && this.gl.sendToolResponse(res);
+  }
+  async finishSession(focus){
+    const L=this.state.live; if(!L||L.state==='end') return; clearInterval(this.tick);
+    const dur=Math.floor((Date.now()-L.startedAt)/1000); const gl=this.gl;
+    const blob = gl ? await gl.recordingBlob() : null; if (blob) { if (this.recUrl) URL.revokeObjectURL(this.recUrl); this.recUrl = URL.createObjectURL(blob); this.recBlob = blob; await this.DB.putBlob('rec-'+L.n, blob); }
+    this.turnsBySession[L.n] = L.turns;
+    const date = new Date().toLocaleDateString('en-GB',{weekday:'short', day:'numeric', month:'short'});
+    try { await this.DB.insertSession({n:L.n, date, mode: L.mode==='loop' ? 'Full loop' : L.mode==='question' ? 'One question · '+L.lpName : 'One LP · '+L.lpName, duration:this.fmt(dur), focus, seed:this.seed()}); } catch(e){ console.warn(e); }
+    this.upd({state:'end', speaker:'none', duration:this.fmt(dur), focus});
+    this.setState({recSession: blob ? L.n : this.state.recSession, selSession:L.n});
+    setTimeout(()=>{ if (this.gl===gl) { gl.close(); this.gl=null; } }, 2500);
+    await this.refresh();
+  }
+  onAction(name){
+    const L=this.state.live, gl=this.gl; if(!L) return;
+    if (name==='pause') { if(gl){ gl.muted=true; gl.stopPlayback(); } this.upd(x=>({prevState:x.state, state:'paused', speaker:'none'})); }
+    else if (name==='resume') { if(gl) gl.muted=false; this.upd(x=>({state:x.prevState||'answering', prevState:null})); }
+    else if (name==='redo') gl && gl.sendText('Please ask me the same question again — I want to redo my answer. Call ask_question again with the same question first.');
+    else if (name==='next') gl && gl.sendText('Let’s move on to the next question. Call ask_question first.');
+    else if (name==='feedback') gl && gl.sendText('I’m done with my answer. Coach me now: call coach_feedback, then tell me the strength, the fixes and the verdict.');
+    else if (name==='hint') this.upd(x=>({showHint:true, hintText: x.hintText || this.hintFor(x.lpName)}));
+    else if (name==='dismissHint') this.upd({showHint:false});
+    else if (name==='end') this.finishSession('');
+    else if (name==='restart') { const m=L.mode, f=L.focus; this.endLive(); this.startLive({mode:m, lp:f}); }
+    else if (name==='review') { const n=L.n; this.endLive(); this.openSession(n); }
+  }
+  endLive(silent){ clearInterval(this.tick); if (this.gl){ this.gl.close(); this.gl=null; } if (!silent) this.setState({live:null, demo:false}); }
+  async onFiles(e){
+    const list = Array.from(e.target.files||[]); if(!list.length) return;
+    const KW = [['customer','co'],['own','own'],['simplif','inv'],['invent','inv'],['right','right'],['wrong','right'],['learn','learn'],['curious','learn'],['hire','hire'],['develop','hire'],['standard','std'],['quality','std'],['big','big'],['ambitious','big'],['data','bias'],['decision','bias'],['frugal','frugal'],['resource','frugal'],['trust','trust'],['bad news','trust'],['deep','deep'],['problem','deep'],['disagree','back'],['manager','back'],['deadline','deliver'],['deliver','deliver'],['missed','deliver'],['team','employer'],['burnout','employer'],['impact','scale'],['responsib','scale']];
+    let qs=0, types=new Set();
+    for (const f of list) {
+      const text = await f.text();
+      const type = /responsibilit|qualification|job description|what you.ll do/i.test(text) ? 'JD' : /interview|round|loop|bar raiser/i.test(text) ? 'Past interviews' : /background|experience|resume|cv\b/i.test(text) ? 'Background' : 'Other';
+      types.add(type);
+      await this.DB.addFile({name:f.name, type, size:Math.max(1,Math.round(f.size/1024))+' KB', updated:'today', content:text.slice(0,20000)});
+      const found = text.split(/\n+/).map(l=>l.replace(/^[-*>#\d.\s]+/,'').trim()).filter(l=>l.endsWith('?') && l.length>24 && l.length<240);
+      const rows = found.map((t,i)=>{ const low=t.toLowerCase(); const hit=KW.find(([k])=>low.includes(k)); return {id:'u'+Date.now().toString(36)+i, text:t, lp_id: hit ? hit[1] : 'deep', source:type==='Past interviews' ? 'previous' : 'custom', difficulty:2}; });
+      if (rows.length) { await this.DB.addQuestions(rows); qs += rows.length; }
+    }
+    e.target.value='';
+    this.setState({importInfo:{files:list.length, questions:qs, types:Array.from(types).join(' · ')}});
+    this.toast('Imported '+list.length+' file'+(list.length>1?'s':'')+' · '+qs+' questions added to the bank');
+    await this.refresh();
+  }
+  async importBank(src, label){
+    if (this.state.importing) return;
+    this.setState({importing:true, importPct:0, importMsg:'Reading '+label+'…'});
+    try {
+      const IMP = this.IMP || (this.IMP = await import('./mock-import.js'));
+      const {rows, objects} = await IMP.importExponent(src, p => this.setState({importPct:p.pct, importMsg:(p.note || 'Scanning')+' · '+p.objects+' entries · '+p.rows+' behavioural'}));
+      const have = new Set(this.state.questions.map(q => q.text.toLowerCase()));
+      const fresh = rows.filter(r => !have.has(r.text.toLowerCase()));
+      this.setState({importMsg:'Saving '+fresh.length+' new questions…', importPct:100});
+      if (fresh.length) await this.DB.addQuestions(fresh);
+      await this.refresh();
+      this.toast('Imported '+fresh.length+' new behavioural questions from '+objects.toLocaleString()+' entries ('+rows.filter(r=>r.amazon).length+' asked at Amazon)');
+    } catch(e) { this.toast('Import failed: '+e.message); }
+    this.setState({importing:false});
+  }
+  async cycle(storyId, lpId, cur){ const next = cur==='primary' ? 'secondary' : cur==='secondary' ? null : 'primary'; await this.DB.setStoryLp(storyId, lpId, next); await this.refresh(); }
+  async exportData(){ const json = await this.DB.exportJSON(); await this.download('mock-backup-'+new Date().toISOString().slice(0,10)+'.json', new Blob([json],{type:'application/json'})); this.toast('Backup downloaded · '+Math.round(json.length/1024)+' KB'); }
+  renderVals(){
+    const S=this.state, theme=this.props.theme||'light', voice=this.props.voice||'orb';
+    const firstRun = (this.props.firstRun ?? false) || !S.onboarded;
+    const live = S.live, isDriven = !!live && !S.demo && !!S.gem.key, isDemo = !!live && S.demo;
+    const screen = firstRun && !live ? 'onboarding' : S.screen;
+    const lastSessionN = S.sessions[0] ? S.sessions[0].n : 0;
+    const lastLabel = (l) => l.last_session ? (l.last_session===lastSessionN ? 'last session' : 'session '+l.last_session) : 'never';
+    const lps = S.lps.map(l => ({...l, ...this.v(l.verdict), last: lastLabel(l), onOpen: ()=>this.go('library','lp',{selLp:l.id})}));
+    const lpMap = Object.fromEntries(lps.map(l=>[l.id,l]));
+    const stories = S.stories.map(s => ({...s, ...this.v(s.best), lpShorts:[...s.primary,...s.secondary].map(id=>(lpMap[id]||{}).short||id), usesColor: s.uses>=8 ? 'var(--m-gold)' : 'var(--m-fg3)', onOpen: ()=>this.go('library','story',{selStory:s.id})}));
+    const coveredIds = new Set(S.story_lps ? [] : stories.flatMap(s=>[...s.primary,...s.secondary])); const covered = lps.filter(l=>coveredIds.has(l.id)).length;
+    const allQ = S.questions.map(q => ({...q, ...this.v(q.last_verdict), lpName:(lpMap[q.lp_id]||{}).name||'Untagged', lpBorder: q.lp_id ? 'var(--m-line)' : 'var(--m-gold-line)', lpColor: q.lp_id ? 'var(--m-fg2)' : 'var(--m-gold)', sourceLabel:{previous:'Previous interview',common:'Common',custom:'Custom',exponent:'Exponent'}[q.source]||q.source, askedLabel: q.asked ? 'asked '+q.asked+'×' : 'not asked', onAsk: ()=>this.startLive({mode:'question', lp:q.lp_id||'deep', qText:q.text}), onAnswer: ()=>this.answerQ(q)}));
+    allQ.forEach(q => { q.meta = q.sourceLabel + (q.tags ? ' · '+q.tags : '') + ' · ' + q.askedLabel; });
+    const qf = S.qFilter; const filteredQ = allQ.filter(q => qf==='amazon' ? /amazon|aws/i.test(q.tags||'') : qf==='mine' ? (q.source==='custom'||q.source==='previous') : qf==='untagged' ? !q.lp_id : qf==='asked' ? q.asked>0 : true);
+    const questions = filteredQ.slice(0, S.qLimit);
+    const qFilters = [['all','All'],['amazon','Asked at Amazon'],['mine','Mine'],['asked','Asked'],['untagged','Untagged']].map(([k,label]) => ({label, border: qf===k ? '1px solid var(--m-fg)' : '1px solid var(--m-line)', bg: qf===k ? 'var(--m-fg)' : 'transparent', fg: qf===k ? 'var(--m-card)' : 'var(--m-fg)', onPick: ()=>this.setState({qFilter:k, qLimit:40})}));
+    const files = S.files.map(f => ({...f, onOpen: ()=>this.go('library','file',{selFile:f.name}), onToggle: async (on)=>{ await this.DB.setFileIncluded(f.name, on); this.refresh(); }}));
+    const sessions = S.sessions.map(s => ({...s, chips:(s.verdicts||'').split(',').filter(Boolean).map(v=>this.v(+v)), onOpen: ()=>this.openSession(s.n)}));
+    const sess0 = S.sessions.find(s=>s.n===S.selSession) || {n:'', date:'', mode:'', duration:'', focus:''};
+    const sess = {...sess0, hasFocus: !!sess0.focus};
+    const answers = S.answers.filter(a=>a.question).map((a,i) => ({...a, ...this.v(a.verdict), lpShort:(lpMap[a.lp_id]||{}).short||a.lp_id, compact: i>0, card:{q:'Q'+(i+1), question:a.question, lp:a.lp_name||a.lp_id, story:a.story||'—', verdict:a.verdict, better:a.better||null, reason:a.reason||'', missed:a.missed||[], star:{s:a.star_s,t:a.star_t,a:a.star_a,r:a.star_r}, iPct:a.i_pct, pace:a.pace, paceNote: a.pace>160?'fast':a.pace<120?'slow':'good', fillers:a.fillers, length:a.length, lengthNote:'', strength:a.strength, fixes:a.fixes||[]}}));
+    const weakSrc = S.answers.filter(a=>a.question).sort((a,b)=>b.verdict-a.verdict)[0];
+    const weak = weakSrc ? {...weakSrc, ...this.v(weakSrc.verdict), lp_name: weakSrc.lp_name||weakSrc.lp_id} : null;
+    const focusLp = lps.slice().sort((a,b)=>(b.verdict===0?2.5:b.verdict)-(a.verdict===0?2.5:a.verdict) || (a.last_session||0)-(b.last_session||0))[0] || {id:'deep', name:'Dive Deep', vLabel:'', last:''};
+    const focusWhy = focusLp.verdict===0 ? 'Never practised' : focusLp.vLabel+' · '+focusLp.last;
+    const lp = lpMap[S.selLp] || lps[0] || {name:'', descr:''};
+    const lpStories = stories.filter(s=>s.primary.includes(lp.id)||s.secondary.includes(lp.id)).map(s=>{ const r = s.primary.includes(lp.id) ? 'Primary' : 'Secondary'; return {...s, role:r, num0:s.numbers.join(' · '), roleBg:r==='Primary'?'var(--m-fg)':'transparent', roleFg:r==='Primary'?'var(--m-card)':'var(--m-fg2)', roleBorder:r==='Primary'?'1px solid transparent':'1px solid var(--m-line2)'}; });
+    const lpQs = allQ.filter(q=>q.lp_id===lp.id).slice(0,12);
+    const ans = S.ans ? {...S.ans, hasText: !!S.ans.text && !S.ans.loading, hasSample: !!S.ans.sample} : {question:'', text:'', sample:'', seed:0, lpName:'', loading:false, hasText:false, hasSample:false};
+    const sessNs = Array.from(new Set(S.heat.map(h=>h.session_n))).sort((a,b)=>a-b).slice(-8);
+    const heatFor = (id) => sessNs.map(n => { const h=S.heat.find(x=>x.lp_id===id&&x.session_n===n); return {...this.v(h?h.verdict:0), session_n:n}; });
+    const story = stories.find(s=>s.id===S.selStory) || stories[0] || {title:'', numbers:[], primary:[], secondary:[], situation:'', task:'', action:'', result:'', learning:''};
+    const storyMaps = [...story.primary.map(id=>({id, role:'primary'})), ...story.secondary.map(id=>({id, role:'secondary'}))].map(m=>({...m, name:(lpMap[m.id]||{}).name||m.id, bg: m.role==='primary'?'var(--m-fg)':'transparent', fg: m.role==='primary'?'var(--m-card)':'var(--m-fg2)', border: m.role==='primary'?'1px solid transparent':'1px solid var(--m-line2)'}));
+    const gridCols = lps.map(l => ({short:l.short, color: coveredIds.has(l.id)?'var(--m-fg3)':'var(--m-gold)', gapBg: coveredIds.has(l.id)?'transparent':'var(--m-gold-fill)'}));
+    const grid = stories.map(s => ({title:s.title, cells: lps.map(l => { const role = s.primary.includes(l.id)?'primary':s.secondary.includes(l.id)?'secondary':null; return {title:s.title+' × '+l.name, bg: role==='primary'?'var(--m-fg)':'var(--m-elev)', ring: role==='secondary'?'inset 0 0 0 2px var(--m-fg2)':'none', onTap: ()=>this.cycle(s.id, l.id, role)}; })}));
+    const file = S.files.find(f=>f.name===S.selFile) || {name:'', type:'', content:''};
+    const heatRows = lps.map(l => ({name:l.name, cells:heatFor(l.id), vFill:l.vFill, vOnFill:l.vOnFill, vGlyph:l.vGlyph}));
+    const cnt = {s:lps.filter(l=>l.verdict===1).length, i:lps.filter(l=>l.verdict===2).length, n:lps.filter(l=>l.verdict===3).length, x:lps.filter(l=>l.verdict===4).length, z:lps.filter(l=>!l.verdict).length};
+    const tot = Math.max(1, lps.length); const pct = {s:cnt.s/tot*100, i:cnt.i/tot*100, n:cnt.n/tot*100, x:cnt.x/tot*100, z:cnt.z/tot*100};
+    const weakest = lps.slice().sort((a,b)=>(b.verdict===0?9:b.verdict)-(a.verdict===0?9:a.verdict)).slice(0,3).map(l=>({...l, onDrill: ()=>this.startLive({mode:'lp', lp:l.id})}));
+    const score = {1:4,2:3,3:2,4:1};
+    const trend = sessNs.map(n => { const xs=S.heat.filter(h=>h.session_n===n&&h.verdict).map(h=>score[h.verdict]); return {n, avg: xs.length ? xs.reduce((a,b)=>a+b,0)/xs.length : 2.5}; });
+    const trendDots = trend.map((t,i)=>({label:'S'+t.n, x: 20 + i*(280/Math.max(1,trend.length-1)), y: 20 + (4-t.avg)*30}));
+    const usage = stories.slice().sort((a,b)=>b.uses-a.uses).slice(0,5).map(s=>({title:s.title, uses:s.uses, pct:Math.round(s.uses/Math.max(1,stories[0]?Math.max(...stories.map(x=>x.uses)):1)*100), color: s.uses>=8?'var(--m-gold)':'var(--m-fg)', bar: s.uses>=8?'var(--m-gold-fill)':'var(--m-fg2)'}));
+    const nextN = (S.sessions.reduce((m,s)=>Math.max(m,s.n),0)||0)+1;
+    const idate = S.settings.interview_date || '2026-10-30'; const daysLeft = Math.max(0, Math.ceil((new Date(idate) - new Date())/86400000));
+    const seg = (cur, keys) => ({bg:Object.fromEntries(keys.map(k=>[k, cur===k?'var(--m-card)':'transparent'])), sh:Object.fromEntries(keys.map(k=>[k, cur===k?'var(--shadow-1)':'none'])), fg:Object.fromEntries(keys.map(k=>[k, cur===k?'var(--m-fg)':'var(--m-fg2)']))});
+    const libSeg = seg(S.lib, ['lps','stories','questions','files']), histSeg = seg(S.histTab, ['transcript','analysis']), coachSeg = seg(S.coaching, ['each','recap']);
+    const sheetOptions = [{k:'focus', icon:focusLp.vGlyph||'●', iconBg:focusLp.vFill||'var(--m-gold-fill)', iconFg:focusLp.vOnFill||'#202124', title:focusLp.name+' drill', sub:'Suggested · up to 3 questions'}, {k:'loop', icon:'5', iconBg:'var(--m-elev)', iconFg:'var(--m-fg2)', title:'Full loop', sub:'3 questions across LPs · ~15 min'}, {k:'lp', icon:'…', iconBg:'var(--m-elev)', iconFg:'var(--m-fg2)', title:'Current LP · '+lp.name, sub:'The LP you last opened in the Library'}].map(o => ({...o, border: S.pick===o.k ? '1.5px solid var(--m-warm-line)' : '1px solid var(--m-line)', bg: S.pick===o.k ? 'var(--m-warm-tint)' : 'transparent', check: S.pick===o.k ? '✓' : '', onPick: ()=>this.setState({pick:o.k})}));
+    const rawTurns = this.turnsBySession[S.selSession] || (S.selSession===14 && this.SEED ? [{ai:true,text:'Tell me about a time you found a problem that others had missed. How did you find it?'},{ai:false,text:'Black Friday week, 7:40 — card authorisations started failing for about 18% of EU traffic. On-call assumed the provider.'},{ai:true,text:'What made you look at the config path rather than the provider?'},{ai:false,text:'Their status page was green, and the error rate stepped up exactly on a deploy boundary.'}] : []);
+    const sessTurns = rawTurns.map(t => ({...t, who: t.ai ? 'Dana' : 'You', whoColor: t.ai ? 'var(--m-warm)' : 'var(--m-fg3)', edge: t.ai ? 'var(--m-warm-line)' : 'var(--m-line)'}));
+    const L = live || {};
+    const liveRecap = (L.answers||[]).map(a => ({mono:'DW', name:'Dana Whitfield', role:'Bar Raiser', lp:(lpMap[a.lp_id]||{}).name||a.lp_id, v:a.verdict}));
+    const liveNotes = (lpMap[this.lpId(L.lpName)] ? stories.filter(s=>s.primary.includes(this.lpId(L.lpName))||s.secondary.includes(this.lpId(L.lpName))) : []).slice(0,3).map(s=>({t:s.title, n:s.numbers.slice(0,2).join(' · ')}));
+    const gemBadge = S.gem.key ? 'configured · '+S.gem.model+' · '+S.gem.voice : 'not configured — live screen runs the demo';
+    return {
+      theme, isDark: theme==='dark', pw:390, ph:844, voice,
+      notReady: !S.ready, status:S.status, hasToast: !!S.toast, toast:S.toast,
+      dbBadge: S.dbMode==='duckdb' ? 'DuckDB-WASM ✓' : S.dbMode==='memory' ? 'in-memory fallback (DuckDB-WASM blocked here)' : 'starting', gemBadge, gem:S.gem, gemStatus:S.gemStatus, models:this.LIVE ? this.LIVE.MODELS : [S.gem.model], voices:this.LIVE ? this.LIVE.VOICES : [S.gem.voice],
+      isHome: screen==='home', isLibrary: screen==='library', isLp: screen==='lp', isStory: screen==='story', isGrid: screen==='grid', isFile: screen==='file', isHistory: screen==='history', isSession: screen==='session', isProgress: screen==='progress', isSettings: screen==='settings', isOnboarding: screen==='onboarding',
+      isLibLps: S.lib==='lps', isLibStories: S.lib==='stories', isLibQuestions: S.lib==='questions', isLibFiles: S.lib==='files',
+      showTabs: ['home','library','history','progress'].includes(screen) && !live,
+      tabColor: {practice: S.tab==='practice'?'var(--m-fg)':'var(--m-fg3)', library: S.tab==='library'?'var(--m-fg)':'var(--m-fg3)', history: S.tab==='history'?'var(--m-fg)':'var(--m-fg3)', progress: S.tab==='progress'?'var(--m-fg)':'var(--m-fg3)'},
+      libBg:libSeg.bg, libSh:libSeg.sh, libFg:libSeg.fg, histBg:histSeg.bg, histSh:histSeg.sh, histFg:histSeg.fg, coachBg:coachSeg.bg, coachSh:coachSeg.sh, coachFg:coachSeg.fg,
+      goHome: ()=>this.go('practice','home'), goLibrary: ()=>this.go('library','library'), goHistory: ()=>this.go('history','history'), goProgress: ()=>this.go('progress','progress'), openSettings: ()=>this.go('practice','settings'),
+      libLps: ()=>this.setState({lib:'lps'}), libStories: ()=>this.setState({lib:'stories'}), libQuestions: ()=>this.setState({lib:'questions'}), libFiles: ()=>this.setState({lib:'files'}),
+      backLibrary: ()=>this.go('library','library',{lib:'lps'}), backStories: ()=>this.go('library','library',{lib:'stories'}), backFiles: ()=>this.go('library','library',{lib:'files'}), backHistory: ()=>this.go('history','history'),
+      openGrid: ()=>this.go('library','grid'), histTranscript: ()=>this.setState({histTab:'transcript'}), histAnalysis: ()=>this.setState({histTab:'analysis'}), isHistTranscript: S.histTab==='transcript', isHistAnalysis: S.histTab==='analysis',
+      openSheet: ()=>this.setState({sheet:true, pick:'focus'}), closeSheet: ()=>this.setState({sheet:false}), sheet:S.sheet, sheetOptions, coachEach: ()=>this.setState({coaching:'each'}), coachRecap: ()=>this.setState({coaching:'recap'}),
+      startFocus: ()=>this.startLive({mode:'lp', lp:focusLp.id}), startLoop: ()=>this.startLive({mode:'loop'}), startLp: ()=>this.startLive({mode:'lp', lp:lp.id}), startStory: ()=>this.startLive({mode:'lp', lp:story.primary[0]||story.secondary[0]||'deep'}), startWeak: ()=> weak && this.startLive({mode:'question', lp:weak.lp_id, qText:weak.question}),
+      startPicked: ()=> S.pick==='loop' ? this.startLive({mode:'loop'}) : S.pick==='lp' ? this.startLive({mode:'lp', lp:lp.id}) : this.startLive({mode:'lp', lp:focusLp.id}),
+      liveHint: S.gem.key ? 'Live · '+S.gem.voice+' · mic granted at setup' : 'Demo until you add a Gemini key in Settings',
+      lps, covered, coveredPct: Math.round(covered/16*100), gaps: 16-covered, stories, storyCount:stories.length, questions, questionCount:allQ.length, questionShown:Math.min(questions.length, filteredQ.length), qFilters, moreQuestions: filteredQ.length > questions.length, showMore: ()=>this.setState({qLimit:S.qLimit+40}), files,
+      importing: !!S.importing, importPct: S.importPct||0, importMsg: S.importMsg||'', importBundled: ()=>this.importBank('./uploads/exponent_new_qa.json-a408b1cb.zst', 'the bundled Exponent export (18 MB)'), onBankFile: (e)=>{ const all=Array.from(e.target.files||[]); if(!all.length) return; const banks=all.filter(f=>/\.(zst|json)$/i.test(f.name)); const texts=all.filter(f=>!/\.(zst|json)$/i.test(f.name)); if (texts.length) this.onFiles({target:{files:texts, value:''}}); (async()=>{ for (const f of banks) await this.importBank(f, f.name); })(); e.target.value=''; },
+      answerOpen: !!S.ans, ans, closeAnswer: ()=>this.setState({ans:null}), regenAnswer: ()=> S.ans && this.answerQ(S.ans.q, Math.floor(Math.random()*90000)+10000), askThisNow: ()=>{ const q=S.ans && S.ans.q; this.setState({ans:null}); if (q) this.startLive({mode:'question', lp:q.lp_id||'deep', qText:q.text}); },
+      seedVal: this.seed(), onSeed: (e)=>{ this.DB.setSetting('seed', String(parseInt(e.target.value,10)||12345)).then(()=>this.refresh()); }, newSeed: ()=>{ this.DB.setSetting('seed', String(Math.floor(Math.random()*90000)+10000)).then(()=>this.refresh()); },
+      recCount: S.recKeys.length, storageNote: this.DB && this.DB.getStorage()==='idb' ? 'kept in IndexedDB' : 'kept in localStorage', onRestore: (e)=>this.onRestore(e), exportRecordings: ()=>this.exportRecordings(), downloadRec: ()=>{ if (this.recBlob) this.download('mock-session-'+S.selSession+'.webm', this.recBlob); }, sessions, sessionCount:sessions.length, sess, answers, answerCount:answers.length, hasWeak: !!weak, weak: weak||{}, nextN, daysLeft, focusName: focusLp.name, focusWhy,
+      lp, lpStories, lpStoryCount:lpStories.length, lpQs, lpQCount:lpQs.length, lpHist: heatFor(lp.id), story, storyMaps, gridCols, grid, file, fileText: file.content || 'No content stored for this sample file. Files you drop keep their full text and are sent to the interviewer when included.',
+      hasRecording: !!this.recUrl && S.recSession===S.selSession, recUrl:this.recUrl||'', sessTurns, noTurns: sessTurns.length===0,
+      cols: sessNs.map(n=>'S'+n), heatRows, weakest, cnt, pct, trendPoints: trendDots.map(d=>d.x+','+d.y).join(' '), trendDots, usage,
+      interviewDate: idate, onDate: (e)=>{ this.DB.setSetting('interview_date', e.target.value).then(()=>this.refresh()); }, pauseMs:+(S.settings.pause_ms||2500), pauseLabel:((+(S.settings.pause_ms||2500))/1000).toFixed(2).replace(/0$/,'')+' s', onPause: (e)=>{ this.DB.setSetting('pause_ms', e.target.value).then(()=>this.refresh()); },
+      systemText: S.settings.system||'', onSystem: (e)=>{ this.DB.setSetting('system', e.target.value).then(()=>this.refresh()); this.toast('System instruction saved'); }, resetSystem: ()=>{ this.DB.setSetting('system', this.DB.seedRows().settings.find(s=>s.key==='system').value).then(()=>this.refresh()); },
+      onKey: (e)=>this.setGem('key', e.target.value.trim()), onModel: (v)=>this.setGem('model', v), onVoice: (v)=>this.setGem('voice', v), testGemini: ()=>this.testGemini(),
+      exportData: ()=>this.exportData(), resetAll: ()=>{ if (confirm('Reset to sample data? Your sessions and imports will be removed.')) { this.DB.reset().then(()=>location.reload()); } }, replayOnboarding: ()=>{ localStorage.removeItem('mock.onboarded'); this.setState({onboarded:false, step:1, screen:'home', tab:'practice'}); },
+      onFiles: (e)=>this.onFiles(e), importInfo:S.importInfo||{}, hasImport: !!S.importInfo,
+      step1: S.step===1, step2: S.step===2, step3: S.step===3, step1Label: S.importInfo ? 'Looks right' : 'Skip — start with the sample library', dot:{a:'var(--m-fg)', b: S.step>=2?'var(--m-fg)':'var(--m-line2)', c: S.step>=3?'var(--m-warm-fill)':'var(--m-line2)'},
+      obNext: ()=>this.setState({step: Math.min(3, S.step+1)}), obDone: ()=>{ localStorage.setItem('mock.onboarded','1'); this.setState({onboarded:true, step:1}); }, obStart: ()=>{ localStorage.setItem('mock.onboarded','1'); this.setState({onboarded:true, step:1}); this.startLive({mode:'lp', lp:focusLp.id}); },
+      isDriven, isDemo, L, liveMode: L.mode==='loop' ? 'loop' : 'lp', liveRecap, liveNotes, liveCount:(L.answers||[]).length, liveFixes:(L.answers||[]).reduce((n,a)=>n+(a.fixes||[]).length,0), onAction: (n)=>this.onAction(n), exitDemo: ()=>this.endLive(),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/colors.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/typography.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/effects.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/styles.css">
+<script src="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:var(--m-canvas);font-family:var(--font-sans)}
+:root{--m-canvas:#FFFFFF;--m-bg:#F8F9FA;--m-card:#FFFFFF;--m-elev:#F1F3F4;--m-line:#DADCE0;--m-line2:#BDC1C6;--m-fg:#202124;--m-fg2:#5F6368;--m-fg3:#80868B;--m-warm:#B06000;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:#FEF7E0;--m-warm-line:#FDE293;--m-cool:#1A73E8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:#E8F0FE;--m-cool-line:#A8C7FA;--m-green:#1E7E43;--m-green-fill:#34A853;--m-green-tint:#E6F4EA;--m-green-line:#A8DAB5;--m-blue:#1558B0;--m-blue-fill:#1A73E8;--m-blue-tint:#E8F0FE;--m-blue-line:#A8C7FA;--m-gold:#B06000;--m-gold-fill:#F9AB00;--m-gold-tint:#FEF7E0;--m-gold-line:#FDE293;--m-red:#C5221F;--m-red-fill:#EA4335;--m-red-tint:#FCE8E6;--m-red-line:#F6AEA9;--m-scrim:rgba(32,33,36,.32)}
+[data-theme="dark"]{--m-canvas:#18191B;--m-bg:#202124;--m-card:#292A2D;--m-elev:#303134;--m-line:#3C4043;--m-line2:#5F6368;--m-fg:#E8EAED;--m-fg2:#9AA0A6;--m-fg3:#80868B;--m-warm:#FDD663;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:rgba(249,171,0,.14);--m-warm-line:rgba(253,214,99,.45);--m-cool:#8AB4F8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:rgba(138,180,248,.14);--m-cool-line:rgba(138,180,248,.45);--m-green:#81C995;--m-green-fill:#34A853;--m-green-tint:rgba(52,168,83,.18);--m-green-line:rgba(129,201,149,.5);--m-blue:#8AB4F8;--m-blue-fill:#1A73E8;--m-blue-tint:rgba(138,180,248,.14);--m-blue-line:rgba(138,180,248,.45);--m-gold:#FDD663;--m-gold-fill:#F9AB00;--m-gold-tint:rgba(249,171,0,.18);--m-gold-line:rgba(253,214,99,.5);--m-red:#F28B82;--m-red-fill:#EA4335;--m-red-tint:rgba(234,67,53,.18);--m-red-line:rgba(242,139,130,.5);--m-scrim:rgba(0,0,0,.55);--background:#202124;--surface:#292A2D;--surface-neutral:#303134;--border:#3C4043;--text-primary:#E8EAED;--text-strong:#E8EAED;--text-secondary:#9AA0A6;--text-muted:#80868B;--aladdin-blue:#8AB4F8;--blue-dark:#A8C7FA;--intent-surface:rgba(138,180,248,.14);--intent-border:rgba(138,180,248,.45);--green-surface:rgba(52,168,83,.18);--green-border:rgba(129,201,149,.5);--green-dark:#81C995;--red-surface:rgba(234,67,53,.18);--red-border:rgba(242,139,130,.5);--red-dark:#F28B82;--gate-surface:rgba(249,171,0,.18);--gate-border:rgba(253,214,99,.5);--gold-dark:#FDD663;--shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 2px 6px rgba(0,0,0,.45);--shadow-3:0 8px 28px rgba(0,0,0,.5)}
+a{color:var(--m-cool);text-decoration:none}a:hover{text-decoration:underline}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="min-height:100vh;background:var(--m-canvas);color:var(--m-fg);font-family:var(--font-sans);padding:40px 48px 120px;display:flex;flex-direction:column;gap:56px;box-sizing:border-box">
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Board 3</span>
+      <span style="font:800 40px/1 var(--font-sans);letter-spacing:-.03em">Library</span>
+      <span style="font:400 15px/1.5 var(--font-sans);color:var(--m-fg2);max-width:680px;text-wrap:pretty">Your prep as a library: LPs, stories, questions, files. Four sections behind one segmented control on phone; one sidebar group on desktop. Every row ends in a verdict, because readiness is the point.</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;font:500 13px/1 var(--font-sans)"><a href="Mock.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Overview</a><a href="Mock - Foundations.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Foundations</a><a href="Mock - Practice.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Practice</a><a href="Mock - Live Session.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Live</a><a href="Mock - History & Progress.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">History</a><a href="Mock - Settings & Onboarding.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Settings</a></div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06px;text-transform:uppercase;color:var(--m-fg3)">LPs</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">The 16, pre-loaded · LP detail</span></div>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Library · LPs">
+        <span style="font:700 14px/1.2 var(--font-sans)">LPs — editable, with reset</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">Library</span><button style="height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg2);font:700 13px/1 var(--font-sans);cursor:pointer">Reset to defaults</button></div>
+              <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--m-elev)"><span style="flex:1;height:32px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 13px/1 var(--font-sans)">LPs</span><span style="flex:1;height:32px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Stories</span><span style="flex:1;height:32px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Questions</span><span style="flex:1;height:32px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Files</span></div>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:14px 20px 0">
+              <div style="border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <sc-for list="{{ lps }}" as="l" hint-placeholder-count="10">
+                  <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--m-line)">
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px"><span style="font:700 14px/1.2 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">{{ l.stories }} stories · {{ l.questions }} questions · {{ l.last }}</span></div>
+                    <span style="flex:none;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;background:{{ l.vBg }};color:{{ l.vFg }};border:{{ l.vBorder }};font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap"><span>{{ l.vGlyph }}</span>{{ l.vLabel }}</span>
+                    <svg viewBox="0 0 24 24" style="width:16px;height:16px;flex:none;fill:none;stroke:var(--m-fg3);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m9 18 6-6-6-6"></path></svg>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-around;align-items:flex-start;padding:10px 8px 28px;border-top:1px solid var(--m-line);background:var(--m-card)">
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg><span style="font:500 11px/1 var(--font-sans)">Practice</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg><span style="font:700 11px/1 var(--font-sans)">Library</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">History</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">Progress</span></span>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="LP detail · Dive Deep">
+        <span style="font:700 14px/1.2 var(--font-sans)">LP detail — Dive Deep</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between">
+              <button style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>LPs</button>
+              <button style="height:36px;padding:0 14px;border-radius:999px;border:none;background:transparent;color:var(--m-cool);font:700 13px/1 var(--font-sans);cursor:pointer">Edit</button>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:6px 20px 0;display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">Dive Deep</span><span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:var(--m-gold-tint);color:var(--m-gold);border:1px solid var(--m-gold-line);font:700 11px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase"><span style="font-size:12px">●</span>Not inclined</span></div>
+                <span style="font:400 14px/1.5 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">{{ deep.desc }}</span>
+                <span style="font:400 12px/1.3 var(--font-sans);color:var(--m-fg3)">Practised yesterday · 9 questions · asked 11 times</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Mapped stories · 3</span><span style="font:700 12px/1 var(--font-sans);color:var(--m-cool)">+ Add</span></div>
+                <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                  <sc-for list="{{ deepStories }}" as="s" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--m-line)">
+                      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:700 13px/1.2 var(--font-sans)">{{ s.title }}</span><span style="font:500 11px/1.2 var(--font-mono);color:var(--m-fg2)">{{ s.num0 }}</span></div>
+                      <span style="height:22px;padding:0 8px;border-radius:999px;background:{{ s.roleBg }};color:{{ s.roleFg }};border:{{ s.roleBorder }};display:inline-flex;align-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase">{{ s.role }}</span>
+                      <button aria-label="Remove" style="width:28px;height:28px;border-radius:50%;border:none;background:transparent;color:var(--m-fg3);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Question bank · 9</span><span style="display:flex;gap:12px;font:700 12px/1 var(--font-sans);color:var(--m-cool)"><span>+ Add</span><span>Upload</span></span></div>
+                <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                  <sc-for list="{{ deepQs }}" as="q" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--m-line)"><span style="flex:1;font:400 13px/1.35 var(--font-sans);text-wrap:pretty">{{ q.text }}</span><span style="flex:none;font:700 11px/1 var(--font-sans);color:{{ q.vFg }}">{{ q.vGlyph }}</span></div>
+                  </sc-for>
+                  <div style="padding:9px 12px;font:500 12px/1 var(--font-sans);color:var(--m-fg3)">6 more</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Verdict history · best attempt</span>
+                <div style="padding:12px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+                  <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px"><sc-for list="{{ deepHist }}" as="c" hint-placeholder-count="8"><span style="height:26px;border-radius:6px;background:{{ c.vFill }};color:{{ c.vOnFill }};display:grid;place-items:center;font:700 11px/1 var(--font-sans)">{{ c.vGlyph }}</span></sc-for></div>
+                  <div style="display:flex;justify-content:space-between;font:500 10px/1 var(--font-sans);color:var(--m-fg3);letter-spacing:.04em"><span>S7</span><span>S14</span></div>
+                  <div style="display:flex;align-items:center;gap:10px;padding-top:4px;border-top:1px solid var(--m-line)"><button style="width:32px;height:32px;border-radius:50%;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></button><div style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font:600 13px/1.2 var(--font-sans)">Best attempt · session 12</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">Payments outage · 2:48 · <span style="color:var(--m-blue)">◆ Inclined</span></span></div></div>
+                </div>
+              </div>
+            </div>
+            <div style="padding:12px 20px 34px"><button style="width:100%;height:56px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 16px/1 var(--font-sans);cursor:pointer" style-active="transform:scale(.98)">Practise this LP</button></div>
+          </div>
+        </x-import>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Stories</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">Cards · editor · story × LP grid · import</span></div>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Library · Stories">
+        <span style="font:700 14px/1.2 var(--font-sans)">Story cards</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">Library</span><div style="display:flex;gap:6px"><button style="height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 13px/1 var(--font-sans);cursor:pointer">Grid</button><button style="height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 13px/1 var(--font-sans);cursor:pointer">Import</button><button style="height:36px;padding:0 14px;border-radius:999px;border:none;background:var(--m-fg);color:var(--m-card);font:700 13px/1 var(--font-sans);cursor:pointer">+ Story</button></div></div>
+              <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--m-elev)"><span style="flex:1;height:32px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">LPs</span><span style="flex:1;height:32px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 13px/1 var(--font-sans)">Stories</span><span style="flex:1;height:32px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Questions</span><span style="flex:1;height:32px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Files</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:500 12px/1 var(--font-sans);color:var(--m-fg2)">10 stories · <span style="font-family:var(--font-mono)">13/16</span> LPs covered</span><span style="font:500 12px/1 var(--font-sans);color:var(--m-gold)">3 gaps</span></div>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:12px 20px 0;display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ stories }}" as="s" hint-placeholder-count="3">
+                <div style="padding:14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span style="font:700 15px/1.2 var(--font-sans)">{{ s.title }}</span><span style="flex:none;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;background:{{ s.vBg }};color:{{ s.vFg }};border:{{ s.vBorder }};font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap"><span>{{ s.vGlyph }}</span>{{ s.vLabel }}</span></div>
+                  <span style="font:400 13px/1.4 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">{{ s.summary }}</span>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ s.numbers }}" as="n" hint-placeholder-count="3"><span style="display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;background:var(--m-elev);font:500 11px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ n }}</span></sc-for></div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><sc-for list="{{ s.lpShorts }}" as="t" hint-placeholder-count="3"><span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;border:1px solid var(--m-line);font:700 10px/1 var(--font-sans);letter-spacing:.06em;color:var(--m-fg2)">{{ t }}</span></sc-for><span style="font:400 11px/1 var(--font-sans);color:var(--m-fg3);margin-left:auto">used {{ s.uses }}×</span></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;justify-content:space-around;align-items:flex-start;padding:10px 8px 28px;border-top:1px solid var(--m-line);background:var(--m-card)">
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg><span style="font:500 11px/1 var(--font-sans)">Practice</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg><span style="font:700 11px/1 var(--font-sans)">Library</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">History</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">Progress</span></span>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Story editor">
+        <span style="font:700 14px/1.2 var(--font-sans)">Story editor — Payments outage</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between">
+              <button style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Stories</button>
+              <button style="height:36px;padding:0 14px;border-radius:999px;border:none;background:transparent;color:var(--m-cool);font:700 13px/1 var(--font-sans);cursor:pointer">Save</button>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:6px 20px 0;display:flex;flex-direction:column;gap:14px">
+              <x-import component-from-global-scope="AladdinDesignSystem_34d902.Input" label="Title" default-value="Payments outage" hint-size="100%,66px"></x-import>
+              <x-import component-from-global-scope="AladdinDesignSystem_34d902.Input" label="Situation" multiline="{{ true }}" default-value="{{ story.situation }}" hint-size="100%,112px"></x-import>
+              <x-import component-from-global-scope="AladdinDesignSystem_34d902.Input" label="Task" multiline="{{ true }}" default-value="{{ story.task }}" hint-size="100%,112px"></x-import>
+              <div style="display:flex;flex-direction:column;gap:6px"><span style="font:700 13px/1.2 var(--font-sans);color:var(--m-fg)">Action · Result · Learning</span><span style="font:400 12px/1.3 var(--font-sans);color:var(--m-fg3)">below the fold — same fields</span></div>
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 13px/1.2 var(--font-sans)">Key numbers</span><div style="display:flex;gap:6px;flex-wrap:wrap"><sc-for list="{{ story.numbers }}" as="n" hint-placeholder-count="3"><span style="display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 10px;border-radius:999px;background:var(--m-elev);font:500 12px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ n }}<span style="width:18px;height:18px;border-radius:50%;display:grid;place-items:center;color:var(--m-fg3);font-size:11px">✕</span></span></sc-for><span style="display:inline-flex;align-items:center;height:30px;padding:0 12px;border-radius:999px;border:1px dashed var(--m-line2);color:var(--m-fg2);font:700 12px/1 var(--font-sans)">+ number</span></div></div>
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 13px/1.2 var(--font-sans)">LP mapping</span>
+                <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--m-line)"><span style="font:600 13px/1.2 var(--font-sans)">Dive Deep</span><div style="display:flex;padding:2px;border-radius:999px;background:var(--m-elev)"><span style="height:24px;padding:0 10px;border-radius:999px;background:var(--m-fg);color:var(--m-card);display:grid;place-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase">Primary</span><span style="height:24px;padding:0 10px;display:grid;place-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg2)">Secondary</span></div></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--m-line)"><span style="font:600 13px/1.2 var(--font-sans)">Ownership</span><div style="display:flex;padding:2px;border-radius:999px;background:var(--m-elev)"><span style="height:24px;padding:0 10px;display:grid;place-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg2)">Primary</span><span style="height:24px;padding:0 10px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase">Secondary</span></div></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--m-line)"><span style="font:600 13px/1.2 var(--font-sans)">Bias for Action</span><div style="display:flex;padding:2px;border-radius:999px;background:var(--m-elev)"><span style="height:24px;padding:0 10px;display:grid;place-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg2)">Primary</span><span style="height:24px;padding:0 10px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase">Secondary</span></div></div>
+                  <div style="padding:10px 12px;font:700 12px/1 var(--font-sans);color:var(--m-cool)">+ Map another LP</div>
+                </div>
+              </div>
+            </div>
+            <div style="padding:12px 20px 34px;display:flex;gap:10px"><button style="flex:1;height:56px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 16px/1 var(--font-sans);cursor:pointer" style-active="transform:scale(.98)">Pressure-test this story</button></div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Story × LP grid">
+        <span style="font:700 14px/1.2 var(--font-sans)">Story × LP grid — one tap cycles none → primary → secondary</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between">
+              <button style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Stories</button>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:6px 16px 0;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;flex-direction:column;gap:8px;padding:0 4px"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">Story × LP</span>
+                <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:500 13px/1 var(--font-sans);color:var(--m-fg2)"><span style="font:500 15px/1 var(--font-mono);color:var(--m-fg);font-variant-numeric:tabular-nums">13</span> of 16 LPs covered</span><span style="font:500 12px/1 var(--font-sans);color:var(--m-gold)">3 gaps</span></div>
+                <div style="display:flex;height:6px;border-radius:3px;background:var(--m-elev);overflow:hidden"><span style="width:81%;background:var(--m-fg)"></span></div>
+              </div>
+              <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);padding:10px 8px;display:flex;flex-direction:column;gap:4px">
+                <div style="display:grid;grid-template-columns:88px repeat(16,1fr);gap:2px;align-items:end"><span></span><sc-for list="{{ gridCols }}" as="c" hint-placeholder-count="16"><span style="font:700 8px/1 var(--font-sans);letter-spacing:.02em;color:{{ c.color }};text-align:center;padding-bottom:3px">{{ c.short }}</span></sc-for></div>
+                <sc-for list="{{ grid }}" as="r" hint-placeholder-count="10">
+                  <div style="display:grid;grid-template-columns:88px repeat(16,1fr);gap:2px;align-items:center">
+                    <span style="font:600 10px/1.1 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px;color:{{ r.titleColor }}">{{ r.title }}</span>
+                    <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="16"><span title="{{ c.title }}" style="aspect-ratio:1;border-radius:3px;background:{{ c.bg }};box-shadow:{{ c.ring }};box-sizing:border-box"></span></sc-for>
+                  </div>
+                </sc-for>
+                <div style="display:grid;grid-template-columns:88px repeat(16,1fr);gap:2px;margin-top:2px"><span style="font:700 8px/1 var(--font-sans);color:var(--m-fg3);text-transform:uppercase;letter-spacing:.06em">gap</span><sc-for list="{{ gridCols }}" as="c" hint-placeholder-count="16"><span style="height:4px;border-radius:2px;background:{{ c.gapBg }}"></span></sc-for></div>
+              </div>
+              <div style="display:flex;gap:14px;font:500 11px/1.2 var(--font-sans);color:var(--m-fg2);padding:0 4px"><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;background:var(--m-fg)"></span>Primary</span><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:3px;box-shadow:inset 0 0 0 2px var(--m-fg2)"></span>Secondary</span><span style="display:inline-flex;align-items:center;gap:5px"><span style="width:12px;height:4px;border-radius:2px;background:var(--m-gold-fill)"></span>No strong story</span></div>
+              <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--m-gold-tint);border:1px solid var(--m-gold-line)"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-gold);padding-top:2px;white-space:nowrap">Over-used</span><span style="font:400 13px/1.4 var(--font-sans)"><strong>Payments outage</strong> covers 4 LPs and was used 9 times. A loop will notice — map a second story to Ownership and Earn Trust.</span></div>
+              <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line)"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3);padding-top:2px;white-space:nowrap">Gaps</span><span style="font:400 13px/1.4 var(--font-sans)">Are Right A Lot · Learn and Be Curious · Think Big — no story mapped. <span style="color:var(--m-cool);font-weight:700">Ask the coach for candidates</span></span></div>
+            </div>
+            <div style="padding:12px 20px 34px"><button style="width:100%;height:48px;border-radius:999px;border:1px solid var(--m-line);background:var(--m-card);color:var(--m-fg);font:700 15px/1 var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg>Import stories from markdown</button></div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Import stories">
+        <span style="font:700 14px/1.2 var(--font-sans)">Import stories — markdown review</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;position:relative;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans);overflow:hidden">
+            <div style="position:absolute;inset:0;background:var(--m-scrim)"></div>
+            <div style="position:absolute;left:0;right:0;bottom:0;top:120px;background:var(--m-card);border-radius:24px 24px 0 0;box-shadow:var(--shadow-3);display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:center;padding:8px 0 0"><span style="width:36px;height:5px;border-radius:3px;background:var(--m-line2)"></span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px 0"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">stories.md · 4 found</span><span style="font:800 24px/1.1 var(--font-sans);letter-spacing:-.025em">Import stories</span></div><button aria-label="Close" style="width:36px;height:36px;border-radius:50%;border:none;background:var(--m-elev);color:var(--m-fg2);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+              <div style="flex:1;min-height:0;overflow:hidden;padding:16px 20px 0;display:flex;flex-direction:column;gap:10px">
+                <span style="font:400 13px/1.4 var(--font-sans);color:var(--m-fg2)">Each <span style="font-family:var(--font-mono)">## heading</span> becomes a story. STAR sections and numbers were detected; LPs are suggested from the text.</span>
+                <sc-for list="{{ importStories }}" as="s" hint-placeholder-count="4">
+                  <div style="padding:12px;border-radius:12px;border:1px solid var(--m-line);background:var(--m-bg);display:flex;flex-direction:column;gap:8px">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font:700 14px/1.2 var(--font-sans)">{{ s.title }}</span><span style="font:500 11px/1 var(--font-sans);color:{{ s.statusColor }}">{{ s.status }}</span></div>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Suggested</span><sc-for list="{{ s.lps }}" as="t" hint-placeholder-count="2"><span style="display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:999px;background:var(--m-cool-tint);border:1px solid var(--m-cool-line);color:var(--m-cool);font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase">{{ t }}</span></sc-for><span style="font:700 11px/1 var(--font-sans);color:var(--m-fg3)">Change</span></div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="padding:14px 20px 34px;border-top:1px solid var(--m-line)"><button style="width:100%;height:56px;border-radius:999px;border:none;background:var(--m-fg);color:var(--m-card);font:700 16px/1 var(--font-sans);cursor:pointer">Import 3 stories · skip 1 duplicate</button></div>
+            </div>
+          </div>
+        </x-import>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Questions</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">Bank with filters · one-tap import review · add manually</span></div>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Library · Questions">
+        <span style="font:700 14px/1.2 var(--font-sans)">Question bank — filtered to “not asked” off, all LPs</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">Library</span><div style="display:flex;gap:6px"><button style="height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 13px/1 var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg>Upload</button><button style="height:36px;padding:0 14px;border-radius:999px;border:none;background:var(--m-fg);color:var(--m-card);font:700 13px/1 var(--font-sans);cursor:pointer">+ Question</button></div></div>
+              <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--m-elev)"><span style="flex:1;height:32px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">LPs</span><span style="flex:1;height:32px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Stories</span><span style="flex:1;height:32px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 13px/1 var(--font-sans)">Questions</span><span style="flex:1;height:32px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Files</span></div>
+              <div style="display:flex;gap:6px;overflow:hidden">
+                <span style="flex:none;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;gap:4px;font:500 13px/1 var(--font-sans)">LP <span style="font-size:10px;color:var(--m-fg3)">▾</span></span>
+                <span style="flex:none;height:32px;padding:0 6px 0 12px;border-radius:999px;background:var(--m-fg);color:var(--m-card);display:inline-flex;align-items:center;gap:6px;font:500 13px/1 var(--font-sans)">Previous interview<span style="width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px">✕</span></span>
+                <span style="flex:none;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;gap:4px;font:500 13px/1 var(--font-sans)">Difficulty <span style="font-size:10px;color:var(--m-fg3)">▾</span></span>
+                <span style="flex:none;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;font:500 13px/1 var(--font-sans)">Not asked</span>
+                <span style="flex:none;height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;gap:4px;font:500 13px/1 var(--font-sans)">Last verdict <span style="font-size:10px;color:var(--m-fg3)">▾</span></span>
+              </div>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:12px 20px 0;display:flex;flex-direction:column;gap:8px">
+              <span style="font:500 12px/1 var(--font-sans);color:var(--m-fg2)">92 questions · 5 from previous interviews</span>
+              <div style="border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <sc-for list="{{ questions }}" as="q" hint-placeholder-count="5">
+                  <div style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-bottom:1px solid var(--m-line)">
+                    <span style="font:600 14px/1.35 var(--font-sans);text-wrap:pretty">{{ q.text }}</span>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                      <span style="display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;border:1px solid var(--m-line);font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;color:var(--m-fg2)">{{ q.lpName }}</span>
+                      <span style="font:400 11px/1 var(--font-sans);color:var(--m-fg3)">{{ q.sourceLabel }} · {{ q.diffLabel }} · {{ q.askedLabel }}</span>
+                      <span style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;background:{{ q.vBg }};color:{{ q.vFg }};border:{{ q.vBorder }};font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap"><span>{{ q.vGlyph }}</span>{{ q.vLabel }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-around;align-items:flex-start;padding:10px 8px 28px;border-top:1px solid var(--m-line);background:var(--m-card)">
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg><span style="font:500 11px/1 var(--font-sans)">Practice</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg><span style="font:700 11px/1 var(--font-sans)">Library</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">History</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">Progress</span></span>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Import review">
+        <span style="font:700 14px/1.2 var(--font-sans)">Import review — confident tags accepted, only the doubtful ask</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between">
+              <button style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Cancel</button>
+              <span style="font:500 12px/1 var(--font-sans);color:var(--m-fg3);padding-right:8px">1 tap to save</span>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:6px 20px 0;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:4px"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">12 questions found</span><span style="font:400 13px/1.4 var(--font-sans);color:var(--m-fg2)"><span style="font-family:var(--font-mono)">loop-2024-notes.md</span> · tagged “Previous interview” · 2 already in your bank</span></div>
+              <div style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:12px;background:var(--m-green-tint);border:1px solid var(--m-green-line)"><span style="font:700 20px/1 var(--font-mono);color:var(--m-green)">10</span><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:700 14px/1.2 var(--font-sans)">tagged with confidence</span><span style="font:400 12px/1.3 var(--font-sans);color:var(--m-fg2)">Dive Deep ×3, Bias for Action ×2, Have Backbone ×2, Deliver Results, Ownership, Frugality</span></div><span style="font:700 12px/1 var(--font-sans);color:var(--m-cool)">Review</span></div>
+              <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-gold)">2 need you · or leave them flagged</span>
+              <div style="border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <div style="display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-bottom:1px solid var(--m-line)"><span style="font:600 14px/1.35 var(--font-sans)">What would you do differently?</span><div style="display:flex;gap:6px;flex-wrap:wrap"><span style="height:30px;padding:0 12px;border-radius:999px;background:var(--m-gold-tint);border:1px solid var(--m-gold-line);color:var(--m-gold);display:inline-flex;align-items:center;font:700 12px/1 var(--font-sans)">Learn and Be Curious?</span><span style="height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;font:500 12px/1 var(--font-sans)">Follow-up, not a question</span></div></div>
+                <div style="display:flex;flex-direction:column;gap:8px;padding:12px 14px"><span style="font:600 14px/1.35 var(--font-sans)">How do you decide what not to build?</span><div style="display:flex;gap:6px;flex-wrap:wrap"><span style="height:30px;padding:0 12px;border-radius:999px;background:var(--m-gold-tint);border:1px solid var(--m-gold-line);color:var(--m-gold);display:inline-flex;align-items:center;font:700 12px/1 var(--font-sans)">Frugality?</span><span style="height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;font:500 12px/1 var(--font-sans)">Invent and Simplify</span></div></div>
+              </div>
+            </div>
+            <div style="padding:12px 20px 34px;display:flex;flex-direction:column;gap:8px"><button style="height:56px;border-radius:999px;border:none;background:var(--m-fg);color:var(--m-card);font:700 16px/1 var(--font-sans);cursor:pointer">Save all 12</button><span style="text-align:center;font:400 12px/1.3 var(--font-sans);color:var(--m-fg3)">Unresolved tags stay flagged in the bank — never a blocker.</span></div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Add question">
+        <span style="font:700 14px/1.2 var(--font-sans)">Add a question manually</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;position:relative;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans);overflow:hidden">
+            <div style="position:absolute;inset:0;background:var(--m-scrim)"></div>
+            <div style="position:absolute;left:0;right:0;bottom:0;top:200px;background:var(--m-card);border-radius:24px 24px 0 0;box-shadow:var(--shadow-3);display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:center;padding:8px 0 0"><span style="width:36px;height:5px;border-radius:3px;background:var(--m-line2)"></span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px 0"><span style="font:800 24px/1.1 var(--font-sans);letter-spacing:-.025em">New question</span><button aria-label="Close" style="width:36px;height:36px;border-radius:50%;border:none;background:var(--m-elev);color:var(--m-fg2);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+              <div style="flex:1;min-height:0;overflow:hidden;padding:16px 20px 0;display:flex;flex-direction:column;gap:16px">
+                <x-import component-from-global-scope="AladdinDesignSystem_34d902.Input" label="Question" multiline="{{ true }}" default-value="Tell me about a time you had to make a call between two of your own priorities." hint-size="100%,112px"></x-import>
+                <div style="display:flex;flex-direction:column;gap:6px"><span style="font:700 13px/1.2 var(--font-sans)">LP</span><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 14px;height:44px;border-radius:8px;border:1px solid var(--m-line);background:var(--m-bg)"><span style="font:500 14px/1 var(--font-sans)">Ownership</span><span style="font:700 11px/1 var(--font-sans);color:var(--m-cool)">Suggested · change</span></div></div>
+                <x-import component-from-global-scope="AladdinDesignSystem_34d902.Select" label="Source" options="{{ sourceOptions }}" value="Custom" hint-size="100%,66px"></x-import>
+                <div style="display:flex;flex-direction:column;gap:6px"><span style="font:700 13px/1.2 var(--font-sans)">Difficulty</span><div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px;border-radius:999px;background:var(--m-elev)"><span style="height:36px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Easy</span><span style="height:36px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 13px/1 var(--font-sans)">Medium</span><span style="height:36px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Hard</span></div></div>
+              </div>
+              <div style="padding:14px 20px 34px;border-top:1px solid var(--m-line);display:flex;gap:10px"><button style="flex:1;height:56px;border-radius:999px;border:none;background:var(--m-fg);color:var(--m-card);font:700 16px/1 var(--font-sans);cursor:pointer">Save to bank</button><button style="height:56px;padding:0 18px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 14px/1 var(--font-sans);cursor:pointer">Save &amp; ask now</button></div>
+            </div>
+          </div>
+        </x-import>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Files</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">Drop zone · typed list with include toggles · preview and editor</span></div>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Library · Files">
+        <span style="font:700 14px/1.2 var(--font-sans)">Files</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">Library</span><span style="font:500 12px/1 var(--font-sans);color:var(--m-fg2)">4 of 5 included in prep</span></div>
+              <div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--m-elev)"><span style="flex:1;height:32px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">LPs</span><span style="flex:1;height:32px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Stories</span><span style="flex:1;height:32px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Questions</span><span style="flex:1;height:32px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 13px/1 var(--font-sans)">Files</span></div>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:14px 20px 0;display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 16px;border-radius:16px;border:1.5px dashed var(--m-line2);background:var(--m-card);text-align:center"><span style="width:40px;height:40px;border-radius:50%;background:var(--m-elev);color:var(--m-fg2);display:grid;place-items:center"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg></span><span style="font:700 14px/1.2 var(--font-sans)">Drop markdown here</span><span style="font:400 12px/1.4 var(--font-sans);color:var(--m-fg2)">JD, background, notes from past loops. <span style="color:var(--m-cool);font-weight:700">Browse</span></span></div>
+              <div style="border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <sc-for list="{{ files }}" as="f" hint-placeholder-count="5">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--m-line)">
+                    <span style="flex:none;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg></span>
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span style="font:500 13px/1.2 var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.name }}</span><div style="display:flex;align-items:center;gap:6px"><span style="display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:999px;background:var(--m-elev);font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;color:var(--m-fg2)">{{ f.type }}</span><span style="font:400 11px/1 var(--font-sans);color:var(--m-fg3)">{{ f.size }} · {{ f.updated }}</span></div></div>
+                    <x-import component-from-global-scope="AladdinDesignSystem_34d902.Switch" checked="{{ f.on }}" hint-size="36px,20px"></x-import>
+                  </div>
+                </sc-for>
+              </div>
+              <span style="font:400 12px/1.4 var(--font-sans);color:var(--m-fg3);padding:0 4px">Dropping is the whole action: type detected from content, included by default. Toggle off only what’s stale.</span>
+            </div>
+            <div style="display:flex;justify-content:space-around;align-items:flex-start;padding:10px 8px 28px;border-top:1px solid var(--m-line);background:var(--m-card)">
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg><span style="font:500 11px/1 var(--font-sans)">Practice</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg><span style="font:700 11px/1 var(--font-sans)">Library</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">History</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">Progress</span></span>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="File preview">
+        <span style="font:700 14px/1.2 var(--font-sans)">Markdown preview</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between">
+              <button style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Files</button>
+              <div style="display:flex;padding:3px;border-radius:999px;background:var(--m-elev)"><span style="height:30px;padding:0 14px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 12px/1 var(--font-sans)">Preview</span><span style="height:30px;padding:0 14px;display:grid;place-items:center;font:500 12px/1 var(--font-sans);color:var(--m-fg2)">Edit</span></div>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:8px 20px 0;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:500 13px/1.2 var(--font-mono)">loop-2024-notes.md</span><span style="display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:999px;background:var(--m-elev);font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;color:var(--m-fg2)">Past interviews</span></div>
+              <div style="flex:1;min-height:0;overflow:hidden;padding:18px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:12px">
+                <span style="font:800 22px/1.15 var(--font-sans);letter-spacing:-.02em">AWS loop — March 2024</span>
+                <span style="font:400 14px/1.5 var(--font-sans);color:var(--m-fg2)">Five rounds, SDM II. Outcome: no offer. Feedback themes below, verbatim where I could remember.</span>
+                <span style="font:700 15px/1.2 var(--font-sans);margin-top:4px">Round 3 · Bar raiser</span>
+                <ul style="margin:0;padding-left:18px;font:400 14px/1.55 var(--font-sans);display:flex;flex-direction:column;gap:4px"><li>“Tell me about a time you found a problem others had missed.” — went long on context, result thin.</li><li>Follow-up: “How did you know it was the config?” — couldn’t quote the number.</li><li>Asked for a second example; used the migration story.</li></ul>
+                <span style="font:700 15px/1.2 var(--font-sans);margin-top:4px">Round 4 · Skip-level</span>
+                <ul style="margin:0;padding-left:18px;font:400 14px/1.55 var(--font-sans);display:flex;flex-direction:column;gap:4px"><li>“Decision without all the data.” — fraud MVP. Good.</li><li>“What would you do differently?” — rambled.</li></ul>
+                <div style="margin-top:auto;padding:10px 12px;border-radius:10px;background:var(--m-cool-tint);border:1px solid var(--m-cool-line);font:500 12px/1.4 var(--font-sans)"><span style="font:700 10px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-cool);display:block;margin-bottom:2px">Mock found</span>5 questions · 2 verdict hints · 1 story reference</div>
+              </div>
+            </div>
+            <div style="padding:12px 20px 34px;display:flex;gap:10px"><button style="flex:1;height:48px;border-radius:999px;border:1px solid var(--m-line);background:var(--m-card);color:var(--m-fg);font:700 14px/1 var(--font-sans);cursor:pointer">Import 5 questions</button><button style="flex:1;height:48px;border-radius:999px;border:1px solid var(--m-line);background:var(--m-card);color:var(--m-fg);font:700 14px/1 var(--font-sans);cursor:pointer">Replay this loop</button></div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="File editor">
+        <span style="font:700 14px/1.2 var(--font-sans)">Markdown editor</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between">
+              <button style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Files</button>
+              <div style="display:flex;padding:3px;border-radius:999px;background:var(--m-elev)"><span style="height:30px;padding:0 14px;display:grid;place-items:center;font:500 12px/1 var(--font-sans);color:var(--m-fg2)">Preview</span><span style="height:30px;padding:0 14px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 12px/1 var(--font-sans)">Edit</span></div>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:8px 20px 0;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:500 13px/1.2 var(--font-mono)">background.md</span><span style="font:500 11px/1 var(--font-sans);color:var(--m-fg3)">Saved · just now</span></div>
+              <div style="flex:1;min-height:0;overflow:hidden;padding:16px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-cool-line);box-shadow:0 0 0 3px var(--m-cool-tint);font:400 13px/1.7 var(--font-mono);color:var(--m-fg);white-space:pre-wrap">{{ mdSource }}</div>
+            </div>
+            <div style="padding:12px 20px 34px;display:flex;gap:10px"><button style="flex:1;height:48px;border-radius:999px;border:none;background:var(--m-fg);color:var(--m-card);font:700 14px/1 var(--font-sans);cursor:pointer">Done</button></div>
+          </div>
+        </x-import>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Desktop · 1440</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">Library — LPs, master-detail</span></div>
+    <div data-screen-label="Desktop library · LPs" style="width:1440px;height:900px;background:var(--m-bg);display:grid;grid-template-columns:240px 440px 1fr;overflow:hidden;border:1px solid var(--m-line);border-radius:16px;box-sizing:border-box">
+      <div style="border-right:1px solid var(--m-line);background:var(--m-card);display:flex;flex-direction:column;padding:20px 12px 16px;box-sizing:border-box;gap:4px">
+        <span style="display:inline-flex;align-items:baseline;font:800 22px/1 var(--font-sans);letter-spacing:-.03em;padding:0 12px 18px">Mock<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--m-warm-fill);margin-left:3px"></span></span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>Practice</span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;background:var(--m-elev);color:var(--m-fg);font:700 14px/1 var(--font-sans)"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg>Library</span>
+        <span style="display:flex;flex-direction:column;gap:2px;padding:2px 0 2px 44px;font:500 13px/1.8 var(--font-sans);color:var(--m-fg3)"><span style="color:var(--m-fg);font-weight:700">LPs</span><span>Stories</span><span>Questions</span><span>Files</span></span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>History</span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>Progress</span>
+        <span style="flex:1"></span>
+        <span style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px;border:1px solid var(--m-warm-line);background:var(--m-warm-tint)"><span style="font:500 12px/1.2 var(--font-sans);color:var(--m-fg2)">Interview</span><span style="font:500 14px/1 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--m-warm)">19 days</span></span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">Settings</span>
+      </div>
+      <div style="border-right:1px solid var(--m-line);display:flex;flex-direction:column;min-height:0">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:24px 20px 12px"><span style="font:800 24px/1 var(--font-sans);letter-spacing:-.025em">LPs</span><button style="height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg2);font:700 12px/1 var(--font-sans);cursor:pointer">Reset to defaults</button></div>
+        <div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column">
+          <sc-for list="{{ lps }}" as="l" hint-placeholder-count="16">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 20px;border-bottom:1px solid var(--m-line);background:{{ l.rowBg }}">
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:600 13px/1.2 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">{{ l.stories }} stories · {{ l.questions }} q · {{ l.last }}</span></div>
+              <span style="flex:none;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;background:{{ l.vBg }};color:{{ l.vFg }};border:{{ l.vBorder }};font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap"><span>{{ l.vGlyph }}</span>{{ l.vLabel }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;min-height:0;padding:28px 36px;gap:20px;overflow:hidden">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:8px;max-width:620px"><div style="display:flex;align-items:center;gap:12px"><span style="font:800 32px/1.1 var(--font-sans);letter-spacing:-.025em">Dive Deep</span><span style="display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:var(--m-gold-tint);color:var(--m-gold);border:1px solid var(--m-gold-line);font:700 11px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase"><span style="font-size:12px">●</span>Not inclined</span></div><span style="font:400 15px/1.5 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">{{ deep.desc }}</span></div>
+          <div style="display:flex;gap:8px"><button style="height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 14px/1 var(--font-sans);cursor:pointer">Edit</button><button style="height:40px;padding:0 18px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 14px/1 var(--font-sans);cursor:pointer">Practise this LP</button></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;min-height:0">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Mapped stories · 3</span><span style="font:700 12px/1 var(--font-sans);color:var(--m-cool)">+ Add</span></div>
+            <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+              <sc-for list="{{ deepStories }}" as="s" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--m-line)"><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:700 14px/1.2 var(--font-sans)">{{ s.title }}</span><span style="font:500 12px/1.2 var(--font-mono);color:var(--m-fg2)">{{ s.num0 }}</span></div><span style="height:22px;padding:0 8px;border-radius:999px;background:{{ s.roleBg }};color:{{ s.roleFg }};border:{{ s.roleBorder }};display:inline-flex;align-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase">{{ s.role }}</span></div></sc-for>
+            </div>
+            <div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Verdict history · sessions 7–14</span></div>
+            <div style="padding:14px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+              <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px"><sc-for list="{{ deepHist }}" as="c" hint-placeholder-count="8"><span style="height:36px;border-radius:8px;background:{{ c.vFill }};color:{{ c.vOnFill }};display:grid;place-items:center;font:700 14px/1 var(--font-sans)">{{ c.vGlyph }}</span></sc-for></div>
+              <div style="display:flex;align-items:center;gap:10px;padding-top:8px;border-top:1px solid var(--m-line)"><button style="width:36px;height:36px;border-radius:50%;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></button><div style="display:flex;flex-direction:column;gap:1px"><span style="font:600 14px/1.2 var(--font-sans)">Best attempt · session 12 · 2:48</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">Payments outage · <span style="color:var(--m-blue)">◆ Inclined</span> · “named the component and the metric”</span></div></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;min-height:0">
+            <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Question bank · 9</span><span style="display:flex;gap:12px;font:700 12px/1 var(--font-sans);color:var(--m-cool)"><span>+ Add</span><span>Upload</span></span></div>
+            <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+              <sc-for list="{{ deepQsAll }}" as="q" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--m-line)"><span style="flex:1;font:400 14px/1.4 var(--font-sans);text-wrap:pretty">{{ q.text }}</span><span style="font:400 11px/1 var(--font-sans);color:var(--m-fg3);white-space:nowrap">{{ q.meta }}</span><span style="flex:none;font:700 12px/1 var(--font-sans);color:{{ q.vFg }}">{{ q.vGlyph }}</span></div></sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Desktop · 1440</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">Library — Story × LP grid</span></div>
+    <div data-screen-label="Desktop library · grid" style="width:1440px;height:900px;background:var(--m-bg);display:grid;grid-template-columns:240px 1fr;overflow:hidden;border:1px solid var(--m-line);border-radius:16px;box-sizing:border-box">
+      <div style="border-right:1px solid var(--m-line);background:var(--m-card);display:flex;flex-direction:column;padding:20px 12px 16px;box-sizing:border-box;gap:4px">
+        <span style="display:inline-flex;align-items:baseline;font:800 22px/1 var(--font-sans);letter-spacing:-.03em;padding:0 12px 18px">Mock<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--m-warm-fill);margin-left:3px"></span></span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">Practice</span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;background:var(--m-elev);color:var(--m-fg);font:700 14px/1 var(--font-sans)">Library</span>
+        <span style="display:flex;flex-direction:column;gap:2px;padding:2px 0 2px 44px;font:500 13px/1.8 var(--font-sans);color:var(--m-fg3)"><span>LPs</span><span style="color:var(--m-fg);font-weight:700">Stories</span><span>Questions</span><span>Files</span></span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">History</span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">Progress</span>
+        <span style="flex:1"></span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">Settings</span>
+      </div>
+      <div style="display:flex;flex-direction:column;padding:28px 36px;gap:18px;min-height:0;overflow:hidden">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:6px"><div style="display:flex;gap:4px"><span style="height:32px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Cards</span><span style="height:32px;padding:0 14px;border-radius:999px;background:var(--m-elev);display:inline-flex;align-items:center;font:700 13px/1 var(--font-sans)">Story × LP grid</span></div><span style="font:800 32px/1.1 var(--font-sans);letter-spacing:-.025em">Story × LP</span></div>
+          <div style="display:flex;align-items:center;gap:20px"><div style="display:flex;flex-direction:column;gap:6px;width:260px"><div style="display:flex;justify-content:space-between;font:500 13px/1 var(--font-sans)"><span><span style="font:500 16px/1 var(--font-mono);font-variant-numeric:tabular-nums">13</span> of 16 LPs covered</span><span style="color:var(--m-gold)">3 gaps</span></div><div style="display:flex;height:6px;border-radius:3px;background:var(--m-elev);overflow:hidden"><span style="width:81%;background:var(--m-fg)"></span></div></div><button style="height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 14px/1 var(--font-sans);cursor:pointer">Import markdown</button><button style="height:40px;padding:0 18px;border-radius:999px;border:none;background:var(--m-fg);color:var(--m-card);font:700 14px/1 var(--font-sans);cursor:pointer">+ Story</button></div>
+        </div>
+        <div style="border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);padding:16px 20px;display:flex;flex-direction:column;gap:6px">
+          <div style="display:grid;grid-template-columns:220px repeat(16,1fr) 90px;gap:6px;align-items:end"><span></span><sc-for list="{{ gridCols }}" as="c" hint-placeholder-count="16"><span style="font:700 11px/1.1 var(--font-sans);color:{{ c.color }};text-align:center;padding-bottom:4px;letter-spacing:.04em">{{ c.short }}</span></sc-for><span style="font:700 10px/1.1 var(--font-sans);color:var(--m-fg3);letter-spacing:.06em;text-transform:uppercase;text-align:right">Used</span></div>
+          <sc-for list="{{ grid }}" as="r" hint-placeholder-count="10">
+            <div style="display:grid;grid-template-columns:220px repeat(16,1fr) 90px;gap:6px;align-items:center">
+              <span style="font:600 14px/1.2 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:{{ r.titleColor }}">{{ r.title }}</span>
+              <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="16"><span title="{{ c.title }}" style="height:36px;border-radius:8px;background:{{ c.bg }};box-shadow:{{ c.ring }};box-sizing:border-box;cursor:pointer"></span></sc-for>
+              <span style="font:500 12px/1 var(--font-mono);color:{{ r.usesColor }};text-align:right;font-variant-numeric:tabular-nums">{{ r.uses }}×</span>
+            </div>
+          </sc-for>
+          <div style="display:grid;grid-template-columns:220px repeat(16,1fr) 90px;gap:6px;margin-top:4px;align-items:center"><span style="font:700 10px/1 var(--font-sans);color:var(--m-fg3);text-transform:uppercase;letter-spacing:.06em">No strong story</span><sc-for list="{{ gridCols }}" as="c" hint-placeholder-count="16"><span style="height:5px;border-radius:3px;background:{{ c.gapBg }}"></span></sc-for><span></span></div>
+        </div>
+        <div style="display:flex;gap:12px">
+          <div style="flex:1;display:flex;gap:10px;align-items:flex-start;padding:14px 16px;border-radius:12px;background:var(--m-gold-tint);border:1px solid var(--m-gold-line)"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-gold);padding-top:2px;white-space:nowrap">Over-used</span><span style="font:400 14px/1.45 var(--font-sans)"><strong>Payments outage</strong> covers 4 LPs and was used 9 times. Map a second story to Ownership and Earn Trust.</span></div>
+          <div style="flex:1;display:flex;gap:10px;align-items:flex-start;padding:14px 16px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line)"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3);padding-top:2px;white-space:nowrap">Gaps</span><span style="font:400 14px/1.45 var(--font-sans)">Are Right A Lot · Learn and Be Curious · Think Big. Click a cell to map; the coach can suggest which of your stories stretch to them.</span></div>
+          <div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);font:500 12px/1.2 var(--font-sans);color:var(--m-fg2)"><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:4px;background:var(--m-fg)"></span>Primary</span><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:4px;box-shadow:inset 0 0 0 2px var(--m-fg2)"></span>Secondary</span><span style="display:inline-flex;align-items:center;gap:6px"><span style="width:14px;height:14px;border-radius:4px;background:var(--m-elev)"></span>One tap cycles none → primary → secondary</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { D:null };
+  componentDidMount(){ import('./mock-data.js').then(D => this.setState({D})); }
+  renderVals(){
+    const D = this.state.D, theme = this.props.theme || 'light';
+    const L = D ? D.LPS : [], S = D ? D.STORIES : [], Q = D ? D.QUESTIONS : [], F = D ? D.FILES : [];
+    const deep = D ? D.lpById.deep : {desc:''};
+    const role = (s, id) => s.primary.includes(id) ? 'Primary' : 'Secondary';
+    const deepStories = S.filter(s => s.primary.includes('deep') || s.secondary.includes('deep')).map(s => { const r = role(s,'deep'); return {...s, role:r, num0:s.numbers.join(' · '), roleBg: r==='Primary'?'var(--m-fg)':'transparent', roleFg: r==='Primary'?'var(--m-card)':'var(--m-fg2)', roleBorder: r==='Primary'?'1px solid transparent':'1px solid var(--m-line2)'}; });
+    const extraDeep = [{text:'Walk me through the most complex technical problem you’ve debugged yourself in the last year.', meta:'Common · asked 2×', vFg:'var(--m-blue)', vGlyph:'◆'},{text:'Tell me about a metric you distrusted. What did you do?', meta:'Previous interview · asked 1×', vFg:'var(--m-gold)', vGlyph:'●'},{text:'When did you last go three levels deeper than your role required?', meta:'Custom · not asked', vFg:'var(--m-fg3)', vGlyph:'○'},{text:'Describe a time an anecdote and the data disagreed.', meta:'Common · asked 3×', vFg:'var(--m-blue)', vGlyph:'◆'},{text:'How do you audit a team’s operational health without being told?', meta:'Custom · not asked', vFg:'var(--m-fg3)', vGlyph:'○'}];
+    const deepQs = [...Q.filter(q => q.lp==='deep').map(q => ({text:q.text, meta:q.sourceLabel+' · '+q.askedLabel.toLowerCase(), vFg:q.vFg, vGlyph:q.vGlyph})), ...extraDeep];
+    const deepHist = D ? D.HEAT.deep.map(c => D.v(c)) : [];
+    const gridCols = L.map(l => ({short:l.short, gap:l.stories===0, color: l.stories===0 ? 'var(--m-gold)' : 'var(--m-fg3)', gapBg: l.stories===0 ? 'var(--m-gold-fill)' : 'transparent'}));
+    const grid = S.map(s => ({title:s.title, uses:s.uses, usesColor: s.overused ? 'var(--m-gold)' : 'var(--m-fg3)', titleColor: s.overused ? 'var(--m-gold)' : 'var(--m-fg)', cells: L.map(l => { const p = s.primary.includes(l.id), sec = s.secondary.includes(l.id); return {title: s.title+' × '+l.name, bg: p ? 'var(--m-fg)' : 'var(--m-elev)', ring: sec ? 'inset 0 0 0 2px var(--m-fg2)' : 'none'}; })}));
+    const story = S.find(s => s.id==='payments') || {numbers:[], situation:'', task:''};
+    const importStories = [{title:'Platform rebuild', status:'Duplicate · skip', statusColor:'var(--m-fg3)', lps:['Invent and Simplify']},{title:'Region failover drill', status:'New · 3 numbers found', statusColor:'var(--m-green)', lps:['Ownership','Dive Deep']},{title:'Intern programme', status:'New · no numbers', statusColor:'var(--m-gold)', lps:['Hire and Develop the Best']},{title:'Pricing experiment', status:'New · 2 numbers found', statusColor:'var(--m-green)', lps:['Are Right A Lot','Think Big']}];
+    const importQs = [
+      {text:'Tell me about a time you found a problem that others had missed.', lp:'Dive Deep', note:'Confident', ok:true},
+      {text:'Tell me about a time you made a decision without all the data you wanted.', lp:'Bias for Action', note:'Confident', ok:true},
+      {text:'What would you do differently?', lp:'Learn and Be Curious', note:'Low confidence · follow-up?', ok:false},
+      {text:'Describe a time you pushed back on a senior stakeholder.', lp:'Have Backbone; Disagree and Commit', note:'Confident', ok:true},
+      {text:'How do you decide what not to build?', lp:'Frugality', note:'Could be Invent and Simplify', ok:false},
+      {text:'Tell me about a goal you missed.', lp:'Deliver Results', note:'Confident', ok:true},
+    ].map(q => ({...q, bg: q.ok ? 'var(--m-cool-tint)' : 'var(--m-gold-tint)', border: q.ok ? 'var(--m-cool-line)' : 'var(--m-gold-line)', fg: q.ok ? 'var(--m-cool)' : 'var(--m-gold)', okBg: q.ok ? 'var(--m-green-tint)' : 'var(--m-elev)', okFg: q.ok ? 'var(--m-green)' : 'var(--m-fg3)'}));
+    return {
+      theme, isDark: theme==='dark', pw:390, ph:844,
+      lps: L.map(l => ({...l, rowBg: l.id==='deep' ? 'var(--m-elev)' : 'transparent'})),
+      deep, deepStories, deepQs: deepQs.slice(0,3), deepQsAll: deepQs, deepHist,
+      stories: S, story, gridCols, grid, importStories,
+      questions: Q.slice(0,6), importQs, sourceOptions:['Custom','Previous interview','Common'],
+      files: F,
+      mdSource: '# Background\n\nSenior engineering manager, 11 years. Currently lead Payments Platform (3 teams, 24 engineers) at a fintech.\n\n## Scope\n- Card authorisation path, 40k TPS peak\n- Merchant onboarding platform\n- Observability and on-call for the group\n\n## What I want them to remember\n- Numbers first. 41 min. $1.2M. 3 weeks → 2 days.\n- I trace root causes myself before delegating.\n',
+    };
+  }
+}
+</script>
+</body>
+</html>

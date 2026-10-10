@@ -16,11 +16,11 @@ function make(speed = 0.03) {
   const repo = new MemoryRepo(sampleData());
   const transport = new SimulatedTransport(DEMO_SCRIPT, { speed });
   const analyzer = new SimulatedAnalyzer(DEMO_SCRIPT, 5);
-  const c = new SessionController(transport, analyzer, repo);
+  const c = new SessionController(transport, analyzer, repo, () => Date.now(), false, { tickMs: 2 });
   const seen: string[] = [];
   let last: SessionState = c.state;
   c.subscribe((s) => { last = s; const tag = (s.pausedFrom ? 'paused:' : '') + s.phase + (s.reconnecting ? '+recon' : ''); if (seen[seen.length - 1] !== tag) seen.push(tag); });
-  const start = () => c.start({ mode: 'loop', focus: null, focusLabel: '', coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 1, systemInstruction: '', interviewers: INTERVIEWERS, lps: LPS, stories: STORIES, pauseMs: 2500, model: 'sim', voice: 'sim' });
+  const start = () => c.start({ mode: 'loop', focus: null, focusLabel: '', coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 1, systemInstruction: '', interviewers: INTERVIEWERS, lps: LPS, stories: STORIES, pauseMs: 8, model: 'sim', voice: 'sim' });
   return { repo, transport, c, seen, state: () => last, start };
 }
 

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/colors.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/typography.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/effects.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/styles.css">
+<script src="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:var(--m-canvas);font-family:var(--font-sans)}
+:root{--m-canvas:#FFFFFF;--m-bg:#F8F9FA;--m-card:#FFFFFF;--m-elev:#F1F3F4;--m-line:#DADCE0;--m-line2:#BDC1C6;--m-fg:#202124;--m-fg2:#5F6368;--m-fg3:#80868B;--m-warm:#B06000;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:#FEF7E0;--m-warm-line:#FDE293;--m-cool:#1A73E8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:#E8F0FE;--m-cool-line:#A8C7FA;--m-green:#1E7E43;--m-green-fill:#34A853;--m-green-tint:#E6F4EA;--m-green-line:#A8DAB5;--m-blue:#1558B0;--m-blue-fill:#1A73E8;--m-blue-tint:#E8F0FE;--m-blue-line:#A8C7FA;--m-gold:#B06000;--m-gold-fill:#F9AB00;--m-gold-tint:#FEF7E0;--m-gold-line:#FDE293;--m-red:#C5221F;--m-red-fill:#EA4335;--m-red-tint:#FCE8E6;--m-red-line:#F6AEA9;--m-scrim:rgba(32,33,36,.32)}
+[data-theme="dark"]{--m-canvas:#18191B;--m-bg:#202124;--m-card:#292A2D;--m-elev:#303134;--m-line:#3C4043;--m-line2:#5F6368;--m-fg:#E8EAED;--m-fg2:#9AA0A6;--m-fg3:#80868B;--m-warm:#FDD663;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:rgba(249,171,0,.14);--m-warm-line:rgba(253,214,99,.45);--m-cool:#8AB4F8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:rgba(138,180,248,.14);--m-cool-line:rgba(138,180,248,.45);--m-green:#81C995;--m-green-fill:#34A853;--m-green-tint:rgba(52,168,83,.18);--m-green-line:rgba(129,201,149,.5);--m-blue:#8AB4F8;--m-blue-fill:#1A73E8;--m-blue-tint:rgba(138,180,248,.14);--m-blue-line:rgba(138,180,248,.45);--m-gold:#FDD663;--m-gold-fill:#F9AB00;--m-gold-tint:rgba(249,171,0,.18);--m-gold-line:rgba(253,214,99,.5);--m-red:#F28B82;--m-red-fill:#EA4335;--m-red-tint:rgba(234,67,53,.18);--m-red-line:rgba(242,139,130,.5);--m-scrim:rgba(0,0,0,.55);--background:#202124;--surface:#292A2D;--surface-neutral:#303134;--border:#3C4043;--text-primary:#E8EAED;--text-strong:#E8EAED;--text-secondary:#9AA0A6;--text-muted:#80868B;--aladdin-blue:#8AB4F8;--blue-dark:#A8C7FA;--intent-surface:rgba(138,180,248,.14);--intent-border:rgba(138,180,248,.45);--green-surface:rgba(52,168,83,.18);--green-border:rgba(129,201,149,.5);--green-dark:#81C995;--red-surface:rgba(234,67,53,.18);--red-border:rgba(242,139,130,.5);--red-dark:#F28B82;--gate-surface:rgba(249,171,0,.18);--gate-border:rgba(253,214,99,.5);--gold-dark:#FDD663;--shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 2px 6px rgba(0,0,0,.45);--shadow-3:0 8px 28px rgba(0,0,0,.5)}
+a{color:var(--m-cool);text-decoration:none}a:hover{text-decoration:underline}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="min-height:100vh;background:var(--m-canvas);color:var(--m-fg);font-family:var(--font-sans);padding:40px 48px 120px;display:flex;flex-direction:column;gap:56px;box-sizing:border-box">
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Board 1</span>
+      <span style="font:800 40px/1 var(--font-sans);letter-spacing:-.03em">Practice &amp; New session</span>
+      <span style="font:400 15px/1.5 var(--font-sans);color:var(--m-fg2);max-width:680px;text-wrap:pretty">Mock already knows what you should practise, so the home tab is the Start button: one tap, no choices. The setup sheet is for the exception — three decisions, the rest remembered. Three home directions; <a href="#3b">3b</a> is canonical.</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;font:500 13px/1 var(--font-sans)"><a href="Mock.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Overview</a><a href="Mock - Foundations.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Foundations</a><a href="Mock - Live Session.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Live</a><a href="Mock - Library.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Library</a><a href="Mock - History & Progress.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">History</a><a href="Mock - Settings & Onboarding.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Settings</a></div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Options</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">Practice home — three directions</span><span style="font:400 14px/1.5 var(--font-sans);color:var(--m-fg2)">All three start the suggested drill in one tap. They differ in what else earns the screen.</span></div>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+
+      <div id="3b" style="display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px;width:390px" data-screen-label="Practice home 3b">
+        <div style="display:flex;align-items:flex-start;gap:10px;min-height:58px"><a href="#3b" style="font:600 10.5px/1 var(--font-mono);padding:4px 7px;background:var(--m-fg);color:var(--m-canvas);border-radius:5px;flex:none">3b</a><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 15px/1.2 var(--font-sans)">Start first · canonical</span><span style="font:400 12px/1.4 var(--font-sans);color:var(--m-fg2)">The drill is pre-chosen; Start is the screen. Yesterday’s weakest answer is one tap to redo. Readiness is a strip.</span></div></div>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:58px 20px 0;display:flex;align-items:center;justify-content:space-between">
+              <span style="display:inline-flex;align-items:baseline;font:800 22px/1 var(--font-sans);letter-spacing:-.03em">Mock<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--m-warm-fill);margin-left:3px"></span></span>
+              <div style="display:flex;align-items:center;gap:8px"><span style="height:32px;padding:0 12px;border-radius:999px;background:var(--m-warm-tint);border:1px solid var(--m-warm-line);color:var(--m-warm);display:inline-flex;align-items:center;font:500 12px/1 var(--font-mono);font-variant-numeric:tabular-nums">19 days</span><button aria-label="Settings" style="width:40px;height:40px;border-radius:50%;border:none;background:transparent;color:var(--m-fg2);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button></div>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:18px 20px 0;display:flex;flex-direction:column;gap:14px">
+              <div style="padding:20px;border-radius:20px;background:var(--m-card);border:1.5px solid var(--m-warm-line);display:flex;flex-direction:column;gap:14px">
+                <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-warm)">Session 14 · chosen for you</span>
+                <div style="display:flex;flex-direction:column;gap:6px"><span style="font:800 30px/1.1 var(--font-sans);letter-spacing:-.025em">Dive Deep drill</span><span style="font:400 14px/1.45 var(--font-sans);color:var(--m-fg2)">3 questions · 12 min · coaching after each. Then one Earn Trust question — it’s been six days.</span></div>
+                <button style="height:64px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 18px/1 var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:12px" style-active="transform:scale(.98)"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>Start</button>
+                <div style="display:flex;justify-content:center;gap:16px;font:700 13px/1 var(--font-sans);color:var(--m-fg2)"><span>Change</span><span style="color:var(--m-line2)">·</span><span>Full loop · 50 min</span></div>
+              </div>
+              <div style="padding:14px 16px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Fix yesterday’s weakest answer</span><span style="display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;background:var(--m-gold-tint);color:var(--m-gold);border:1px solid var(--m-gold-line);font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase"><span>●</span>Not inclined</span></div>
+                <span style="font:600 14px/1.35 var(--font-sans);text-wrap:pretty">Tell me about a time you found a problem that others had missed.</span>
+                <button style="height:48px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 14px/1 var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px" style-hover="background:var(--m-elev)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>Redo this answer · 4 min</button>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Readiness</span><span style="font:500 12px/1 var(--font-sans);color:var(--m-fg2)"><span style="font-family:var(--font-mono)">13/16</span> covered · <span style="color:var(--m-gold)">3 gaps</span></span></div>
+                <div style="display:grid;grid-template-columns:repeat(16,1fr);gap:3px"><sc-for list="{{ heat }}" as="c" hint-placeholder-count="16"><span title="{{ c.name }}" style="height:22px;border-radius:4px;background:{{ c.vFill }}"></span></sc-for></div>
+                <div style="display:flex;justify-content:space-between;font:500 10px/1 var(--font-sans);color:var(--m-fg3);letter-spacing:.04em"><span>CO</span><span>OW</span><span>IS</span><span>RL</span><span>LC</span><span>HD</span><span>HS</span><span>TB</span><span>BA</span><span>FR</span><span>ET</span><span>DD</span><span>HB</span><span>DR</span><span>BE</span><span>SS</span></div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-around;align-items:flex-start;padding:10px 8px 28px;border-top:1px solid var(--m-line);background:var(--m-card)">
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg><span style="font:700 11px/1 var(--font-sans)">Practice</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg><span style="font:500 11px/1 var(--font-sans)">Library</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">History</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">Progress</span></span>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <div id="3a" style="display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px;width:390px" data-screen-label="Practice home 3a">
+        <div style="display:flex;align-items:flex-start;gap:10px;min-height:58px"><a href="#3a" style="font:600 10.5px/1 var(--font-mono);padding:4px 7px;background:var(--m-elev);color:var(--m-fg);border-radius:5px;flex:none">3a</a><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 15px/1.2 var(--font-sans)">Readiness first</span><span style="font:400 12px/1.4 var(--font-sans);color:var(--m-fg2)">Countdown and the 16-cell heatmap above the start. The dashboard reading, for the days you want the picture first.</span></div></div>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:58px 20px 0;display:flex;align-items:center;justify-content:space-between">
+              <span style="display:inline-flex;align-items:baseline;font:800 22px/1 var(--font-sans);letter-spacing:-.03em">Mock<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--m-warm-fill);margin-left:3px"></span></span>
+              <button aria-label="Settings" style="width:40px;height:40px;border-radius:50%;border:none;background:transparent;color:var(--m-fg2);display:grid;place-items:center;cursor:pointer" style-hover="background:var(--m-elev)"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:14px 20px 0;display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;flex-direction:column;gap:4px"><span style="font:800 32px/1.1 var(--font-sans);letter-spacing:-.025em">19 days to go.</span><span style="font:400 13px/1.4 var(--font-sans);color:var(--m-fg2)">Loop on Thu 30 Oct · 5 interviewers · session 14 next</span></div>
+              <div style="padding:14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Loop readiness</span><span style="font:500 13px/1 var(--font-mono);font-variant-numeric:tabular-nums">13<span style="color:var(--m-fg3)">/16</span> <span style="font-family:var(--font-sans);font-weight:400;color:var(--m-fg2);font-size:12px">LPs covered</span></span></div>
+                <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px">
+                  <sc-for list="{{ heat }}" as="c" hint-placeholder-count="16">
+                    <span title="{{ c.name }}" style="aspect-ratio:1;border-radius:8px;background:{{ c.vFill }};color:{{ c.vOnFill }};display:grid;place-items:center;font:700 13px/1 var(--font-sans)">{{ c.vGlyph }}</span>
+                  </sc-for>
+                </div>
+                <div style="display:flex;justify-content:space-between;font:500 11px/1.2 var(--font-sans);color:var(--m-fg2)"><span><span style="color:var(--m-green)">✓</span> 3 strong</span><span><span style="color:var(--m-blue)">◆</span> 8 inclined</span><span><span style="color:var(--m-gold)">●</span> 4 not inclined</span><span>○ 1 never</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Today · 37 min · tap any row to start there</span>
+                <div style="border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                  <sc-for list="{{ queue }}" as="t" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--m-line)">
+                      <span style="flex:none;width:28px;height:28px;border-radius:8px;background:{{ t.vFill }};color:{{ t.vOnFill }};display:grid;place-items:center;font:700 12px/1 var(--font-sans)">{{ t.vGlyph }}</span>
+                      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="font:700 14px/1.2 var(--font-sans)">{{ t.lp }}</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">{{ t.why }}</span></div>
+                      <span style="font:500 12px/1 var(--font-mono);color:var(--m-fg3);font-variant-numeric:tabular-nums">{{ t.mins }} min</span>
+                      <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:var(--m-fg3);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <button style="height:60px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 17px/1 var(--font-sans);cursor:pointer" style-active="transform:scale(.98)">Start · Dive Deep drill</button>
+            </div>
+            <div style="display:flex;justify-content:space-around;align-items:flex-start;padding:10px 8px 28px;border-top:1px solid var(--m-line);background:var(--m-card)">
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg><span style="font:700 11px/1 var(--font-sans)">Practice</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg><span style="font:500 11px/1 var(--font-sans)">Library</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">History</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">Progress</span></span>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <div id="3c" style="display:flex;flex-direction:column;gap:10px;scroll-margin-top:16px;width:390px" data-screen-label="Practice home 3c">
+        <div style="display:flex;align-items:flex-start;gap:10px;min-height:58px"><a href="#3c" style="font:600 10.5px/1 var(--font-mono);padding:4px 7px;background:var(--m-elev);color:var(--m-fg);border-radius:5px;flex:none">3c</a><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 15px/1.2 var(--font-sans)">Coach-led plan</span><span style="font:400 12px/1.4 var(--font-sans);color:var(--m-fg2)">The coach writes today’s plan as a sentence with a time budget. One Start runs the whole plan; swap a step if you must.</span></div></div>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:58px 20px 0;display:flex;align-items:center;justify-content:space-between">
+              <div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Sat 11 Oct · 19 days out</span><span style="font:800 24px/1.1 var(--font-sans);letter-spacing:-.025em">Good morning.</span></div>
+              <button aria-label="Settings" style="width:40px;height:40px;border-radius:50%;border:none;background:transparent;color:var(--m-fg2);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:16px 20px 0;display:flex;flex-direction:column;gap:16px">
+              <div style="padding:16px;border-radius:16px;background:var(--m-cool-tint);border:1px solid var(--m-cool-line);display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:8px"><span style="width:28px;height:28px;border-radius:50%;background:var(--m-card);border:2px solid var(--m-cool);display:grid;place-items:center;font:800 10px/1 var(--font-sans);box-sizing:border-box">Co</span><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-cool)">Today’s plan · 37 min</span></div>
+                <span style="font:500 17px/1.4 var(--font-sans);text-wrap:pretty">Drill <strong>Dive Deep</strong> first — you were not inclined on Thursday. Then one <strong>Earn Trust</strong> question; it’s been six days. Finish by mapping a story to <strong>Think Big</strong>.</span>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <sc-for list="{{ queue }}" as="t" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;background:var(--m-card)"><span style="width:22px;height:22px;border-radius:6px;background:{{ t.vFill }};color:{{ t.vOnFill }};display:grid;place-items:center;font:700 11px/1 var(--font-sans)">{{ t.vGlyph }}</span><span style="flex:1;font:600 13px/1.2 var(--font-sans)">{{ t.lp }}</span><span style="font:500 11px/1 var(--font-mono);color:var(--m-fg3);font-variant-numeric:tabular-nums">{{ t.mins }} min</span><span style="font:700 12px/1 var(--font-sans);color:var(--m-fg3)">Swap</span></div>
+                  </sc-for>
+                </div>
+                <button style="height:56px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 16px/1 var(--font-sans);cursor:pointer" style-active="transform:scale(.98)">Start the plan</button>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Weakest first</span><span style="font:500 12px/1 var(--font-sans);color:var(--m-cool)">All 16</span></div>
+                <div style="border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                  <sc-for list="{{ weakest }}" as="l" hint-placeholder-count="5">
+                    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--m-line)">
+                      <span style="flex:1;min-width:0;font:600 13px/1.2 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span>
+                      <span style="font:400 11px/1 var(--font-sans);color:var(--m-fg3)">{{ l.last }}</span>
+                      <span style="display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;background:{{ l.vBg }};color:{{ l.vFg }};border:{{ l.vBorder }};font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap"><span>{{ l.vGlyph }}</span>{{ l.vLabel }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-around;align-items:flex-start;padding:10px 8px 28px;border-top:1px solid var(--m-line);background:var(--m-card)">
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg><span style="font:700 11px/1 var(--font-sans)">Practice</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg><span style="font:500 11px/1 var(--font-sans)">Library</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">History</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">Progress</span></span>
+            </div>
+          </div>
+        </x-import>
+      </div>
+    </div>
+    <p style="margin:0;font:400 13px/1.5 var(--font-sans);color:var(--m-fg3)">Try: “<a href="#3b">3b</a> with the heatmap from <a href="#3a">3a</a>” · “make <a href="#3c">3c</a> the home” · “<a href="#3b">3b</a> without the readiness strip”.</p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">New session · zero-tap entry</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">Three decisions when you tap “Change” · the lock screen when you don’t</span><span style="font:400 14px/1.5 var(--font-sans);color:var(--m-fg2);max-width:680px">What, coaching, go. Question source, story notes and voice keep their last values under “More”. The widget and the Action button start today’s drill without opening the app.</span></div>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="New session · 3 decisions">
+        <span style="font:700 14px/1.2 var(--font-sans);min-height:20px">Setup sheet — what, coaching, go</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;position:relative;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans);overflow:hidden">
+            <div style="position:absolute;inset:0;background:var(--m-scrim)"></div>
+            <div style="position:absolute;left:0;right:0;bottom:0;top:150px;background:var(--m-card);border-radius:24px 24px 0 0;box-shadow:var(--shadow-3);display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:center;padding:8px 0 0"><span style="width:36px;height:5px;border-radius:3px;background:var(--m-line2)"></span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px 0"><span style="font:800 24px/1.1 var(--font-sans);letter-spacing:-.025em">Session 14</span><button aria-label="Close" style="width:36px;height:36px;border-radius:50%;border:none;background:var(--m-elev);color:var(--m-fg2);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+              <div style="flex:1;min-height:0;overflow:hidden;padding:18px 20px 0;display:flex;flex-direction:column;gap:18px">
+                <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">1 · What</span>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:1.5px solid var(--m-warm-line);background:var(--m-warm-tint)"><span style="width:28px;height:28px;border-radius:8px;background:var(--m-gold-fill);color:#202124;display:grid;place-items:center;font:700 12px/1 var(--font-sans)">●</span><div style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font:700 14px/1.2 var(--font-sans)">Dive Deep drill</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">Suggested · 3 questions · 12 min</span></div><span style="font:700 14px/1 var(--font-sans)">✓</span></div>
+                    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:1px solid var(--m-line)"><span style="width:28px;height:28px;border-radius:8px;background:var(--m-elev);display:grid;place-items:center;font:700 11px/1 var(--font-sans);color:var(--m-fg2)">5</span><div style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font:700 14px/1.2 var(--font-sans)">Full loop</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">5 interviewers · ~50 min</span></div></div>
+                    <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;border:1px solid var(--m-line)"><span style="width:28px;height:28px;border-radius:8px;background:var(--m-elev);display:grid;place-items:center;font:700 11px/1 var(--font-sans);color:var(--m-fg2)">…</span><div style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font:700 14px/1.2 var(--font-sans)">Something else</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">One LP · one story · question set · replay · bar raiser</span></div><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:var(--m-fg3);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m9 18 6-6-6-6"></path></svg></div>
+                  </div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">2 · Coaching</span>
+                  <div style="display:grid;grid-template-columns:1fr 1fr;padding:3px;border-radius:999px;background:var(--m-elev)"><span style="height:40px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 13px/1 var(--font-sans)">After each answer</span><span style="height:40px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Recap only</span></div>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:12px;background:var(--m-bg);border:1px solid var(--m-line)"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 12px/1.2 var(--font-sans);color:var(--m-fg2)">More · remembered</span><span style="font:400 12px/1.3 var(--font-sans);color:var(--m-fg3)">Mix of sources · story notes on · Dana</span></div><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:var(--m-fg3);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m6 9 6 6 6-6"></path></svg></div>
+              </div>
+              <div style="padding:14px 20px 34px;border-top:1px solid var(--m-line);display:flex;flex-direction:column;gap:6px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">3 · Go</span><button style="height:60px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 17px/1 var(--font-sans);cursor:pointer" style-active="transform:scale(.98)">Start</button></div>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="New session · something else">
+        <span style="font:700 14px/1.2 var(--font-sans);min-height:20px">“Something else” — one story, asked from every LP it’s mapped to</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;position:relative;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans);overflow:hidden">
+            <div style="position:absolute;inset:0;background:var(--m-scrim)"></div>
+            <div style="position:absolute;left:0;right:0;bottom:0;top:150px;background:var(--m-card);border-radius:24px 24px 0 0;box-shadow:var(--shadow-3);display:flex;flex-direction:column">
+              <div style="display:flex;justify-content:center;padding:8px 0 0"><span style="width:36px;height:5px;border-radius:3px;background:var(--m-line2)"></span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px 0"><button style="height:36px;padding:0 10px 0 4px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Back</button><span style="font:700 15px/1 var(--font-sans)">Something else</span><span style="width:60px"></span></div>
+              <div style="flex:1;min-height:0;overflow:hidden;padding:16px 20px 0;display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:14px;border:1px solid var(--m-line)"><div style="display:flex;flex-direction:column;gap:1px"><span style="font:700 14px/1.2 var(--font-sans)">One LP</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">Dive Deep · suggested</span></div><span style="font:700 12px/1 var(--font-sans);color:var(--m-cool)">Pick LP</span></div>
+                <div style="display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:14px;border:1.5px solid var(--m-warm-line);background:var(--m-warm-tint)">
+                  <div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;flex-direction:column;gap:1px"><span style="font:700 14px/1.2 var(--font-sans)">One story · Payments outage</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">4 questions, one per mapped LP · ~18 min</span></div><span style="font:700 14px/1 var(--font-sans)">✓</span></div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap"><span style="height:24px;padding:0 9px;border-radius:999px;background:var(--m-fg);color:var(--m-card);display:inline-flex;align-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase">Dive Deep</span><span style="height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--m-line2);color:var(--m-fg2);display:inline-flex;align-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase">Ownership</span><span style="height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--m-line2);color:var(--m-fg2);display:inline-flex;align-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase">Bias for Action</span><span style="height:24px;padding:0 9px;border-radius:999px;border:1px solid var(--m-line2);color:var(--m-fg2);display:inline-flex;align-items:center;font:700 10px/1 var(--font-sans);letter-spacing:.06em;text-transform:uppercase">Earn Trust</span></div>
+                  <span style="font:400 12px/1.4 var(--font-sans);color:var(--m-fg2)">Used 9 times — the coach will push you to vary it. <span style="color:var(--m-cool);font-weight:700">Change story</span></span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:14px;border:1px solid var(--m-line)"><div style="display:flex;flex-direction:column;gap:1px"><span style="font:700 14px/1.2 var(--font-sans)">Question set</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">Previous interviews · 5 questions</span></div><span style="font:700 12px/1 var(--font-sans);color:var(--m-cool)">Pick set</span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:14px;border:1px solid var(--m-line)"><div style="display:flex;flex-direction:column;gap:1px"><span style="font:700 14px/1.2 var(--font-sans)">Replay a past interview</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">March 2024 loop · 5 rounds</span></div></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:14px;border:1px solid var(--m-line)"><div style="display:flex;flex-direction:column;gap:1px"><span style="font:700 14px/1.2 var(--font-sans)">Deep dive</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">One question, five follow-ups</span></div></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:14px;border:1px solid var(--m-line)"><div style="display:flex;flex-direction:column;gap:1px"><span style="font:700 14px/1.2 var(--font-sans)">Bar raiser</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">Dana · 4 questions across LPs</span></div></div>
+              </div>
+              <div style="padding:14px 20px 34px;border-top:1px solid var(--m-line);display:flex;flex-direction:column;gap:6px"><button style="height:60px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 17px/1 var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px" style-active="transform:scale(.98)">Start<span style="font:500 13px/1 var(--font-mono);opacity:.8">~18 min</span></button></div>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Lock screen widget">
+        <span style="font:700 14px/1.2 var(--font-sans);min-height:20px">Lock screen — widget and Action button</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:#202124;color:#E8EAED;font-family:var(--font-sans);padding:0 20px;box-sizing:border-box">
+            <div style="padding-top:88px;display:flex;flex-direction:column;align-items:center;gap:4px"><span style="font:500 17px/1.2 var(--font-sans);color:#9AA0A6">Saturday 11 October</span><span style="font:300 88px/1 var(--font-sans);letter-spacing:-.04em;font-variant-numeric:tabular-nums">09:41</span></div>
+            <div style="margin-top:26px;display:flex;flex-direction:column;gap:10px">
+              <div style="padding:14px 16px;border-radius:22px;background:rgba(232,234,237,.1);display:flex;align-items:center;gap:14px">
+                <span style="width:44px;height:44px;border-radius:12px;background:#E8EAED;color:#202124;display:grid;place-items:center;font:800 20px/1 var(--font-sans);letter-spacing:-.03em;position:relative;flex:none">M<span style="position:absolute;right:7px;top:7px;width:6px;height:6px;border-radius:50%;background:#F9AB00"></span></span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:#FDD663">Mock · 19 days to go</span><span style="font:700 17px/1.2 var(--font-sans)">Dive Deep drill · 12 min</span><span style="font:400 12px/1.3 var(--font-sans);color:#9AA0A6">Tap to start · earbuds connected</span></div>
+                <span style="width:48px;height:48px;border-radius:50%;background:#F9AB00;color:#202124;display:grid;place-items:center;flex:none"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></span>
+              </div>
+              <div style="padding:12px 16px;border-radius:22px;background:rgba(232,234,237,.1);display:flex;align-items:center;justify-content:space-between"><span style="font:500 14px/1.2 var(--font-sans)">Yesterday · Session 13 · 3 answers</span><span style="display:flex;gap:3px"><span style="width:14px;height:14px;border-radius:3px;background:#F9AB00"></span><span style="width:14px;height:14px;border-radius:3px;background:#F9AB00"></span><span style="width:14px;height:14px;border-radius:3px;background:#1A73E8"></span></span></div>
+            </div>
+            <div style="flex:1"></div>
+            <div style="margin-bottom:52px;padding:12px 14px;border-radius:14px;border:1px dashed rgba(232,234,237,.3);display:flex;gap:12px;align-items:center;color:#9AA0A6"><span style="width:22px;height:40px;border-radius:6px;border:2px solid #F9AB00;box-sizing:border-box;flex:none"></span><span style="font:400 13px/1.4 var(--font-sans)"><strong style="color:#E8EAED">Action button → Start today’s drill.</strong> Press and hold ends the session. No screen needed.</span></div>
+          </div>
+        </x-import>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { D:null };
+  componentDidMount(){ import('./mock-data.js').then(D => this.setState({D})); }
+  renderVals(){
+    const D = this.state.D, theme = this.props.theme || 'light';
+    const LPS = D ? D.LPS : [], Q = D ? D.TODAY_QUEUE : [];
+    return {
+      theme, isDark: theme==='dark', pw:390, ph:844,
+      heat: LPS, queue: Q,
+      weakest: [...LPS].sort((a,b)=> (b.verdict===0?9:b.verdict) - (a.verdict===0?9:a.verdict) || b.days-a.days).slice(0,5),
+    };
+  }
+}
+</script>
+</body>
+</html>

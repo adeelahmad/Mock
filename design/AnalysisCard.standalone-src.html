@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#F8F9FA">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect x="300" y="200" width="600" height="400" rx="48" fill="#FFFFFF" stroke="#DADCE0" stroke-width="4"/>
+    <rect x="360" y="270" width="180" height="22" rx="11" fill="#1A73E8"/>
+    <rect x="360" y="320" width="420" height="30" rx="8" fill="#202124"/>
+    <rect x="360" y="370" width="300" height="30" rx="8" fill="#5F6368" opacity=".5"/>
+    <rect x="360" y="450" width="480" height="28" rx="14" fill="#E6F4EA"/>
+    <rect x="360" y="450" width="160" height="28" rx="14" fill="#34A853"/>
+    <rect x="520" y="450" width="130" height="28" fill="#1A73E8"/>
+    <rect x="650" y="450" width="110" height="28" fill="#F9AB00"/>
+    <rect x="360" y="510" width="200" height="40" rx="20" fill="#FEF7E0" stroke="#FDE293" stroke-width="3"/>
+    <text x="460" y="538" text-anchor="middle" font-family="DM Sans, Arial, sans-serif" font-weight="700" font-size="22" fill="#B06000">● NOT INCLINED</text>
+  </svg>
+</template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/colors.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/typography.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/effects.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/styles.css">
+<script src="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:var(--m-canvas);font-family:var(--font-sans)}
+:root{--m-canvas:#FFFFFF;--m-bg:#F8F9FA;--m-card:#FFFFFF;--m-elev:#F1F3F4;--m-line:#DADCE0;--m-line2:#BDC1C6;--m-fg:#202124;--m-fg2:#5F6368;--m-fg3:#80868B;--m-warm:#B06000;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:#FEF7E0;--m-warm-line:#FDE293;--m-cool:#1A73E8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:#E8F0FE;--m-cool-line:#A8C7FA;--m-green:#1E7E43;--m-green-fill:#34A853;--m-green-tint:#E6F4EA;--m-green-line:#A8DAB5;--m-blue:#1558B0;--m-blue-fill:#1A73E8;--m-blue-tint:#E8F0FE;--m-blue-line:#A8C7FA;--m-gold:#B06000;--m-gold-fill:#F9AB00;--m-gold-tint:#FEF7E0;--m-gold-line:#FDE293;--m-red:#C5221F;--m-red-fill:#EA4335;--m-red-tint:#FCE8E6;--m-red-line:#F6AEA9;--m-scrim:rgba(32,33,36,.32)}
+[data-theme="dark"]{--m-canvas:#18191B;--m-bg:#202124;--m-card:#292A2D;--m-elev:#303134;--m-line:#3C4043;--m-line2:#5F6368;--m-fg:#E8EAED;--m-fg2:#9AA0A6;--m-fg3:#80868B;--m-warm:#FDD663;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:rgba(249,171,0,.14);--m-warm-line:rgba(253,214,99,.45);--m-cool:#8AB4F8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:rgba(138,180,248,.14);--m-cool-line:rgba(138,180,248,.45);--m-green:#81C995;--m-green-fill:#34A853;--m-green-tint:rgba(52,168,83,.18);--m-green-line:rgba(129,201,149,.5);--m-blue:#8AB4F8;--m-blue-fill:#1A73E8;--m-blue-tint:rgba(138,180,248,.14);--m-blue-line:rgba(138,180,248,.45);--m-gold:#FDD663;--m-gold-fill:#F9AB00;--m-gold-tint:rgba(249,171,0,.18);--m-gold-line:rgba(253,214,99,.5);--m-red:#F28B82;--m-red-fill:#EA4335;--m-red-tint:rgba(234,67,53,.18);--m-red-line:rgba(242,139,130,.5);--m-scrim:rgba(0,0,0,.55);--background:#202124;--surface:#292A2D;--surface-neutral:#303134;--border:#3C4043;--text-primary:#E8EAED;--text-strong:#E8EAED;--text-secondary:#9AA0A6;--text-muted:#80868B;--aladdin-blue:#8AB4F8;--blue-dark:#A8C7FA;--intent-surface:rgba(138,180,248,.14);--intent-border:rgba(138,180,248,.45);--green-surface:rgba(52,168,83,.18);--green-border:rgba(129,201,149,.5);--green-dark:#81C995;--red-surface:rgba(234,67,53,.18);--red-border:rgba(242,139,130,.5);--red-dark:#F28B82;--gate-surface:rgba(249,171,0,.18);--gate-border:rgba(253,214,99,.5);--gold-dark:#FDD663;--shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 2px 6px rgba(0,0,0,.45);--shadow-3:0 8px 28px rgba(0,0,0,.5)}
+a{color:var(--m-cool);text-decoration:none}a:hover{text-decoration:underline}
+</style>
+</helmet>
+<div data-screen-label="Analysis card" style="font-family:var(--font-sans);color:var(--m-fg);background:var(--m-card);border:1px solid var(--m-line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:16px;box-sizing:border-box;width:100%">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+    <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+      <div style="display:flex;gap:8px;align-items:center;font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)"><span>{{ a.q }}</span><span>·</span><span style="color:var(--m-cool)">{{ a.lp }}</span></div>
+      <div style="font:700 17px/1.3 var(--font-sans);letter-spacing:-.01em;text-wrap:pretty">{{ a.question }}</div>
+      <div style="font:400 13px/1.4 var(--font-sans);color:var(--m-fg2)">Story used · <span style="color:var(--m-fg);font-weight:500">{{ a.story }}</span></div>
+    </div>
+    <span style="flex:none;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:{{ vBg }};color:{{ vFg }};border:{{ vBorder }};font:700 11px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap"><span style="font-size:12px">{{ vGlyph }}</span>{{ vLabel }}</span>
+  </div>
+  <sc-if value="{{ hasBetter }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--m-cool-tint);border:1px solid var(--m-cool-line)">
+      <span style="font:700 11px/1.2 var(--font-sans);color:var(--m-cool);text-transform:uppercase;letter-spacing:.06em;padding-top:3px;white-space:nowrap">Better story</span>
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:0"><div style="font:700 14px/1.3 var(--font-sans)">{{ a.better }}</div><div style="font:400 13px/1.4 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">{{ a.reason }}</div></div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ hasMissed }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Numbers you missed · notes → said</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <sc-for list="{{ a.missed }}" as="m" hint-placeholder-count="2">
+          <span style="display:inline-flex;align-items:center;gap:8px;min-height:30px;padding:4px 12px 4px 10px;border-radius:999px;border:1px solid var(--m-line);background:var(--m-bg);font:500 13px/1.2 var(--font-sans)"><span style="font-variant-numeric:tabular-nums">{{ m.notes }}</span><span style="color:var(--m-fg3)">→</span><span style="color:var(--m-red)">{{ m.said }}</span></span>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ full }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">STAR · time split</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">{{ starNote }}</span></div>
+        <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px">
+          <span style="width:{{ a.star.s }}%;background:var(--m-line2)"></span><span style="width:{{ a.star.t }}%;background:var(--m-fg3)"></span><span style="width:{{ a.star.a }}%;background:var(--m-fg2)"></span><span style="width:{{ a.star.r }}%;background:var(--m-cool)"></span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;font:500 12px/1.2 var(--font-sans);color:var(--m-fg2);font-variant-numeric:tabular-nums">
+          <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--m-line2);margin-right:6px"></span>S {{ a.star.s }}%</span><span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--m-fg3);margin-right:6px"></span>T {{ a.star.t }}%</span><span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--m-fg2);margin-right:6px"></span>A {{ a.star.a }}%</span><span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:var(--m-cool);margin-right:6px"></span>R {{ a.star.r }}%</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--m-bg);border:1px solid var(--m-line)">
+          <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">I vs we</span>
+          <div style="display:flex;align-items:baseline;gap:6px"><span style="font:500 24px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ a.iPct }}%</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">“I”</span></div>
+          <div style="display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--m-line)"><span style="width:{{ a.iPct }}%;background:var(--m-cool)"></span></div>
+          <span style="font:400 12px/1.3 var(--font-sans);color:var(--m-fg2)">{{ iNote }}</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;background:var(--m-bg);border:1px solid var(--m-line)">
+          <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Delivery</span>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;font-variant-numeric:tabular-nums">
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 16px/1.1 var(--font-mono)">{{ a.pace }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">wpm · {{ a.paceNote }}</span></div>
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 16px/1.1 var(--font-mono)">{{ a.fillers }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">fillers</span></div>
+            <div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 16px/1.1 var(--font-mono)">{{ a.length }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">{{ a.lengthNote }}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:var(--m-green-tint);color:var(--m-green);display:grid;place-items:center;font:700 12px/1 var(--font-sans)">✓</span><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-green)">Strength</span><span style="font:400 14px/1.45 var(--font-sans);text-wrap:pretty">{{ a.strength }}</span></div></div>
+    <sc-for list="{{ fixes }}" as="f" hint-placeholder-count="3">
+      <div style="display:flex;gap:10px;align-items:flex-start"><span style="flex:none;width:22px;height:22px;border-radius:50%;background:var(--m-cool-tint);color:var(--m-cool);display:grid;place-items:center;font:700 12px/1 var(--font-sans);font-variant-numeric:tabular-nums">{{ f.n }}</span><span style="font:400 14px/1.45 var(--font-sans);padding-top:2px;text-wrap:pretty">{{ f.t }}</span></div>
+    </sc-for>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--m-line)">
+    <button style="height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 13px/1 var(--font-sans);display:inline-flex;align-items:center;gap:8px;cursor:pointer" style-hover="background:var(--m-elev)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>Play answer <span style="font:500 12px/1 var(--font-mono);color:var(--m-fg2)">{{ a.length }}</span></button>
+    <button style="height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 13px/1 var(--font-sans);display:inline-flex;align-items:center;gap:8px;cursor:pointer" style-hover="background:var(--m-elev)">Save as best attempt</button>
+    <button style="height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--m-cool-line);background:var(--m-cool-tint);color:var(--m-cool);font:700 13px/1 var(--font-sans);display:inline-flex;align-items:center;gap:8px;cursor:pointer" style-hover="filter:brightness(1.1)">Drill {{ a.lp }}</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;420px&quot;},&quot;data&quot;:{&quot;editor&quot;:null,&quot;default&quot;:null,&quot;tsType&quot;:&quot;{q:string,question:string,lp:string,story:string,verdict:0|1|2|3|4,better?:string,reason?:string,missed:{notes:string,said:string}[],star:{s:number,t:number,a:number,r:number},iPct:number,pace:number,paceNote:string,fillers:number,length:string,lengthNote:string,strength:string,fixes:string[]}&quot;},&quot;compact&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Layout&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const V = {0:['Not yet','○','transparent','var(--m-fg3)','1px dashed var(--m-line2)'],1:['Strong hire','✓','var(--m-green-tint)','var(--m-green)','1px solid var(--m-green-line)'],2:['Inclined','◆','var(--m-blue-tint)','var(--m-blue)','1px solid var(--m-blue-line)'],3:['Not inclined','●','var(--m-gold-tint)','var(--m-gold)','1px solid var(--m-gold-line)'],4:['Strong no hire','✕','var(--m-red-tint)','var(--m-red)','1px solid var(--m-red-line)']};
+    const a = this.props.data || {q:'Q3',question:'Tell me about a time you found a problem that others had missed. How did you find it?',lp:'Dive Deep',story:'Payments outage',verdict:3,better:'Legacy data migration',reason:'It shows you tracing the root cause yourself, not delegating the trace.',missed:[{notes:'41 min to mitigate',said:'“under an hour”'},{notes:'$1.2M exposure avoided',said:'“significant”'},{notes:'0 repeats in 6 months',said:'not mentioned'}],star:{s:35,t:10,a:40,r:15},iPct:38,pace:168,paceNote:'fast',fillers:11,length:'4:12',lengthNote:'long',strength:'You named the exact failing component and the metric you watched while fixing it.',fixes:['Open with the numbers: 41 minutes, $1.2M.','Cut the setup to two sentences — the room knows what Black Friday is.','Say what you personally did in the first ten minutes.']};
+    const d = V[a.verdict] || V[0];
+    const star = a.star || {s:25,t:25,a:25,r:25};
+    const starNote = star.r < 20 ? 'Result thin — aim for 25%' : star.s > 30 ? 'Situation long — aim for 20%' : 'Balanced';
+    return {
+      a, vLabel:d[0], vGlyph:d[1], vBg:d[2], vFg:d[3], vBorder:d[4],
+      hasBetter: !!a.better, hasMissed: (a.missed||[]).length > 0,
+      full: !(this.props.compact ?? false),
+      fixes: (a.fixes||[]).map((t,i)=>({n:i+1,t})),
+      starNote, iNote: a.iPct < 50 ? 'Mostly “we” — own the actions' : 'Good — you own the actions',
+    };
+  }
+}
+</script>
+</body>
+</html>

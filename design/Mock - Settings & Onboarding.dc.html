@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/colors.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/typography.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/effects.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/styles.css">
+<script src="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:var(--m-canvas);font-family:var(--font-sans)}
+:root{--m-canvas:#FFFFFF;--m-bg:#F8F9FA;--m-card:#FFFFFF;--m-elev:#F1F3F4;--m-line:#DADCE0;--m-line2:#BDC1C6;--m-fg:#202124;--m-fg2:#5F6368;--m-fg3:#80868B;--m-warm:#B06000;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:#FEF7E0;--m-warm-line:#FDE293;--m-cool:#1A73E8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:#E8F0FE;--m-cool-line:#A8C7FA;--m-green:#1E7E43;--m-green-fill:#34A853;--m-green-tint:#E6F4EA;--m-green-line:#A8DAB5;--m-blue:#1558B0;--m-blue-fill:#1A73E8;--m-blue-tint:#E8F0FE;--m-blue-line:#A8C7FA;--m-gold:#B06000;--m-gold-fill:#F9AB00;--m-gold-tint:#FEF7E0;--m-gold-line:#FDE293;--m-red:#C5221F;--m-red-fill:#EA4335;--m-red-tint:#FCE8E6;--m-red-line:#F6AEA9;--m-scrim:rgba(32,33,36,.32)}
+[data-theme="dark"]{--m-canvas:#18191B;--m-bg:#202124;--m-card:#292A2D;--m-elev:#303134;--m-line:#3C4043;--m-line2:#5F6368;--m-fg:#E8EAED;--m-fg2:#9AA0A6;--m-fg3:#80868B;--m-warm:#FDD663;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:rgba(249,171,0,.14);--m-warm-line:rgba(253,214,99,.45);--m-cool:#8AB4F8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:rgba(138,180,248,.14);--m-cool-line:rgba(138,180,248,.45);--m-green:#81C995;--m-green-fill:#34A853;--m-green-tint:rgba(52,168,83,.18);--m-green-line:rgba(129,201,149,.5);--m-blue:#8AB4F8;--m-blue-fill:#1A73E8;--m-blue-tint:rgba(138,180,248,.14);--m-blue-line:rgba(138,180,248,.45);--m-gold:#FDD663;--m-gold-fill:#F9AB00;--m-gold-tint:rgba(249,171,0,.18);--m-gold-line:rgba(253,214,99,.5);--m-red:#F28B82;--m-red-fill:#EA4335;--m-red-tint:rgba(234,67,53,.18);--m-red-line:rgba(242,139,130,.5);--m-scrim:rgba(0,0,0,.55);--background:#202124;--surface:#292A2D;--surface-neutral:#303134;--border:#3C4043;--text-primary:#E8EAED;--text-strong:#E8EAED;--text-secondary:#9AA0A6;--text-muted:#80868B;--aladdin-blue:#8AB4F8;--blue-dark:#A8C7FA;--intent-surface:rgba(138,180,248,.14);--intent-border:rgba(138,180,248,.45);--green-surface:rgba(52,168,83,.18);--green-border:rgba(129,201,149,.5);--green-dark:#81C995;--red-surface:rgba(234,67,53,.18);--red-border:rgba(242,139,130,.5);--red-dark:#F28B82;--gate-surface:rgba(249,171,0,.18);--gate-border:rgba(253,214,99,.5);--gold-dark:#FDD663;--shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 2px 6px rgba(0,0,0,.45);--shadow-3:0 8px 28px rgba(0,0,0,.5)}
+a{color:var(--m-cool);text-decoration:none}a:hover{text-decoration:underline}
+@keyframes mock-ping{0%{transform:scale(.45);opacity:.75}100%{transform:scale(1);opacity:0}}
+@keyframes mock-pulse{0%,100%{transform:scale(.94)}50%{transform:scale(1.06)}}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="min-height:100vh;background:var(--m-canvas);color:var(--m-fg);font-family:var(--font-sans);padding:40px 48px 120px;display:flex;flex-direction:column;gap:56px;box-sizing:border-box">
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Board 5</span>
+      <span style="font:800 40px/1 var(--font-sans);letter-spacing:-.03em">Settings &amp; first run</span>
+      <span style="font:400 15px/1.5 var(--font-sans);color:var(--m-fg2);max-width:680px;text-wrap:pretty">Settings is short and behind the gear. First run is three steps — drop your prep, say hello, start — because the LPs are already there and the microphone is granted where you first talk.</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;font:500 13px/1 var(--font-sans)"><a href="Mock.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Overview</a><a href="Mock - Foundations.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Foundations</a><a href="Mock - Practice.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Practice</a><a href="Mock - Live Session.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Live</a><a href="Mock - Library.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Library</a><a href="Mock - History & Progress.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">History</a></div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">First run</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">Three steps: drop, say hello, start</span><span style="font:400 14px/1.5 var(--font-sans);color:var(--m-fg2);max-width:720px">One drop zone takes everything — stories, questions, JD, notes — and sorts it by content. Mic, level and voice are one screen. Only the last step is required; Mock works with the common bank and no stories, it just coaches less precisely.</span></div>
+    <div style="display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start">
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Setup 1 · drop">
+        <span style="font:700 14px/1.2 var(--font-sans)">1 · Your 16 LPs are ready. Drop your prep.</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:64px 20px 0;display:flex;align-items:center;justify-content:space-between"><span style="display:inline-flex;align-items:baseline;font:800 22px/1 var(--font-sans);letter-spacing:-.03em">Mock<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--m-warm-fill);margin-left:3px"></span></span><div style="display:flex;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--m-fg)"></span><span style="width:8px;height:8px;border-radius:50%;background:var(--m-line2)"></span><span style="width:8px;height:8px;border-radius:50%;background:var(--m-line2)"></span></div></div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:28px 20px 0;display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:800 34px/1.05 var(--font-sans);letter-spacing:-.03em">Your 16 LPs are ready.</span><span style="font:400 15px/1.5 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">Now drop whatever prep you have. Mock sorts it — stories, questions, your JD, notes from past loops.</span></div>
+              <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px"><sc-for list="{{ lpTiles }}" as="l" hint-placeholder-count="16"><span title="{{ l.name }}" style="height:30px;border-radius:7px;background:var(--m-card);border:1px solid var(--m-line);display:grid;place-items:center;font:800 10px/1 var(--font-sans);letter-spacing:-.01em">{{ l.short }}</span></sc-for></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:22px 16px;border-radius:16px;border:1.5px dashed var(--m-line2);background:var(--m-card);text-align:center"><span style="font:700 15px/1.2 var(--font-sans)">Drop files or a folder</span><span style="font:400 12px/1.4 var(--font-sans);color:var(--m-fg2)">.md · .txt · .csv · .docx — anything, mixed</span></div>
+              <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--m-line);font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)"><span>Found in 4 files</span><span style="color:var(--m-green);text-transform:none;letter-spacing:0">sorted automatically</span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--m-line)"><span style="font:600 14px/1.2 var(--font-sans)">3 stories</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">mapped to 7 LPs · 9 numbers</span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--m-line)"><span style="font:600 14px/1.2 var(--font-sans)">12 questions</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">10 tagged · 2 to check later</span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--m-line)"><span style="font:600 14px/1.2 var(--font-sans)">Job description</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">Senior SDM · AWS</span></div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px"><span style="font:600 14px/1.2 var(--font-sans)">Past loop notes</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">March 2024 · 5 rounds</span></div>
+              </div>
+            </div>
+            <div style="padding:12px 20px 34px;display:flex;flex-direction:column;gap:10px"><button style="height:56px;border-radius:999px;border:none;background:var(--m-fg);color:var(--m-card);font:700 16px/1 var(--font-sans);cursor:pointer">Looks right</button><button style="height:44px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:700 14px/1 var(--font-sans);cursor:pointer">Start empty — use the common bank</button></div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Setup 2 · say hello">
+        <span style="font:700 14px/1.2 var(--font-sans)">2 · Say hello — mic, level and voice in one go</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:64px 20px 0;display:flex;align-items:center;justify-content:space-between"><span style="display:inline-flex;align-items:baseline;font:800 22px/1 var(--font-sans);letter-spacing:-.03em">Mock<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--m-warm-fill);margin-left:3px"></span></span><div style="display:flex;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--m-fg)"></span><span style="width:8px;height:8px;border-radius:50%;background:var(--m-fg)"></span><span style="width:8px;height:8px;border-radius:50%;background:var(--m-line2)"></span></div></div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:28px 20px 0;display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:800 34px/1.05 var(--font-sans);letter-spacing:-.03em">Say hello.</span><span style="font:400 15px/1.5 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">Talk for a few seconds. This grants the microphone once, checks your earbuds and sets your level — sessions never ask again.</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line)">{{ orbMe }}<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><span style="font:700 15px/1.2 var(--font-sans);display:flex;align-items:center;gap:8px"><span style="color:var(--m-green)">✓</span>Heard you</span><span style="font:400 12px/1.3 var(--font-sans);color:var(--m-fg2);text-align:center">Earbuds · level ok · pause length set to 2.5 s from how you speak</span></div></div>
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Who interviews you · tap to hear</span>
+                <div style="display:flex;gap:8px">
+                  <div style="flex:1;padding:12px 10px;border-radius:14px;border:1.5px solid var(--m-warm-line);background:var(--m-warm-tint);display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:40px;height:40px;border-radius:50%;background:var(--m-card);border:2px solid var(--m-warm);display:grid;place-items:center;font:800 13px/1 var(--font-sans);box-sizing:border-box">DW</span><span style="font:700 13px/1.2 var(--font-sans)">Dana</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">even, unhurried</span></div>
+                  <div style="flex:1;padding:12px 10px;border-radius:14px;border:1px solid var(--m-line);background:var(--m-card);display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:40px;height:40px;border-radius:50%;background:var(--m-elev);display:grid;place-items:center;font:800 13px/1 var(--font-sans)">PR</span><span style="font:700 13px/1.2 var(--font-sans)">Priya</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">warm, quick</span></div>
+                  <div style="flex:1;padding:12px 10px;border-radius:14px;border:1px solid var(--m-line);background:var(--m-card);display:flex;flex-direction:column;align-items:center;gap:6px"><span style="width:40px;height:40px;border-radius:50%;background:var(--m-elev);display:grid;place-items:center;font:800 13px/1 var(--font-sans)">TN</span><span style="font:700 13px/1.2 var(--font-sans)">Tomasz</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">dry, precise</span></div>
+                </div>
+              </div>
+            </div>
+            <div style="padding:12px 20px 34px;display:flex;flex-direction:column;gap:10px"><button style="height:56px;border-radius:999px;border:none;background:var(--m-fg);color:var(--m-card);font:700 16px/1 var(--font-sans);cursor:pointer">Next</button></div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Setup 3 · start">
+        <span style="font:700 14px/1.2 var(--font-sans)">3 · Start session 1</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans);position:relative">
+            <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--m-warm-fill)"></div>
+            <div style="padding:64px 20px 0;display:flex;align-items:center;justify-content:space-between"><span style="display:inline-flex;align-items:baseline;font:800 22px/1 var(--font-sans);letter-spacing:-.03em">Mock<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--m-warm-fill);margin-left:3px"></span></span><div style="display:flex;gap:6px"><span style="width:8px;height:8px;border-radius:50%;background:var(--m-fg)"></span><span style="width:8px;height:8px;border-radius:50%;background:var(--m-fg)"></span><span style="width:8px;height:8px;border-radius:50%;background:var(--m-warm-fill)"></span></div></div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:28px 20px 0;display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:800 34px/1.05 var(--font-sans);letter-spacing:-.03em">That’s it.</span><span style="font:400 15px/1.5 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">Session 1 is short: three questions from your own bank, coaching after each. Dana is ready when you are.</span></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div style="padding:12px 14px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:2px"><span style="font:500 22px/1 var(--font-mono);font-variant-numeric:tabular-nums">16</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">LPs · 7 with a story</span></div>
+                <div style="padding:12px 14px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:2px"><span style="font:500 22px/1 var(--font-mono);font-variant-numeric:tabular-nums">72</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">questions · 12 yours</span></div>
+              </div>
+              <div style="padding:14px 16px;border-radius:12px;background:var(--m-cool-tint);border:1px solid var(--m-cool-line);display:flex;gap:10px;align-items:flex-start"><span style="font:700 10px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-cool);padding-top:2px;white-space:nowrap">Later</span><span style="font:400 13px/1.45 var(--font-sans)">Interview date, the two unchecked question tags and the three LP gaps are waiting on the home tab — none of them block session 1.</span></div>
+            </div>
+            <div style="padding:12px 20px 34px;display:flex;flex-direction:column;gap:10px"><button style="height:64px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 18px/1 var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:12px" style-active="transform:scale(.98)"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>Start session 1</button><button style="height:44px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:700 14px/1 var(--font-sans);cursor:pointer">Explore first</button></div>
+          </div>
+        </x-import>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Settings</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">One scrolling screen, shown in two halves</span><span style="font:400 14px/1.5 var(--font-sans);color:var(--m-fg2);max-width:680px">Everything here has a default set during first run. You should rarely need it.</span></div>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Settings · top">
+        <span style="font:700 14px/1.2 var(--font-sans)">Interview · live model · voice · pause length</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between">
+              <button style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Practice</button>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:6px 20px 0;display:flex;flex-direction:column;gap:18px">
+              <span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">Settings</span>
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Interview</span>
+                <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--m-line)"><span style="font:500 14px/1.2 var(--font-sans)">Interview date</span><span style="display:flex;align-items:center;gap:8px;font:500 14px/1.2 var(--font-sans);color:var(--m-fg2)">Thu 30 Oct 2026<span style="height:24px;padding:0 8px;border-radius:999px;background:var(--m-warm-tint);border:1px solid var(--m-warm-line);color:var(--m-warm);display:inline-flex;align-items:center;font:500 11px/1 var(--font-mono)">19 d</span></span></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px"><span style="font:500 14px/1.2 var(--font-sans)">Loop size</span><span style="font:500 14px/1.2 var(--font-sans);color:var(--m-fg2)">5 interviewers · 1 bar raiser</span></div>
+                </div>
+              </div>
+              <x-import component-from-global-scope="AladdinDesignSystem_34d902.Select" label="Live model" options="{{ modelOptions }}" value="Live · balanced" hint-size="100%,66px"></x-import>
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Interviewer voice · tap to preview</span>
+                <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                  <sc-for list="{{ voices }}" as="v" hint-placeholder-count="5">
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--m-line);background:{{ v.bg }}">
+                      <span style="width:36px;height:36px;border-radius:50%;background:var(--m-elev);border:2px solid {{ v.ring }};display:grid;place-items:center;font:800 12px/1 var(--font-sans);box-sizing:border-box">{{ v.mono }}</span>
+                      <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:600 14px/1.2 var(--font-sans)">{{ v.name }}</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">{{ v.desc }}</span></div>
+                      <button aria-label="Preview" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg></button>
+                      <span style="width:20px;font:700 14px/1 var(--font-sans);color:var(--m-fg);text-align:center">{{ v.check }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line)">
+                <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:500 14px/1.2 var(--font-sans)">Pause before my turn ends</span><span style="font:500 16px/1 var(--font-mono);font-variant-numeric:tabular-nums">2.5 s</span></div>
+                <div style="position:relative;height:28px;display:flex;align-items:center"><span style="position:absolute;left:0;right:0;height:4px;border-radius:2px;background:var(--m-line)"></span><span style="position:absolute;left:0;width:50%;height:4px;border-radius:2px;background:var(--m-fg)"></span><span style="position:absolute;left:calc(50% - 14px);width:28px;height:28px;border-radius:50%;background:var(--m-card);border:1px solid var(--m-line);box-shadow:var(--shadow-2)"></span></div>
+                <div style="display:flex;justify-content:space-between;font:500 11px/1 var(--font-sans);color:var(--m-fg3)"><span>1 s · sharper</span><span>4 s · calmer</span></div>
+                <span style="font:400 12px/1.45 var(--font-sans);color:var(--m-fg2)">How long Mock waits in silence before treating your answer as finished and starting coaching. Set from your “say hello” check; you can always keep talking.</span>
+              </div>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Settings · bottom">
+        <span style="font:700 14px/1.2 var(--font-sans)">System instruction · appearance · data</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between">
+              <button style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>Practice</button>
+              <span style="font:700 14px/1 var(--font-sans)">Settings</span><span style="width:60px"></span>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:6px 20px 0;display:flex;flex-direction:column;gap:18px">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">System instruction</span><span style="font:700 12px/1 var(--font-sans);color:var(--m-cool)">Reset</span></div>
+                <div style="padding:14px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);font:400 12.5px/1.65 var(--font-mono);color:var(--m-fg);white-space:pre-wrap;min-height:200px">{{ sysPrompt }}</div>
+                <span style="font:400 12px/1.4 var(--font-sans);color:var(--m-fg3)">Sent to the interviewer and the coach on every session, after your files.</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Appearance</span>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:3px;border-radius:999px;background:var(--m-elev)"><span style="height:36px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 13px/1 var(--font-sans)">Light</span><span style="height:36px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Dark</span><span style="height:36px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">System</span></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Library &amp; data</span>
+                <div style="border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--m-line)"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 14px/1.2 var(--font-sans)">Export everything</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">Library, sessions, audio · 212 MB</span></div><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:var(--m-fg2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--m-line)"><div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 14px/1.2 var(--font-sans)">Import library</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">A Mock export, or markdown files</span></div><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:var(--m-fg2);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg></div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px"><span style="font:500 14px/1.2 var(--font-sans);color:var(--m-red)">Delete all data</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg3)">asks twice</span></div>
+                </div>
+              </div>
+              <span style="font:400 12px/1.4 var(--font-sans);color:var(--m-fg3);text-align:center">Mock 0.9 · everything stays on this device unless you export it.</span>
+            </div>
+          </div>
+        </x-import>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { D:null };
+  componentDidMount(){ import('./mock-data.js').then(D => this.setState({D})); }
+  orb(){
+    const h = React.createElement, size = 120, col = 'var(--m-fg)';
+    return h('div',{key:'orb',style:{position:'relative',width:size,height:size,display:'grid',placeItems:'center'}},
+      ...[0,1,2].map(i=>h('span',{key:i,style:{position:'absolute',inset:0,borderRadius:'50%',border:'2px solid '+col,opacity:0,animation:'mock-ping 2.1s '+(i*.7).toFixed(1)+'s cubic-bezier(.2,0,0,1) infinite'}})),
+      h('span',{key:'c',style:{width:size*.42,height:size*.42,borderRadius:'50%',background:col,animation:'mock-pulse 1.1s ease-in-out infinite'}}));
+  }
+  renderVals(){
+    const D = this.state.D, theme = this.props.theme || 'light';
+    const voices = [{mono:'DW',name:'Dana',desc:'Even, unhurried · British',on:true},{mono:'PR',name:'Priya',desc:'Warm, quick follow-ups'},{mono:'TN',name:'Tomasz',desc:'Dry, precise'},{mono:'MO',name:'Marcus',desc:'Low, deliberate'},{mono:'EC',name:'Elena',desc:'Brisk, curious'}].map(v => ({...v, bg: v.on ? 'var(--m-elev)' : 'transparent', ring: v.on ? 'var(--m-warm)' : 'var(--m-line)', check: v.on ? '✓' : ''}));
+    return {
+      theme, isDark: theme==='dark', pw:390, ph:844,
+      modelOptions:['Live · balanced','Live · fastest','Live · most thorough'], voices,
+      lpTiles: D ? D.LPS : [], orbMe: this.orb(),
+      sysPrompt: 'You are interviewing me for a Senior SDM role at AWS. Ask one Leadership Principle question at a time, then probe with at most two follow-ups that push for specifics: numbers, my personal actions, what I would do differently.\n\nAs coach, judge me only against my own files and story notes. Name the better story if there is one. Quote the number I missed. Give one strength, up to three fixes, and a verdict on the four-step scale. Be direct; no praise padding.',
+    };
+  }
+}
+</script>
+</body>
+</html>

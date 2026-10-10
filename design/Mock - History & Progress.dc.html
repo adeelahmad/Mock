@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/colors.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/typography.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/effects.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/styles.css">
+<script src="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:var(--m-canvas);font-family:var(--font-sans)}
+:root{--m-canvas:#FFFFFF;--m-bg:#F8F9FA;--m-card:#FFFFFF;--m-elev:#F1F3F4;--m-line:#DADCE0;--m-line2:#BDC1C6;--m-fg:#202124;--m-fg2:#5F6368;--m-fg3:#80868B;--m-warm:#B06000;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:#FEF7E0;--m-warm-line:#FDE293;--m-cool:#1A73E8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:#E8F0FE;--m-cool-line:#A8C7FA;--m-green:#1E7E43;--m-green-fill:#34A853;--m-green-tint:#E6F4EA;--m-green-line:#A8DAB5;--m-blue:#1558B0;--m-blue-fill:#1A73E8;--m-blue-tint:#E8F0FE;--m-blue-line:#A8C7FA;--m-gold:#B06000;--m-gold-fill:#F9AB00;--m-gold-tint:#FEF7E0;--m-gold-line:#FDE293;--m-red:#C5221F;--m-red-fill:#EA4335;--m-red-tint:#FCE8E6;--m-red-line:#F6AEA9;--m-scrim:rgba(32,33,36,.32)}
+[data-theme="dark"]{--m-canvas:#18191B;--m-bg:#202124;--m-card:#292A2D;--m-elev:#303134;--m-line:#3C4043;--m-line2:#5F6368;--m-fg:#E8EAED;--m-fg2:#9AA0A6;--m-fg3:#80868B;--m-warm:#FDD663;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:rgba(249,171,0,.14);--m-warm-line:rgba(253,214,99,.45);--m-cool:#8AB4F8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:rgba(138,180,248,.14);--m-cool-line:rgba(138,180,248,.45);--m-green:#81C995;--m-green-fill:#34A853;--m-green-tint:rgba(52,168,83,.18);--m-green-line:rgba(129,201,149,.5);--m-blue:#8AB4F8;--m-blue-fill:#1A73E8;--m-blue-tint:rgba(138,180,248,.14);--m-blue-line:rgba(138,180,248,.45);--m-gold:#FDD663;--m-gold-fill:#F9AB00;--m-gold-tint:rgba(249,171,0,.18);--m-gold-line:rgba(253,214,99,.5);--m-red:#F28B82;--m-red-fill:#EA4335;--m-red-tint:rgba(234,67,53,.18);--m-red-line:rgba(242,139,130,.5);--m-scrim:rgba(0,0,0,.55);--background:#202124;--surface:#292A2D;--surface-neutral:#303134;--border:#3C4043;--text-primary:#E8EAED;--text-strong:#E8EAED;--text-secondary:#9AA0A6;--text-muted:#80868B;--aladdin-blue:#8AB4F8;--blue-dark:#A8C7FA;--intent-surface:rgba(138,180,248,.14);--intent-border:rgba(138,180,248,.45);--green-surface:rgba(52,168,83,.18);--green-border:rgba(129,201,149,.5);--green-dark:#81C995;--red-surface:rgba(234,67,53,.18);--red-border:rgba(242,139,130,.5);--red-dark:#F28B82;--gate-surface:rgba(249,171,0,.18);--gate-border:rgba(253,214,99,.5);--gold-dark:#FDD663;--shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 2px 6px rgba(0,0,0,.45);--shadow-3:0 8px 28px rgba(0,0,0,.5)}
+a{color:var(--m-cool);text-decoration:none}a:hover{text-decoration:underline}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="min-height:100vh;background:var(--m-canvas);color:var(--m-fg);font-family:var(--font-sans);padding:40px 48px 120px;display:flex;flex-direction:column;gap:56px;box-sizing:border-box">
+
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Board 4</span>
+      <span style="font:800 40px/1 var(--font-sans);letter-spacing:-.03em">History &amp; Progress</span>
+      <span style="font:400 15px/1.5 var(--font-sans);color:var(--m-fg2);max-width:680px;text-wrap:pretty">History is the evidence: every session recorded, chaptered per question, transcript synced to playback, analysis cards underneath. Progress is the same evidence read across sessions — the heatmap is the hero.</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;font:500 13px/1 var(--font-sans)"><a href="Mock.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Overview</a><a href="Mock - Foundations.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Foundations</a><a href="Mock - Practice.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Practice</a><a href="Mock - Live Session.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Live</a><a href="Mock - Library.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Library</a><a href="Mock - Settings & Onboarding.dc.html" style="padding:8px 12px;border:1px solid var(--m-line);border-radius:999px;color:var(--m-fg)">Settings</a></div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">History</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">Session list · session detail</span></div>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="History list">
+        <span style="font:700 14px/1.2 var(--font-sans)">Sessions — a verdict cell is a link: one tap opens that answer’s playback and card</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">History</span><button aria-label="Search" style="width:40px;height:40px;border-radius:50%;border:none;background:transparent;color:var(--m-fg2);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></button></div>
+              <div style="display:flex;gap:6px"><span style="height:32px;padding:0 12px;border-radius:999px;background:var(--m-fg);color:var(--m-card);display:inline-flex;align-items:center;font:500 13px/1 var(--font-sans)">All · 14</span><span style="height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;font:500 13px/1 var(--font-sans)">Full loop</span><span style="height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;font:500 13px/1 var(--font-sans)">One LP</span><span style="height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;font:500 13px/1 var(--font-sans)">Bar raiser</span></div>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:12px 20px 0">
+              <div style="border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+                <sc-for list="{{ sessions }}" as="s" hint-placeholder-count="8">
+                  <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--m-line)">
+                    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><div style="display:flex;align-items:baseline;gap:8px"><span style="font:700 14px/1.2 var(--font-sans)">Session {{ s.n }}</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">{{ s.date }}</span></div><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.mode }} · <span style="font-family:var(--font-mono)">{{ s.duration }}</span></span></div>
+                    <div style="display:flex;gap:3px"><sc-for list="{{ s.chips }}" as="c" hint-placeholder-count="5"><span style="width:16px;height:16px;border-radius:4px;background:{{ c.vFill }};color:{{ c.vOnFill }};display:grid;place-items:center;font:700 9px/1 var(--font-sans)">{{ c.vGlyph }}</span></sc-for></div>
+                    <svg viewBox="0 0 24 24" style="width:16px;height:16px;flex:none;fill:none;stroke:var(--m-fg3);stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m9 18 6-6-6-6"></path></svg>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-around;align-items:flex-start;padding:10px 8px 28px;border-top:1px solid var(--m-line);background:var(--m-card)">
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg><span style="font:500 11px/1 var(--font-sans)">Practice</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg><span style="font:500 11px/1 var(--font-sans)">Library</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span style="font:700 11px/1 var(--font-sans)">History</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">Progress</span></span>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Session detail · player">
+        <span style="font:700 14px/1.2 var(--font-sans)">Session detail — report, player, synced transcript</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between">
+              <button style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>History</button>
+              <button style="height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 13px/1 var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>Export</button>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:6px 20px 0;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;flex-direction:column;gap:3px"><span style="font:800 26px/1.1 var(--font-sans);letter-spacing:-.025em">Session 14</span><span style="font:400 13px/1.3 var(--font-sans);color:var(--m-fg2)">Sat 10 Oct · Full loop · <span style="font-family:var(--font-mono)">48:12</span> · 5 questions</span></div>
+              <div style="padding:12px 14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;gap:6px"><sc-for list="{{ recap }}" as="r" hint-placeholder-count="5"><div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px"><span style="width:100%;height:30px;border-radius:8px;background:{{ r.vFill }};color:{{ r.vOnFill }};display:grid;place-items:center;font:700 13px/1 var(--font-sans)">{{ r.vGlyph }}</span><span style="font:700 10px/1 var(--font-sans);color:var(--m-fg2)">{{ r.mono }}</span></div></sc-for></div>
+                <div style="display:flex;gap:10px;align-items:flex-start;padding-top:10px;border-top:1px solid var(--m-line)"><span style="font:700 10px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-cool);padding-top:2px;white-space:nowrap">Focus next</span><span style="font:500 13px/1.35 var(--font-sans)">Dive Deep — quantify the blast radius before you describe the fix.</span></div>
+              </div>
+              <div style="padding:14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+                <div style="position:relative;height:56px;display:flex;align-items:center;gap:2px"><sc-for list="{{ waveBars }}" as="b" hint-placeholder-count="60"><span style="flex:1;height:{{ b.h }}%;border-radius:1px;background:{{ b.bg }}"></span></sc-for><span style="position:absolute;top:0;bottom:0;left:26.5%;width:2px;background:var(--m-warm-fill)"></span></div>
+                <div style="position:relative;height:16px"><sc-for list="{{ chapters }}" as="c" hint-placeholder-count="5"><span style="position:absolute;left:{{ c.left }}%;top:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px"><span style="width:1px;height:6px;background:var(--m-line2)"></span><span style="font:700 9px/1 var(--font-sans);color:{{ c.color }};letter-spacing:.04em">{{ c.label }}</span></span></sc-for></div>
+                <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:500 13px/1 var(--font-mono);font-variant-numeric:tabular-nums">12:48 <span style="color:var(--m-fg3)">/ 48:12</span></span><div style="display:flex;align-items:center;gap:10px"><button style="width:36px;height:36px;border-radius:50%;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 10px/1 var(--font-sans);cursor:pointer">15</button><button style="width:48px;height:48px;border-radius:50%;border:none;background:var(--m-fg);color:var(--m-card);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg></button><button style="width:36px;height:36px;border-radius:50%;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 10px/1 var(--font-sans);cursor:pointer">15</button></div><span style="height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;font:700 12px/1 var(--font-mono)">1.5×</span></div>
+              </div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Transcript · Q3 · Dana</span><span style="font:500 11px/1 var(--font-sans);color:var(--m-fg3)">follows playback</span></div>
+              <div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px">
+                <sc-for list="{{ transcript }}" as="t" hint-placeholder-count="5">
+                  <div style="display:flex;gap:10px;padding:10px 12px;border-radius:12px;background:{{ t.bg }};border-left:3px solid {{ t.edge }}"><span style="flex:none;font:500 11px/1.5 var(--font-mono);color:{{ t.timeColor }};font-variant-numeric:tabular-nums">{{ t.time }}</span><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 10px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:{{ t.whoColor }}">{{ t.who }}</span><span style="font:400 13px/1.45 var(--font-sans);color:{{ t.fg }};text-wrap:pretty">{{ t.text }}</span></div></div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="padding:10px 20px 34px"><div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--m-elev)"><span style="flex:1;height:34px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 13px/1 var(--font-sans)">Transcript</span><span style="flex:1;height:34px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Analysis · 5</span></div></div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Session detail · analysis">
+        <span style="font:700 14px/1.2 var(--font-sans)">Session detail — analysis cards</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:54px 12px 0 8px;display:flex;align-items:center;justify-content:space-between">
+              <button style="height:40px;padding:0 12px 0 6px;border-radius:999px;border:none;background:transparent;color:var(--m-fg2);font:500 14px/1 var(--font-sans);display:inline-flex;align-items:center;gap:2px;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m15 18-6-6 6-6"></path></svg>History</button>
+              <span style="font:700 14px/1 var(--font-sans)">Session 14</span>
+              <button style="height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 13px/1 var(--font-sans);cursor:pointer">Export</button>
+            </div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:10px 20px 0;display:flex;flex-direction:column;gap:12px">
+              <dc-import name="AnalysisCard" data="{{ a0 }}" hint-size="100%,640px"></dc-import>
+              <dc-import name="AnalysisCard" data="{{ a1 }}" compact="{{ true }}" hint-size="100%,300px"></dc-import>
+            </div>
+            <div style="padding:10px 20px 34px"><div style="display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--m-elev)"><span style="flex:1;height:34px;display:grid;place-items:center;font:500 13px/1 var(--font-sans);color:var(--m-fg2)">Transcript</span><span style="flex:1;height:34px;border-radius:999px;background:var(--m-card);box-shadow:var(--shadow-1);display:grid;place-items:center;font:700 13px/1 var(--font-sans)">Analysis · 5</span></div></div>
+          </div>
+        </x-import>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Progress</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">Heatmap · readiness · weakest · trend · story usage</span></div>
+    <div style="display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start">
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Progress · heatmap">
+        <span style="font:700 14px/1.2 var(--font-sans)">Heatmap — 16 LPs × sessions, plus “now”</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:4px"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">Progress</span><span style="font:400 13px/1.3 var(--font-sans);color:var(--m-fg2)">Sessions 7–14 · 19 days to go</span></div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:14px 20px 0;display:flex;flex-direction:column;gap:12px">
+              <div style="padding:12px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:4px">
+                <div style="display:grid;grid-template-columns:96px repeat(8,1fr) 28px;gap:3px;align-items:center;padding-bottom:4px"><span></span><sc-for list="{{ cols }}" as="c" hint-placeholder-count="8"><span style="font:500 9px/1 var(--font-mono);color:var(--m-fg3);text-align:center">{{ c }}</span></sc-for><span style="font:700 9px/1 var(--font-sans);color:var(--m-fg);text-align:center;letter-spacing:.04em">NOW</span></div>
+                <sc-for list="{{ heatRows }}" as="r" hint-placeholder-count="16">
+                  <div style="display:grid;grid-template-columns:96px repeat(8,1fr) 28px;gap:3px;align-items:center">
+                    <span style="font:600 10px/1.1 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px">{{ r.name }}</span>
+                    <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="8"><span style="height:22px;border-radius:4px;background:{{ c.vFill }}"></span></sc-for>
+                    <span style="height:22px;border-radius:4px;background:{{ r.nowBg }};color:{{ r.nowFg }};border:{{ r.nowBorder }};display:grid;place-items:center;font:700 10px/1 var(--font-sans);box-sizing:border-box">{{ r.nowGlyph }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="display:flex;gap:12px;font:500 11px/1.2 var(--font-sans);color:var(--m-fg2);padding:0 2px"><span><span style="color:var(--m-green)">■</span> Strong</span><span><span style="color:var(--m-blue)">■</span> Inclined</span><span><span style="color:var(--m-gold)">■</span> Not inclined</span><span><span style="color:var(--m-red)">■</span> Strong no</span><span style="color:var(--m-fg3)">■ Not asked</span></div>
+              <div style="padding:14px;border-radius:16px;background:var(--m-gold-tint);border:1px solid var(--m-gold-line);display:flex;flex-direction:column;gap:10px">
+                <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-gold)">Weakest LPs</span>
+                <sc-for list="{{ weakest }}" as="l" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font:600 13px/1.2 var(--font-sans)">{{ l.name }}</span><span style="font:400 11px/1 var(--font-sans);color:var(--m-fg2)">{{ l.why }}</span><button style="height:30px;padding:0 12px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 12px/1 var(--font-sans);cursor:pointer">Drill</button></div></sc-for>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-around;align-items:flex-start;padding:10px 8px 28px;border-top:1px solid var(--m-line);background:var(--m-card)">
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg><span style="font:500 11px/1 var(--font-sans)">Practice</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg><span style="font:500 11px/1 var(--font-sans)">Library</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">History</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span style="font:700 11px/1 var(--font-sans)">Progress</span></span>
+            </div>
+          </div>
+        </x-import>
+      </div>
+
+      <div style="width:390px;display:flex;flex-direction:column;gap:10px" data-screen-label="Progress · trend">
+        <span style="font:700 14px/1.2 var(--font-sans)">Trend, readiness and story usage</span>
+        <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ isDark }}" width="{{ pw }}" height="{{ ph }}" hint-size="390px,844px">
+          <div style="height:100%;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans)">
+            <div style="padding:58px 20px 0;display:flex;flex-direction:column;gap:4px"><span style="font:800 28px/1.1 var(--font-sans);letter-spacing:-.025em">Progress</span><span style="font:400 13px/1.3 var(--font-sans);color:var(--m-fg2)">scrolled · below the heatmap</span></div>
+            <div style="flex:1;min-height:0;overflow:hidden;padding:14px 20px 0;display:flex;flex-direction:column;gap:12px">
+              <div style="padding:14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Trend · average verdict per session</span><span style="font:500 12px/1 var(--font-sans);color:var(--m-green)">↗ improving</span></div>
+                <svg viewBox="0 0 320 110" style="width:100%;height:110px;display:block;overflow:visible">
+                  <line x1="0" y1="20" x2="320" y2="20" style="stroke:var(--m-line);stroke-width:1"></line><line x1="0" y1="50" x2="320" y2="50" style="stroke:var(--m-line);stroke-width:1"></line><line x1="0" y1="80" x2="320" y2="80" style="stroke:var(--m-line);stroke-width:1"></line>
+                  <text x="0" y="16" style="font:500 9px var(--font-sans);fill:var(--m-fg3)">Strong hire</text><text x="0" y="46" style="font:500 9px var(--font-sans);fill:var(--m-fg3)">Inclined</text><text x="0" y="76" style="font:500 9px var(--font-sans);fill:var(--m-fg3)">Not inclined</text>
+                  <polyline points="{{ trendPoints }}" style="fill:none;stroke:var(--m-cool-fill);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round"></polyline>
+                  <sc-for list="{{ trendDots }}" as="d" hint-placeholder-count="8"><circle cx="{{ d.x }}" cy="{{ d.y }}" r="4" style="fill:var(--m-card);stroke:var(--m-cool-fill);stroke-width:2.5"></circle></sc-for>
+                  <sc-for list="{{ trendDots }}" as="d" hint-placeholder-count="8"><text x="{{ d.x }}" y="106" text-anchor="middle" style="font:500 9px var(--font-mono);fill:var(--m-fg3)">{{ d.label }}</text></sc-for>
+                </svg>
+              </div>
+              <div style="padding:14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+                <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Readiness · now</span>
+                <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px"><span style="width:19%;background:var(--m-green-fill)"></span><span style="width:50%;background:var(--m-blue-fill)"></span><span style="width:25%;background:var(--m-gold-fill)"></span><span style="width:6%;background:var(--m-line2)"></span></div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-variant-numeric:tabular-nums">
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 20px/1 var(--font-mono);color:var(--m-green)">3</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">✓ strong</span></div>
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 20px/1 var(--font-mono);color:var(--m-blue)">8</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">◆ inclined</span></div>
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 20px/1 var(--font-mono);color:var(--m-gold)">4</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">● not incl.</span></div>
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font:500 20px/1 var(--font-mono);color:var(--m-fg3)">1</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">○ never</span></div>
+                </div>
+              </div>
+              <div style="padding:14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Story usage · last 8 sessions</span><span style="font:500 11px/1 var(--font-sans);color:var(--m-gold)">1 over-used</span></div>
+                <sc-for list="{{ usage }}" as="u" hint-placeholder-count="6">
+                  <div style="display:grid;grid-template-columns:130px 1fr 28px;gap:10px;align-items:center"><span style="font:600 12px/1.2 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:{{ u.color }}">{{ u.title }}</span><div style="height:8px;border-radius:4px;background:var(--m-elev);overflow:hidden"><span style="display:block;height:100%;width:{{ u.pct }}%;background:{{ u.bar }}"></span></div><span style="font:500 11px/1 var(--font-mono);color:var(--m-fg2);text-align:right;font-variant-numeric:tabular-nums">{{ u.uses }}</span></div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-around;align-items:flex-start;padding:10px 8px 28px;border-top:1px solid var(--m-line);background:var(--m-card)">
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg><span style="font:500 11px/1 var(--font-sans)">Practice</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg><span style="font:500 11px/1 var(--font-sans)">Library</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg3)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span style="font:500 11px/1 var(--font-sans)">History</span></span>
+              <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--m-fg)"><svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg><span style="font:700 11px/1 var(--font-sans)">Progress</span></span>
+            </div>
+          </div>
+        </x-import>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Desktop · 1440</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">History — session detail</span></div>
+    <div data-screen-label="Desktop history" style="width:1440px;height:900px;background:var(--m-bg);display:grid;grid-template-columns:240px 300px 1fr;overflow:hidden;border:1px solid var(--m-line);border-radius:16px;box-sizing:border-box">
+      <div style="border-right:1px solid var(--m-line);background:var(--m-card);display:flex;flex-direction:column;padding:20px 12px 16px;box-sizing:border-box;gap:4px">
+        <span style="display:inline-flex;align-items:baseline;font:800 22px/1 var(--font-sans);letter-spacing:-.03em;padding:0 12px 18px">Mock<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--m-warm-fill);margin-left:3px"></span></span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">Practice</span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">Library</span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;background:var(--m-elev);color:var(--m-fg);font:700 14px/1 var(--font-sans)">History</span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">Progress</span>
+        <span style="flex:1"></span>
+        <span style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px;border:1px solid var(--m-warm-line);background:var(--m-warm-tint)"><span style="font:500 12px/1.2 var(--font-sans);color:var(--m-fg2)">Interview</span><span style="font:500 14px/1 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--m-warm)">19 days</span></span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">Settings</span>
+      </div>
+      <div style="border-right:1px solid var(--m-line);display:flex;flex-direction:column;min-height:0">
+        <div style="padding:24px 16px 10px;font:800 24px/1 var(--font-sans);letter-spacing:-.025em">History</div>
+        <div style="flex:1;min-height:0;overflow:hidden">
+          <sc-for list="{{ sessions }}" as="s" hint-placeholder-count="8">
+            <div style="display:flex;flex-direction:column;gap:6px;padding:12px 16px;border-bottom:1px solid var(--m-line);background:{{ s.rowBg }}">
+              <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 13px/1.2 var(--font-sans)">Session {{ s.n }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">{{ s.date }}</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.mode }} · <span style="font-family:var(--font-mono)">{{ s.duration }}</span></span><div style="display:flex;gap:3px;flex:none"><sc-for list="{{ s.chips }}" as="c" hint-placeholder-count="5"><span style="width:14px;height:14px;border-radius:3px;background:{{ c.vFill }}"></span></sc-for></div></div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;min-height:0;padding:24px 32px;gap:16px;overflow:hidden">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:4px"><span style="font:800 30px/1.1 var(--font-sans);letter-spacing:-.025em">Session 14</span><span style="font:400 14px/1.3 var(--font-sans);color:var(--m-fg2)">Sat 10 Oct · Full loop · <span style="font-family:var(--font-mono)">48:12</span> · 5 questions · 5 interviewers</span></div>
+          <div style="display:flex;gap:8px;align-items:center"><div style="display:flex;gap:4px;margin-right:8px"><sc-for list="{{ recap }}" as="r" hint-placeholder-count="5"><span title="{{ r.name }}" style="width:30px;height:30px;border-radius:8px;background:{{ r.vFill }};color:{{ r.vOnFill }};display:grid;place-items:center;font:700 13px/1 var(--font-sans)">{{ r.vGlyph }}</span></sc-for></div><button style="height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 14px/1 var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>Export <span style="font-size:10px;color:var(--m-fg3)">▾</span></button></div>
+        </div>
+        <div style="padding:16px 20px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:10px">
+          <div style="position:relative;height:72px;display:flex;align-items:center;gap:3px"><sc-for list="{{ waveBars }}" as="b" hint-placeholder-count="60"><span style="flex:1;height:{{ b.h }}%;border-radius:1px;background:{{ b.bg }}"></span></sc-for><span style="position:absolute;top:-6px;bottom:-6px;left:26.5%;width:2px;background:var(--m-warm-fill)"></span></div>
+          <div style="position:relative;height:18px"><sc-for list="{{ chapters }}" as="c" hint-placeholder-count="5"><span style="position:absolute;left:{{ c.left }}%;top:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px"><span style="width:1px;height:6px;background:var(--m-line2)"></span><span style="font:700 10px/1 var(--font-sans);color:{{ c.color }};letter-spacing:.04em;white-space:nowrap">{{ c.label }} · {{ c.lp }}</span></span></sc-for></div>
+          <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:500 14px/1 var(--font-mono);font-variant-numeric:tabular-nums">12:48 <span style="color:var(--m-fg3)">/ 48:12</span></span><div style="display:flex;align-items:center;gap:12px"><button style="width:36px;height:36px;border-radius:50%;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 10px/1 var(--font-sans);cursor:pointer">15</button><button style="width:48px;height:48px;border-radius:50%;border:none;background:var(--m-fg);color:var(--m-card);display:grid;place-items:center;cursor:pointer"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg></button><button style="width:36px;height:36px;border-radius:50%;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 10px/1 var(--font-sans);cursor:pointer">15</button></div><div style="display:flex;gap:6px"><span style="height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;font:700 12px/1 var(--font-mono)">1.5×</span><span style="height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;font:500 12px/1 var(--font-sans);color:var(--m-fg2)">Skip my answers</span></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 440px;gap:16px;min-height:0">
+          <div style="display:flex;flex-direction:column;gap:8px;min-height:0">
+            <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Transcript · follows playback</span><span style="font:500 11px/1 var(--font-sans);color:var(--m-fg3)">click a line to seek</span></div>
+            <div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ transcriptAll }}" as="t" hint-placeholder-count="7">
+                <div style="display:flex;gap:12px;padding:10px 14px;border-radius:12px;background:{{ t.bg }};border-left:3px solid {{ t.edge }}"><span style="flex:none;font:500 12px/1.5 var(--font-mono);color:{{ t.timeColor }};font-variant-numeric:tabular-nums">{{ t.time }}</span><div style="display:flex;flex-direction:column;gap:2px"><span style="font:700 10px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:{{ t.whoColor }}">{{ t.who }}</span><span style="font:400 14px/1.45 var(--font-sans);color:{{ t.fg }};text-wrap:pretty">{{ t.text }}</span></div></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;min-height:0">
+            <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Analysis · Q3 of 5</span><span style="font:500 11px/1 var(--font-sans);color:var(--m-cool)">All 5</span></div>
+            <div style="flex:1;min-height:0;overflow:hidden"><dc-import name="AnalysisCard" data="{{ a0 }}" hint-size="100%,600px"></dc-import></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Desktop · 1440</span><span style="font:700 22px/1.2 var(--font-sans);letter-spacing:-.015em">Progress</span></div>
+    <div data-screen-label="Desktop progress" style="width:1440px;height:900px;background:var(--m-bg);display:grid;grid-template-columns:240px 1fr;overflow:hidden;border:1px solid var(--m-line);border-radius:16px;box-sizing:border-box">
+      <div style="border-right:1px solid var(--m-line);background:var(--m-card);display:flex;flex-direction:column;padding:20px 12px 16px;box-sizing:border-box;gap:4px">
+        <span style="display:inline-flex;align-items:baseline;font:800 22px/1 var(--font-sans);letter-spacing:-.03em;padding:0 12px 18px">Mock<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--m-warm-fill);margin-left:3px"></span></span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">Practice</span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">Library</span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">History</span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;background:var(--m-elev);color:var(--m-fg);font:700 14px/1 var(--font-sans)">Progress</span>
+        <span style="flex:1"></span>
+        <span style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px;border:1px solid var(--m-warm-line);background:var(--m-warm-tint)"><span style="font:500 12px/1.2 var(--font-sans);color:var(--m-fg2)">Interview</span><span style="font:500 14px/1 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--m-warm)">19 days</span></span>
+        <span style="display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:10px;color:var(--m-fg2);font:500 14px/1 var(--font-sans)">Settings</span>
+      </div>
+      <div style="display:flex;flex-direction:column;padding:28px 36px;gap:18px;min-height:0;overflow:hidden">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between"><div style="display:flex;flex-direction:column;gap:4px"><span style="font:800 32px/1.1 var(--font-sans);letter-spacing:-.025em">Progress</span><span style="font:400 14px/1.3 var(--font-sans);color:var(--m-fg2)">14 sessions · 19 days to the loop</span></div>
+          <div style="display:flex;gap:10px"><div style="padding:10px 16px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:2px"><span style="font:500 22px/1 var(--font-mono);font-variant-numeric:tabular-nums">13<span style="color:var(--m-fg3)">/16</span></span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">LPs covered</span></div><div style="padding:10px 16px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:2px"><span style="font:500 22px/1 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--m-green)">3</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">✓ strong hire</span></div><div style="padding:10px 16px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:2px"><span style="font:500 22px/1 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--m-gold)">4</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">● not inclined</span></div><div style="padding:10px 16px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:2px"><span style="font:500 22px/1 var(--font-mono);font-variant-numeric:tabular-nums">6:20</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">hours practised</span></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 380px;gap:16px;min-height:0">
+          <div style="padding:16px 20px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:5px">
+            <div style="display:grid;grid-template-columns:230px repeat(8,1fr) 44px;gap:5px;align-items:center;padding-bottom:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">LP × session</span><sc-for list="{{ cols }}" as="c" hint-placeholder-count="8"><span style="font:500 11px/1 var(--font-mono);color:var(--m-fg3);text-align:center">{{ c }}</span></sc-for><span style="font:700 10px/1 var(--font-sans);color:var(--m-fg);text-align:center;letter-spacing:.06em">NOW</span></div>
+            <sc-for list="{{ heatRows }}" as="r" hint-placeholder-count="16">
+              <div style="display:grid;grid-template-columns:230px repeat(8,1fr) 44px;gap:5px;align-items:center">
+                <span style="font:600 13px/1.2 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span>
+                <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="8"><span style="height:34px;border-radius:7px;background:{{ c.vFill }};color:{{ c.vOnFill }};display:grid;place-items:center;font:700 12px/1 var(--font-sans)">{{ c.vGlyph }}</span></sc-for>
+                <span style="height:34px;border-radius:7px;background:{{ r.nowBg }};color:{{ r.nowFg }};border:{{ r.nowBorder }};display:grid;place-items:center;font:700 12px/1 var(--font-sans);box-sizing:border-box">{{ r.nowGlyph }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;min-height:0">
+            <div style="padding:14px 16px;border-radius:16px;background:var(--m-gold-tint);border:1px solid var(--m-gold-line);display:flex;flex-direction:column;gap:10px">
+              <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-gold)">Weakest LPs</span>
+              <sc-for list="{{ weakest }}" as="l" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:10px"><div style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font:600 14px/1.2 var(--font-sans)">{{ l.name }}</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">{{ l.why }}</span></div><button style="height:32px;padding:0 14px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 12px/1 var(--font-sans);cursor:pointer">Drill</button></div></sc-for>
+            </div>
+            <div style="padding:14px 16px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Trend · average verdict</span><span style="font:500 12px/1 var(--font-sans);color:var(--m-green)">↗ improving</span></div>
+              <svg viewBox="0 0 320 110" style="width:100%;height:120px;display:block;overflow:visible">
+                <line x1="0" y1="20" x2="320" y2="20" style="stroke:var(--m-line);stroke-width:1"></line><line x1="0" y1="50" x2="320" y2="50" style="stroke:var(--m-line);stroke-width:1"></line><line x1="0" y1="80" x2="320" y2="80" style="stroke:var(--m-line);stroke-width:1"></line>
+                <text x="0" y="16" style="font:500 9px var(--font-sans);fill:var(--m-fg3)">Strong hire</text><text x="0" y="46" style="font:500 9px var(--font-sans);fill:var(--m-fg3)">Inclined</text><text x="0" y="76" style="font:500 9px var(--font-sans);fill:var(--m-fg3)">Not inclined</text>
+                <polyline points="{{ trendPoints }}" style="fill:none;stroke:var(--m-cool-fill);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round"></polyline>
+                <sc-for list="{{ trendDots }}" as="d" hint-placeholder-count="8"><circle cx="{{ d.x }}" cy="{{ d.y }}" r="4" style="fill:var(--m-card);stroke:var(--m-cool-fill);stroke-width:2.5"></circle></sc-for>
+                <sc-for list="{{ trendDots }}" as="d" hint-placeholder-count="8"><text x="{{ d.x }}" y="106" text-anchor="middle" style="font:500 9px var(--font-mono);fill:var(--m-fg3)">{{ d.label }}</text></sc-for>
+              </svg>
+            </div>
+            <div style="padding:14px 16px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Story usage</span><span style="font:500 11px/1 var(--font-sans);color:var(--m-gold)">1 over-used</span></div>
+              <sc-for list="{{ usage }}" as="u" hint-placeholder-count="6"><div style="display:grid;grid-template-columns:140px 1fr 28px;gap:10px;align-items:center"><span style="font:600 12px/1.2 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:{{ u.color }}">{{ u.title }}</span><div style="height:8px;border-radius:4px;background:var(--m-elev);overflow:hidden"><span style="display:block;height:100%;width:{{ u.pct }}%;background:{{ u.bar }}"></span></div><span style="font:500 11px/1 var(--font-mono);color:var(--m-fg2);text-align:right;font-variant-numeric:tabular-nums">{{ u.uses }}</span></div></sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;'light'|'dark'&quot;,&quot;section&quot;:&quot;Theme&quot;}}">
+class Component extends DCLogic {
+  state = { D:null };
+  componentDidMount(){ import('./mock-data.js').then(D => this.setState({D})); }
+  renderVals(){
+    const D = this.state.D, theme = this.props.theme || 'light';
+    const S = D ? D.SESSIONS : [], L = D ? D.LPS : [], ST = D ? D.STORIES : [], A = D ? D.ANALYSES : [];
+    const recapRaw = [{mono:'PR',name:'Priya Raman',v:2},{mono:'TN',name:'Tomasz Nowak',v:1},{mono:'DW',name:'Dana Whitfield',v:3},{mono:'MO',name:'Marcus Oyelaran',v:2},{mono:'EC',name:'Elena Castellanos',v:2}];
+    const recap = D ? recapRaw.map(r => ({...r, ...D.v(r.v)})) : [];
+    const playedTo = 0.265, N = 72;
+    const waveBars = Array.from({length:N},(_,i)=>{ const t=i/N; const env = 0.35+0.65*Math.abs(Math.sin(i*0.9)+0.4*Math.sin(i*2.3)+0.25*Math.cos(i*5.1))/1.65; const quiet = (t>0.17&&t<0.2)||(t>0.4&&t<0.42)||(t>0.62&&t<0.645)||(t>0.81&&t<0.835); return {h: Math.round((quiet?0.08:env)*100), bg: t<playedTo ? 'var(--m-fg)' : 'var(--m-line2)'}; });
+    const chapters = [{label:'Q1',lp:'Customer Obsession',left:0},{label:'Q2',lp:'Ownership',left:18},{label:'Q3',lp:'Dive Deep',left:41},{label:'Q4',lp:'Bias for Action',left:63},{label:'Q5',lp:'Deliver Results',left:82}].map(c => ({...c, color: c.label==='Q3' ? 'var(--m-fg)' : 'var(--m-fg3)'}));
+    const turnsRaw = [
+      {time:'12:04', who:'Dana · interviewer', ai:true, text:'Tell me about a time you found a problem that others had missed. How did you find it?'},
+      {time:'12:19', who:'You', ai:false, text:'Sure. Black Friday week, 7:40 in the morning — card authorisations started failing for about 18% of EU traffic. On-call assumed the provider.'},
+      {time:'12:48', who:'Dana · interviewer', ai:true, text:'What made you look at the config path rather than the provider?', now:true},
+      {time:'12:55', who:'You', ai:false, text:'Two things. Their status page was green, and the error rate stepped up exactly on a deploy boundary.'},
+      {time:'13:31', who:'Dana · interviewer', ai:true, text:'How long until it was mitigated?'},
+      {time:'13:36', who:'You', ai:false, text:'Under an hour. Forty-something minutes.'},
+      {time:'14:02', who:'Coach', ai:true, coach:true, text:'Strength: you named the exact failing component and the metric you watched. Fix one: open with the numbers — 41 minutes, $1.2M.'},
+    ];
+    const transcriptAll = turnsRaw.map(t => ({...t, bg: t.now ? 'var(--m-cool-tint)' : 'var(--m-card)', edge: t.now ? 'var(--m-cool-fill)' : (t.coach ? 'var(--m-cool-line)' : 'var(--m-line)'), timeColor: t.now ? 'var(--m-cool)' : 'var(--m-fg3)', whoColor: t.coach ? 'var(--m-cool)' : t.ai ? 'var(--m-warm)' : 'var(--m-fg3)', fg: t.now ? 'var(--m-fg)' : 'var(--m-fg2)'}));
+    const score = (v) => ({1:4,2:3,3:2,4:1})[v] || null;
+    const trend = S.slice().reverse().map(s => { const xs = s.verdicts.map(score).filter(Boolean); return {n:s.n, avg: xs.reduce((a,b)=>a+b,0)/xs.length}; });
+    const trendDots = trend.map((t,i) => ({label:'S'+t.n, x: 20 + i*(280/Math.max(1,trend.length-1)), y: 20 + (4 - t.avg)*30}));
+    const heatRows = (D ? D.HEAT_ROWS : []).map((r,i) => { const l = L[i]; return {...r, nowBg: l.vFill, nowFg: l.vOnFill, nowBorder: l.verdict===0 ? '1px dashed var(--m-line2)' : '1px solid transparent', nowGlyph: l.vGlyph}; });
+    const usage = ST.slice().sort((a,b)=>b.uses-a.uses).slice(0,6).map(s => ({title:s.title, uses:s.uses, pct: Math.round(s.uses/9*100), color: s.overused ? 'var(--m-gold)' : 'var(--m-fg)', bar: s.overused ? 'var(--m-gold-fill)' : 'var(--m-fg2)'}));
+    return {
+      theme, isDark: theme==='dark', pw:390, ph:844,
+      sessions: S.map(s => ({...s, rowBg: s.n===14 ? 'var(--m-elev)' : 'transparent'})), recap, waveBars, chapters,
+      transcript: transcriptAll.slice(0,5), transcriptAll,
+      a0: A[0], a1: A[1],
+      cols: ['S7','S8','S9','S10','S11','S12','S13','S14'], heatRows,
+      weakest: [{name:'Learn and Be Curious', why:'never practised'},{name:'Think Big', why:'no story · 12 days'},{name:'Dive Deep', why:'● three sessions running'}],
+      trendPoints: trendDots.map(d => d.x+','+d.y).join(' '), trendDots, usage,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/colors.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/typography.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/tokens/effects.css">
+<link rel="stylesheet" href="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/styles.css">
+<script src="_ds/aladdin-design-system-34d90210-9d1d-45ec-8da2-1a54497cf414/_ds_bundle.js"></script>
+<style>
+body{margin:0;background:var(--m-canvas);font-family:var(--font-sans)}
+:root{--m-canvas:#FFFFFF;--m-bg:#F8F9FA;--m-card:#FFFFFF;--m-elev:#F1F3F4;--m-line:#DADCE0;--m-line2:#BDC1C6;--m-fg:#202124;--m-fg2:#5F6368;--m-fg3:#80868B;--m-warm:#B06000;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:#FEF7E0;--m-warm-line:#FDE293;--m-cool:#1A73E8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:#E8F0FE;--m-cool-line:#A8C7FA;--m-green:#1E7E43;--m-green-fill:#34A853;--m-green-tint:#E6F4EA;--m-green-line:#A8DAB5;--m-blue:#1558B0;--m-blue-fill:#1A73E8;--m-blue-tint:#E8F0FE;--m-blue-line:#A8C7FA;--m-gold:#B06000;--m-gold-fill:#F9AB00;--m-gold-tint:#FEF7E0;--m-gold-line:#FDE293;--m-red:#C5221F;--m-red-fill:#EA4335;--m-red-tint:#FCE8E6;--m-red-line:#F6AEA9;--m-scrim:rgba(32,33,36,.32)}
+[data-theme="dark"]{--m-canvas:#18191B;--m-bg:#202124;--m-card:#292A2D;--m-elev:#303134;--m-line:#3C4043;--m-line2:#5F6368;--m-fg:#E8EAED;--m-fg2:#9AA0A6;--m-fg3:#80868B;--m-warm:#FDD663;--m-warm-fill:#F9AB00;--m-on-warm:#202124;--m-warm-tint:rgba(249,171,0,.14);--m-warm-line:rgba(253,214,99,.45);--m-cool:#8AB4F8;--m-cool-fill:#1A73E8;--m-on-cool:#FFFFFF;--m-cool-tint:rgba(138,180,248,.14);--m-cool-line:rgba(138,180,248,.45);--m-green:#81C995;--m-green-fill:#34A853;--m-green-tint:rgba(52,168,83,.18);--m-green-line:rgba(129,201,149,.5);--m-blue:#8AB4F8;--m-blue-fill:#1A73E8;--m-blue-tint:rgba(138,180,248,.14);--m-blue-line:rgba(138,180,248,.45);--m-gold:#FDD663;--m-gold-fill:#F9AB00;--m-gold-tint:rgba(249,171,0,.18);--m-gold-line:rgba(253,214,99,.5);--m-red:#F28B82;--m-red-fill:#EA4335;--m-red-tint:rgba(234,67,53,.18);--m-red-line:rgba(242,139,130,.5);--m-scrim:rgba(0,0,0,.55);--background:#202124;--surface:#292A2D;--surface-neutral:#303134;--border:#3C4043;--text-primary:#E8EAED;--text-strong:#E8EAED;--text-secondary:#9AA0A6;--text-muted:#80868B;--aladdin-blue:#8AB4F8;--blue-dark:#A8C7FA;--intent-surface:rgba(138,180,248,.14);--intent-border:rgba(138,180,248,.45);--green-surface:rgba(52,168,83,.18);--green-border:rgba(129,201,149,.5);--green-dark:#81C995;--red-surface:rgba(234,67,53,.18);--red-border:rgba(242,139,130,.5);--red-dark:#F28B82;--gate-surface:rgba(249,171,0,.18);--gate-border:rgba(253,214,99,.5);--gold-dark:#FDD663;--shadow-1:0 1px 2px rgba(0,0,0,.4);--shadow-2:0 2px 6px rgba(0,0,0,.45);--shadow-3:0 8px 28px rgba(0,0,0,.5)}
+a{color:var(--m-cool);text-decoration:none}a:hover{text-decoration:underline}
+@keyframes mock-ping{0%{transform:scale(.45);opacity:.75}100%{transform:scale(1);opacity:0}}
+@keyframes mock-pulse{0%,100%{transform:scale(.94)}50%{transform:scale(1.06)}}
+@keyframes mock-breathe{0%,100%{transform:scale(.8);opacity:.35}50%{transform:scale(1);opacity:.9}}
+@keyframes mock-bar{from{transform:scaleY(.22)}to{transform:scaleY(1)}}
+@keyframes mock-idle{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes mock-spin{to{transform:rotate(360deg)}}
+@keyframes mock-blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes mock-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+<div data-screen-label="Live · {{ stateLabel }}" style="position:relative;height:100%;min-height:640px;display:flex;flex-direction:column;background:var(--m-bg);color:var(--m-fg);font-family:var(--font-sans);overflow:hidden;box-sizing:border-box">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:{{ accentFill }}"></div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:58px 20px 0">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0">
+      <span style="flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--m-elev);border:2px solid {{ monoBorder }};color:var(--m-fg);font:800 13px/1 var(--font-sans);letter-spacing:-.02em;box-sizing:border-box">{{ mono }}</span>
+      <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
+        <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:{{ accentFg }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ roundLabel }}</span>
+        <span style="font:700 15px/1.2 var(--font-sans);white-space:nowrap">{{ ivName }}</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <sc-if value="{{ isCoaching }}" hint-placeholder-val="{{ false }}">{{ vizSmall }}</sc-if>
+      <sc-if value="{{ showLp }}" hint-placeholder-val="{{ false }}"><span style="height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--m-line);display:inline-flex;align-items:center;font:700 11px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;color:var(--m-fg2);white-space:nowrap">{{ lpName }}</span></sc-if>
+      <sc-if value="{{ notEnd }}" hint-placeholder-val="{{ true }}"><button onClick="{{ onEnd }}" style="height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-red);font:700 13px/1 var(--font-sans);cursor:pointer" style-hover="background:var(--m-red-tint)">End</button></sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ recon }}" hint-placeholder-val="{{ false }}">
+    <div style="margin:12px 20px 0;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--m-gold-tint);border:1px solid var(--m-gold-line);color:var(--m-gold);font:500 13px/1.3 var(--font-sans);animation:mock-in .32s var(--ease-standard)">
+      <span style="flex:none;width:14px;height:14px;border-radius:50%;border:2px solid var(--m-gold);border-right-color:transparent;animation:mock-spin 1s linear infinite;box-sizing:border-box"></span>
+      <span>Reconnecting… your answer is still being recorded.</span>
+    </div>
+  </sc-if>
+
+  <div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:18px 20px 0;gap:14px;position:relative">
+
+    <sc-if value="{{ isConnecting }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center">
+        {{ vizMain }}
+        <div style="display:flex;flex-direction:column;gap:6px"><span style="font:700 20px/1.25 var(--font-sans);letter-spacing:-.01em">Connecting to {{ ivName }}…</span><span style="font:400 14px/1.4 var(--font-sans);color:var(--m-fg2)">Session {{ sessionNo }} · Full loop · 5 interviewers</span></div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);text-align:left;box-sizing:border-box">
+          <div style="display:flex;align-items:center;justify-content:space-between;font:500 13px/1.2 var(--font-sans)"><span style="display:flex;align-items:center;gap:8px"><span style="color:var(--m-green)">✓</span>Microphone ready</span><span style="color:var(--m-fg3)">granted at setup</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font:500 13px/1.2 var(--font-sans)"><span style="display:flex;align-items:center;gap:8px"><span style="color:var(--m-green)">✓</span>Earbuds connected</span><span style="color:var(--m-fg3)">level ok</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;font:500 13px/1.2 var(--font-sans);color:var(--m-fg2)"><span>Nothing to tap — Dana starts in a moment.</span></div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ stInterviewer }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:1;display:flex;flex-direction:column;gap:16px;min-height:0">
+        <div style="font:700 28px/1.2 var(--font-sans);letter-spacing:-.02em;text-wrap:pretty;min-height:168px">{{ qShown }}<sc-if value="{{ revealing }}" hint-placeholder-val="{{ true }}"><span style="display:inline-block;width:3px;height:.85em;background:{{ accentFg }};margin-left:5px;vertical-align:-3px;animation:mock-blink 1s steps(2) infinite"></span></sc-if></div>
+        <div style="flex:1;display:grid;place-items:center">{{ vizMain }}</div>
+        <div style="display:flex;justify-content:center;align-items:center;gap:8px;font:500 13px/1.2 var(--font-sans);color:var(--m-fg2)"><span style="width:8px;height:8px;border-radius:50%;background:{{ accentFg }}"></span>{{ ivFirst }} is speaking</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ stMine }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;gap:14px;min-height:0">
+        <div style="font:600 19px/1.3 var(--font-sans);letter-spacing:-.01em;color:var(--m-fg2);text-wrap:pretty">{{ qFull }}</div>
+        <div style="flex:1;display:grid;place-items:center">{{ vizMain }}</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <span style="font:500 48px/1 var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:{{ timerColor }}">{{ timer }}</span>
+          <span style="font:500 13px/1.2 var(--font-sans);color:{{ timerNoteColor }};display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:{{ listenDot }}"></span>{{ timerNote }}</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ tlBody }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;gap:12px;min-height:0">
+        <div style="padding:12px 14px;border-radius:12px;background:var(--m-card);border-left:3px solid {{ accentFg }}"><div style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3);margin-bottom:4px">{{ qLabel }} · pinned</div><div style="font:600 16px/1.3 var(--font-sans);letter-spacing:-.01em;text-wrap:pretty">{{ qFull }}</div></div>
+        <div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:10px;justify-content:flex-end">
+          <sc-for list="{{ turns }}" as="t" hint-placeholder-count="4">
+            <div style="display:flex;gap:8px;align-items:flex-end;justify-content:{{ t.align }}">
+              <sc-if value="{{ t.isAi }}" hint-placeholder-val="{{ true }}"><span style="flex:none;width:26px;height:26px;border-radius:50%;background:var(--m-elev);display:grid;place-items:center;font:800 10px/1 var(--font-sans)">{{ t.mono }}</span></sc-if>
+              <div style="max-width:78%;padding:10px 12px;border-radius:14px;background:{{ t.bg }};color:{{ t.fg }};font:400 14px/1.4 var(--font-sans);text-wrap:pretty">{{ t.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;padding:10px 12px;border-radius:14px;background:var(--m-card);border:1px solid var(--m-line)">
+          {{ vizSmall }}
+          <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font:700 14px/1.2 var(--font-sans)">{{ nowText }}</span><span style="font:400 12px/1.2 var(--font-sans);color:var(--m-fg2)">{{ nowSub }}</span></div>
+          <sc-if value="{{ isMine }}" hint-placeholder-val="{{ false }}"><span style="font:500 24px/1 var(--font-mono);font-variant-numeric:tabular-nums;color:{{ timerColor }}">{{ timer }}</span></sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ spBody }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;gap:18px;min-height:0">
+        <div style="padding:14px;border-radius:16px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+            <span style="font:500 13px/1.2 var(--font-sans);color:var(--m-fg2);display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:{{ listenDot }}"></span>{{ nowText }}</span>
+            <sc-if value="{{ isMine }}" hint-placeholder-val="{{ false }}"><span style="font:500 22px/1 var(--font-mono);font-variant-numeric:tabular-nums;color:{{ timerColor }}">{{ timer }}</span></sc-if>
+          </div>
+          {{ vizBand }}
+        </div>
+        <div style="font:700 26px/1.2 var(--font-sans);letter-spacing:-.02em;text-wrap:pretty">{{ qShown }}<sc-if value="{{ revealing }}" hint-placeholder-val="{{ false }}"><span style="display:inline-block;width:3px;height:.85em;background:{{ accentFg }};margin-left:5px;vertical-align:-3px;animation:mock-blink 1s steps(2) infinite"></span></sc-if></div>
+        <div style="flex:1"></div>
+        <sc-if value="{{ isMine }}" hint-placeholder-val="{{ false }}"><div style="font:500 13px/1.3 var(--font-sans);color:{{ timerNoteColor }}">{{ timerNote }}</div></sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isCoaching }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;gap:14px;min-height:0;overflow:hidden">
+        <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">{{ qLabel }} · {{ lpName }} · {{ ivFirst }}’s question</span><span style="font:500 14px/1.35 var(--font-sans);color:var(--m-fg2);text-wrap:pretty">{{ qFull }}</span></div>
+        <sc-if value="{{ sStrength }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);animation:mock-in .32s var(--ease-standard)"><span style="flex:none;width:24px;height:24px;border-radius:50%;background:var(--m-green-tint);color:var(--m-green);display:grid;place-items:center;font:700 12px/1 var(--font-sans)">✓</span><div style="display:flex;flex-direction:column;gap:3px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-green)">Strength</span><span style="font:400 15px/1.4 var(--font-sans);text-wrap:pretty">{{ strength }}</span></div></div>
+        </sc-if>
+        <sc-for list="{{ fixesShown }}" as="f" hint-placeholder-count="3">
+          <div style="display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;background:var(--m-cool-tint);border:1px solid var(--m-cool-line);animation:mock-in .32s var(--ease-standard)"><span style="flex:none;width:24px;height:24px;border-radius:50%;background:var(--m-cool-fill);color:var(--m-on-cool);display:grid;place-items:center;font:700 12px/1 var(--font-sans);font-variant-numeric:tabular-nums">{{ f.n }}</span><div style="display:flex;flex-direction:column;gap:3px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-cool)">Fix {{ f.n }}</span><span style="font:400 15px/1.4 var(--font-sans);text-wrap:pretty">{{ f.t }}</span></div></div>
+        </sc-for>
+        <sc-if value="{{ sVerdict }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 2px;animation:mock-in .32s var(--ease-standard)">
+            <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">{{ lpName }} verdict</span>
+            <span style="display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:999px;background:{{ vBg }};color:{{ vFg }};border:{{ vBorder }};font:700 11px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap"><span style="font-size:12px">{{ vGlyph }}</span>{{ vLabel }}</span>
+          </div>
+          <a href="#" style="font:700 13px/1.2 var(--font-sans);color:var(--m-cool)">Full analysis →</a>
+        </sc-if>
+        <sc-if value="{{ coachTyping }}" hint-placeholder-val="{{ false }}"><div style="display:flex;align-items:center;gap:8px;font:500 13px/1.2 var(--font-sans);color:var(--m-fg2)"><span style="width:8px;height:8px;border-radius:50%;background:var(--m-cool);animation:mock-idle 1.2s ease-in-out infinite"></span>Coach is speaking…</div></sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isEnd }}" hint-placeholder-val="{{ false }}">
+      <div style="flex:1;display:flex;flex-direction:column;gap:14px;min-height:0;overflow:hidden">
+        <div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3)">Session {{ sessionNo }} · Full loop</span><span style="font:800 30px/1.1 var(--font-sans);letter-spacing:-.025em">Loop complete.</span></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div style="padding:10px 12px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:2px"><span style="font:500 22px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ recapDuration }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">duration</span></div>
+          <div style="padding:10px 12px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:2px"><span style="font:500 22px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ recapCount }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">questions</span></div>
+          <div style="padding:10px 12px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);display:flex;flex-direction:column;gap:2px"><span style="font:500 22px/1 var(--font-mono);font-variant-numeric:tabular-nums">{{ recapFixes }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">fixes to drill</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden">
+          <sc-for list="{{ recap }}" as="r" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--m-line)">
+              <span style="flex:none;width:28px;height:28px;border-radius:50%;background:var(--m-elev);display:grid;place-items:center;font:800 10px/1 var(--font-sans)">{{ r.mono }}</span>
+              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1px"><span style="font:600 13px/1.2 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.lp }}</span><span style="font:400 11px/1.2 var(--font-sans);color:var(--m-fg2)">{{ r.name }} · {{ r.role }}</span></div>
+              <span style="flex:none;display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:999px;background:{{ r.vBg }};color:{{ r.vFg }};border:{{ r.vBorder }};font:700 10px/1 var(--font-sans);letter-spacing:.04em;text-transform:uppercase;white-space:nowrap"><span>{{ r.vGlyph }}</span>{{ r.vLabel }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:12px 14px;border-radius:12px;background:var(--m-cool-tint);border:1px solid var(--m-cool-line);display:flex;flex-direction:column;gap:3px"><span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-cool)">Suggested focus · session {{ nextSessionNo }}</span><span style="font:600 14px/1.35 var(--font-sans);text-wrap:pretty">Dive Deep — quantify the blast radius before you describe the fix.</span></div>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ hint }}" hint-placeholder-val="{{ false }}">
+    <div style="margin:0 20px 10px;display:flex;align-items:center;gap:10px;padding:10px 8px 10px 12px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-warm-line);animation:mock-in .32s var(--ease-standard)">
+      <span style="flex:none;color:var(--m-warm)"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg></span>
+      <span style="flex:1;font:500 13px/1.35 var(--font-sans)">{{ hintText }}</span>
+      <button onClick="{{ onDismissHint }}" aria-label="Dismiss hint" style="flex:none;width:32px;height:32px;border-radius:50%;border:none;background:transparent;color:var(--m-fg3);display:grid;place-items:center;cursor:pointer" style-hover="background:var(--m-elev)"><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ notesOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="margin:0 20px 10px;border-radius:12px;background:var(--m-card);border:1px solid var(--m-line);overflow:hidden;animation:mock-in .32s var(--ease-standard)">
+      <button onClick="{{ onToggleNotes }}" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border:none;background:transparent;color:var(--m-fg2);font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-align:left"><span>Story notes · {{ lpName }}</span><svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m18 15-6-6-6 6"></path></svg></button>
+      <sc-for list="{{ notes }}" as="n" hint-placeholder-count="2">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:8px 12px;border-top:1px solid var(--m-line)"><span style="font:600 13px/1.3 var(--font-sans)">{{ n.t }}</span><span style="font:500 12px/1.3 var(--font-mono);color:var(--m-warm);font-variant-numeric:tabular-nums;text-align:right">{{ n.n }}</span></div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showHandles }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;gap:8px;padding:0 20px 10px">
+      <button onClick="{{ onToggleTranscript }}" style="flex:1;height:34px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg2);font:500 12px/1 var(--font-sans);display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer" style-hover="background:var(--m-elev)">Transcript · {{ turnCount }} turns<svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="m18 15-6-6-6 6"></path></svg></button>
+      <sc-if value="{{ notesClosed }}" hint-placeholder-val="{{ true }}"><button onClick="{{ onToggleNotes }}" style="height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg2);font:500 12px/1 var(--font-sans);display:inline-flex;align-items:center;gap:6px;cursor:pointer" style-hover="background:var(--m-elev)">Notes</button></sc-if>
+      <button onClick="{{ onHint }}" style="height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg2);font:500 12px/1 var(--font-sans);display:inline-flex;align-items:center;gap:6px;cursor:pointer" style-hover="background:var(--m-elev)">Hint</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showHandles }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;justify-content:center;padding:0 20px 8px;font:500 12px/1.3 var(--font-sans);color:var(--m-fg3);text-align:center">Hands-free: say “redo”, “next” or “hint”. Coaching starts when you stop talking.</div>
+    <div style="display:flex;justify-content:center;align-items:flex-end;gap:22px;padding:0 12px 30px">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:60px"><button onClick="{{ onRedo }}" aria-label="Redo" style="width:54px;height:54px;border-radius:50%;border:1px solid var(--m-line);background:var(--m-card);color:var(--m-fg);display:grid;place-items:center;cursor:pointer" style-hover="background:var(--m-elev)"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg></button><span style="font:500 11px/1 var(--font-sans);color:var(--m-fg2)">Redo</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:76px"><button onClick="{{ onPause }}" aria-label="Pause" style="width:72px;height:72px;border-radius:50%;border:none;background:{{ accentFill }};color:{{ onAccent }};display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow-2)" style-active="transform:scale(.98)"><svg viewBox="0 0 24 24" style="width:28px;height:28px;fill:currentColor"><rect x="6" y="4" width="4" height="16" rx="1"></rect><rect x="14" y="4" width="4" height="16" rx="1"></rect></svg></button><span style="font:500 11px/1 var(--font-sans);color:var(--m-fg2)">Pause</span></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;width:60px"><button onClick="{{ onNext }}" aria-label="Next" style="width:54px;height:54px;border-radius:50%;border:1px solid var(--m-line);background:var(--m-card);color:var(--m-fg);display:grid;place-items:center;cursor:pointer" style-hover="background:var(--m-elev)"><svg viewBox="0 0 24 24" style="width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" x2="19" y1="5" y2="19"></line></svg></button><span style="font:500 11px/1 var(--font-sans);color:var(--m-fg2)">Next</span></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isCoaching }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;gap:10px;padding:6px 20px 34px">
+      <button onClick="{{ onRedo }}" style="flex:1;height:56px;border-radius:999px;border:none;background:var(--m-cool-fill);color:var(--m-on-cool);font:700 16px/1 var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px" style-active="transform:scale(.98)"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>Redo answer</button>
+      <button onClick="{{ onNext }}" style="flex:1;height:56px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 16px/1 var(--font-sans);cursor:pointer;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:3px" style-hover="background:var(--m-elev)">Next question<span style="font:500 11px/1 var(--font-sans);color:var(--m-fg3)">{{ nextAuto }}</span></button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isEnd }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:10px;padding:6px 20px 34px">
+      <button onClick="{{ onRestart }}" style="height:56px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 16px/1 var(--font-sans);cursor:pointer" style-active="transform:scale(.98)">Start session {{ nextSessionNo }}</button>
+      <button onClick="{{ onReview }}" style="height:48px;border-radius:999px;border:1px solid var(--m-line);background:transparent;color:var(--m-fg);font:700 15px/1 var(--font-sans);cursor:pointer" style-hover="background:var(--m-elev)">Review in History</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isPaused }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:var(--m-scrim);backdrop-filter:blur(3px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:28px;z-index:5;box-sizing:border-box">
+      <span style="font:700 11px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg2);display:flex;align-items:center;gap:8px"><svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="2" x2="22" y1="2" y2="22"></line></svg>Mic off · timer held</span>
+      <span style="font:800 40px/1 var(--font-sans);letter-spacing:-.03em;color:var(--m-fg)">Paused</span>
+      <span style="font:500 28px/1 var(--font-mono);font-variant-numeric:tabular-nums;color:var(--m-fg2)">{{ timer }}</span>
+      <button onClick="{{ onResume }}" style="width:100%;height:60px;margin-top:12px;border-radius:999px;border:none;background:var(--m-warm-fill);color:var(--m-on-warm);font:700 17px/1 var(--font-sans);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:currentColor"><polygon points="6 3 20 12 6 21 6 3"></polygon></svg>Resume</button>
+      <button onClick="{{ onEnd }}" style="height:44px;padding:0 18px;border-radius:999px;border:none;background:transparent;color:var(--m-red);font:700 14px/1 var(--font-sans);cursor:pointer">End session</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ transcriptOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;top:112px;background:var(--m-card);border-radius:24px 24px 0 0;border-top:1px solid var(--m-line);display:flex;flex-direction:column;z-index:6;box-shadow:var(--shadow-3);animation:mock-in .32s var(--ease-standard)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px 8px 20px"><span style="font:700 15px/1.2 var(--font-sans)">Transcript</span><button onClick="{{ onToggleTranscript }}" aria-label="Close transcript" style="width:36px;height:36px;border-radius:50%;border:none;background:transparent;color:var(--m-fg2);display:grid;place-items:center;cursor:pointer" style-hover="background:var(--m-elev)"><svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div>
+      <div style="margin:0 16px;padding:10px 12px;border-radius:10px;background:var(--m-bg);border-left:3px solid {{ accentFg }}"><div style="font:700 10px/1.2 var(--font-sans);letter-spacing:.06em;text-transform:uppercase;color:var(--m-fg3);margin-bottom:3px">{{ qLabel }} · pinned</div><div style="font:600 14px/1.3 var(--font-sans);text-wrap:pretty">{{ qFull }}</div></div>
+      <div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:10px;padding:14px 16px 24px">
+        <sc-for list="{{ turns }}" as="t" hint-placeholder-count="4">
+          <div style="display:flex;gap:8px;align-items:flex-end;justify-content:{{ t.align }}">
+            <sc-if value="{{ t.isAi }}" hint-placeholder-val="{{ true }}"><span style="flex:none;width:26px;height:26px;border-radius:50%;background:var(--m-elev);display:grid;place-items:center;font:800 10px/1 var(--font-sans)">{{ t.mono }}</span></sc-if>
+            <div style="max-width:80%;padding:10px 12px;border-radius:14px;background:{{ t.bg }};color:{{ t.fg }};font:400 14px/1.4 var(--font-sans);text-wrap:pretty">{{ t.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;390px&quot;,&quot;height&quot;:&quot;844px&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;interviewer&quot;,&quot;options&quot;:[&quot;connecting&quot;,&quot;interviewer&quot;,&quot;answering&quot;,&quot;thinking&quot;,&quot;hint&quot;,&quot;coaching&quot;,&quot;paused&quot;,&quot;reconnecting&quot;,&quot;end&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;layout&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;stage&quot;,&quot;options&quot;:[&quot;stage&quot;,&quot;transcript&quot;,&quot;split&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;voice&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;orb&quot;,&quot;options&quot;:[&quot;orb&quot;,&quot;wave&quot;,&quot;ring&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;loop&quot;,&quot;options&quot;:[&quot;loop&quot;,&quot;lp&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;},&quot;notes&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;State&quot;},&quot;transcriptOpen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;State&quot;},&quot;live&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behaviour&quot;},&quot;q&quot;:{&quot;editor&quot;:null,&quot;default&quot;:0,&quot;tsType&quot;:&quot;0|1&quot;},&quot;revealed&quot;:{&quot;editor&quot;:null,&quot;default&quot;:11,&quot;tsType&quot;:&quot;number&quot;},&quot;timer&quot;:{&quot;editor&quot;:null,&quot;default&quot;:&quot;01:52&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { st:null, q:0, words:0, sec:0, hint:false, tOpen:null, nOpen:null, prev:null, shown:0, recon:false, pass:0, cd:5 };
+  T = [];
+  QS = [
+    {label:'Q3', iv:{name:'Dana Whitfield',first:'Dana',role:'Bar Raiser',n:3,mono:'DW'}, lp:'Dive Deep', text:'Tell me about a time you found a problem that others had missed. How did you find it?', hint:'Try the Payments outage story — 41 min, $1.2M.',
+     notes:[{t:'Payments outage',n:'41 min · $1.2M · 0 repeats'},{t:'Legacy data migration',n:'14 TB · 6h → 40 min'},{t:'Observability cost cut',n:'−38% · $610k/yr'}],
+     a:{verdict:3, strength:'You named the exact failing component and the metric you watched while fixing it.', fixes:['Open with the numbers: 41 minutes, $1.2M.','Cut the setup to two sentences — the room knows what Black Friday is.','Say what you personally did in the first ten minutes.']},
+     turns:[{ai:true,text:'Tell me about a time you found a problem that others had missed. How did you find it?'},{ai:false,text:'Sure. Black Friday week, 7:40 in the morning — card authorisations started failing for about 18% of EU traffic. On-call assumed the provider.'},{ai:true,text:'What made you look at the config path rather than the provider?'},{ai:false,text:'Two things. Their status page was green, and the error rate stepped up exactly on a deploy boundary.'},{ai:true,text:'How long until it was mitigated?'},{ai:false,text:'Under an hour. Forty-something minutes.'}]},
+    {label:'Q4', iv:{name:'Marcus Oyelaran',first:'Marcus',role:'Skip-level',n:4,mono:'MO'}, lp:'Bias for Action', text:'Tell me about a time you made a decision without all the data you wanted.', hint:'Launch under ambiguity — lead with the 30% sample.',
+     notes:[{t:'Launch under ambiguity',n:'30% sample · 5 wks · −22% FP'},{t:'Payments outage',n:'41 min · $1.2M · 0 repeats'}],
+     a:{verdict:2, strength:'Clear framing of what was reversible and what wasn’t.', fixes:['Quantify the result: −22% false positives.','Name the risk you accepted and the trip-wire you set.']},
+     turns:[{ai:true,text:'Tell me about a time you made a decision without all the data you wanted.'},{ai:false,text:'The fraud-rules MVP. We had a 30% data sample and a quarter-long wait for the rest.'},{ai:true,text:'What would have changed your mind?'}]},
+  ];
+  RECAP = [{mono:'PR',name:'Priya Raman',role:'Hiring manager',lp:'Customer Obsession',v:2},{mono:'TN',name:'Tomasz Nowak',role:'Peer SDM',lp:'Ownership',v:1},{mono:'DW',name:'Dana Whitfield',role:'Bar Raiser',lp:'Dive Deep',v:3},{mono:'MO',name:'Marcus Oyelaran',role:'Skip-level',lp:'Bias for Action',v:2},{mono:'EC',name:'Elena Castellanos',role:'Partner team',lp:'Deliver Results',v:2}];
+  V = {0:['Not yet','○','transparent','var(--m-fg3)','1px dashed var(--m-line2)'],1:['Strong hire','✓','var(--m-green-tint)','var(--m-green)','1px solid var(--m-green-line)'],2:['Inclined','◆','var(--m-blue-tint)','var(--m-blue)','1px solid var(--m-blue-line)'],3:['Not inclined','●','var(--m-gold-tint)','var(--m-gold)','1px solid var(--m-gold-line)'],4:['Strong no hire','✕','var(--m-red-tint)','var(--m-red)','1px solid var(--m-red-line)']};
+
+  componentDidMount(){ if (this.props.live && !this.props.driven) { this.start(); this.tick = setInterval(()=>{ const s=this.state.st; if (s==='answering'||s==='thinking') this.setState(x=>({sec:x.sec+1})); },1000); } }
+  componentWillUnmount(){ this.clear(); clearInterval(this.tick); }
+  clear(){ this.T.forEach(clearTimeout); this.T=[]; }
+  after(ms,fn){ this.T.push(setTimeout(fn,ms)); }
+  go(st, extra){ this.clear(); const ns = {...this.state, st, ...(extra||{})}; this.setState({st, ...(extra||{})}); this.plan(st, ns); }
+  start(){ this.go('connecting', {q:0,sec:0,words:0,hint:false,shown:0,recon:false,pass:0,prev:null,tOpen:null,nOpen:null}); }
+  plan(st, ns){
+    const q = ns.q, Q = this.QS[q], n = Q.text.split(' ').length;
+    if (st==='connecting') this.after(2400,()=>this.go('interviewer',{words:0,sec:0,hint:false,shown:0,pass:0}));
+    if (st==='interviewer') { const step=(i)=>{ this.setState({words:i}); if (i<n) this.after(210,()=>step(i+1)); else this.after(1100,()=>this.go('answering',{sec:0})); }; step(Math.max(1, ns.words||1)); }
+    if (st==='answering') {
+      if (ns.pass===0) this.after(7000,()=>this.go('thinking'));
+      else { if (q===1) { this.after(2500,()=>this.setState({recon:true})); this.after(5500,()=>this.setState({recon:false})); } this.after(8000,()=>this.go('coaching',{shown:0,hint:false})); }
+    }
+    if (st==='thinking') this.after(3200,()=>{ this.go('answering',{pass:1,hint:q===0}); if (q===0) this.after(5200,()=>this.setState({hint:false})); });
+    if (st==='coaching') { this.setState({cd:5}); [900,2300,3700,5100,6500].forEach((ms,i)=>this.after(ms,()=>this.setState({shown:i+1}))); [5,4,3,2,1].forEach((n,i)=>this.after(6500+i*1000,()=>this.setState({cd:n}))); this.after(11500,()=>this.next()); }
+  }
+  next(){ if (this.state.q===0) this.go('interviewer',{q:1,words:0,sec:0,hint:false,shown:0,pass:0,recon:false}); else this.go('end'); }
+  fmt(s){ return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+  viz(kind, who, accent, size, opts){
+    opts = opts||{}; const h = React.createElement;
+    const col = who==='ai' ? (accent==='cool'?'var(--m-cool)':'var(--m-warm)') : who==='me' ? 'var(--m-fg)' : 'var(--m-fg3)';
+    const key = kind+'-'+who+'-'+accent+'-'+size;
+    if (kind==='wave') {
+      const w = opts.w||size, hh = opts.h||Math.round(size*.5), n = Math.max(9, Math.floor(w/9));
+      const bars = Array.from({length:n},(_,i)=>{ const c=Math.abs(i-(n-1)/2)/((n-1)/2); const amp = who==='none'?.06:(.3+.7*(1-c*c));
+        return h('span',{key:i,style:{width:4,borderRadius:2,background:col,height:Math.max(4,Math.round(hh*amp)),transformOrigin:'center',animation: who==='none' ? 'mock-idle 2.6s '+(i*.12).toFixed(2)+'s ease-in-out infinite' : 'mock-bar '+(.55+((i*7)%5)*.12).toFixed(2)+'s '+(((i*3)%7)*.07).toFixed(2)+'s ease-in-out infinite alternate'}}); });
+      return h('div',{key,style:{display:'flex',alignItems:'center',justifyContent:'center',gap:5,width:w,height:hh}},bars);
+    }
+    if (kind==='ring') {
+      const r=size/2-4, c=2*Math.PI*r;
+      const arcs = who==='none' ? [h('circle',{key:'a',cx:size/2,cy:size/2,r,fill:'none',stroke:col,strokeWidth:2,strokeDasharray:(c*.08)+' '+(c*.92),strokeLinecap:'round',style:{transformOrigin:'50% 50%',animation:'mock-spin 6s linear infinite'}})]
+        : [0,1,2].map(i=>{ const rr=r-i*(size*.06), cc=2*Math.PI*rr; return h('circle',{key:i,cx:size/2,cy:size/2,r:rr,fill:'none',stroke:col,strokeWidth:i===0?3:2,opacity:1-i*.28,strokeDasharray:(cc*(.55-i*.12))+' '+cc,strokeLinecap:'round',style:{transformOrigin:'50% 50%',animation:'mock-spin '+(2.4+i*1.1)+'s linear infinite'+(i%2?' reverse':'')}}); });
+      return h('svg',{key,width:size,height:size,viewBox:'0 0 '+size+' '+size,style:{display:'block'}}, h('circle',{key:'b',cx:size/2,cy:size/2,r,fill:'none',stroke:col,strokeWidth:1,opacity:.25}), ...arcs, h('circle',{key:'d',cx:size/2,cy:size/2,r:who==='none'?4:size*.11,fill:col,style:{transformOrigin:'50% 50%',animation:who==='none'?'none':'mock-pulse 1.1s ease-in-out infinite'}}));
+    }
+    const core = who==='none' ? size*.18 : size*.42;
+    const rings = who==='none' ? [h('span',{key:'b',style:{position:'absolute',inset:'22%',borderRadius:'50%',border:'1.5px solid '+col,animation:'mock-breathe 3.2s ease-in-out infinite'}})]
+      : [0,1,2].map(i=>h('span',{key:i,style:{position:'absolute',inset:0,borderRadius:'50%',border:'2px solid '+col,opacity:0,animation:'mock-ping 2.1s '+(i*.7).toFixed(1)+'s cubic-bezier(.2,0,0,1) infinite'}}));
+    return h('div',{key,style:{position:'relative',width:size,height:size,display:'grid',placeItems:'center'}}, ...rings, h('span',{key:'c',style:{width:core,height:core,borderRadius:'50%',background:col,animation:who==='none'?'none':'mock-pulse 1.1s ease-in-out infinite',transition:'width .32s,height .32s'}}));
+  }
+  renderVals(){
+    const p = this.props, drv = !!p.driven, live = !!p.live && !drv;
+    const st = drv ? (p.state||'connecting') : live ? (this.state.st||'connecting') : (p.state||'interviewer');
+    const q = live ? this.state.q : (p.q ?? 0);
+    const ivName = p.ivName || 'Interviewer';
+    const Q = drv ? {label:p.qLabel||'Q1', iv:{name:ivName, first:ivName.split(' ')[0], role:p.ivRole||'Interviewer', n:p.ivN||1, mono:p.ivMono||'AI'}, lp:p.lpName||'', text:p.qText||'', hint:p.hintText||'', notes:p.notesData||[], a:p.analysis||{verdict:0,strength:'',fixes:[]}, turns:p.turns||[]} : (this.QS[q] || this.QS[0]);
+    const wordsAll = (Q.text||'').split(' ');
+    const base = (st==='hint'||st==='reconnecting') ? 'answering' : st;
+    const isPaused = base==='paused';
+    const under = isPaused ? (drv ? (p.prevState||'answering') : live ? (this.state.prev||'answering') : 'answering') : base;
+    const words = (drv||!live) ? (under==='interviewer' && !drv ? (p.revealed ?? 11) : wordsAll.length) : this.state.words;
+    const parse = (t)=>{ const m=/^(\d+):(\d+)$/.exec(t||''); return m ? (+m[1])*60+(+m[2]) : 112; };
+    const sec = drv ? (p.sec||0) : live ? this.state.sec : parse(p.timer || (under==='thinking' ? '03:04' : st==='reconnecting' ? '02:21' : '01:52'));
+    const hint = drv ? !!p.showHint : live ? this.state.hint : st==='hint';
+    const recon = drv ? !!p.recon : live ? this.state.recon : st==='reconnecting';
+    const shown = live ? this.state.shown : 9;
+    const layout = p.layout||'stage', voice = p.voice||'orb', mode = p.mode||'loop';
+    const isInterviewer = under==='interviewer', isMine = under==='answering'||under==='thinking', isThinking = under==='thinking';
+    const isCoaching = under==='coaching', isEnd = under==='end', isConnecting = under==='connecting';
+    const accent = (isCoaching||isEnd) ? 'cool' : 'warm';
+    const who = (drv && p.speaker) ? p.speaker : (isInterviewer||isCoaching ? 'ai' : under==='answering' ? 'me' : 'none');
+    const accentFg = accent==='cool' ? 'var(--m-cool)' : 'var(--m-warm)';
+    const accentFill = accent==='cool' ? 'var(--m-cool-fill)' : 'var(--m-warm-fill)';
+    const cue = sec >= 180;
+    const a = Q.a, d = this.V[a.verdict];
+    const total = 1 + a.fixes.length + 1;
+    const tOpen = this.state.tOpen ?? !!p.transcriptOpen, nOpen = this.state.nOpen ?? !!p.notes;
+    const isStage = layout==='stage', isTL = layout==='transcript', isSP = layout==='split';
+    const act = (name, fn)=>()=>{ if (drv) { p.onAction && p.onAction(name); } else if (live) fn(); };
+    const sessionNo = p.sessionNo || 14;
+    const recapSrc = drv ? (p.recap || []) : this.RECAP;
+    const labels = {connecting:'Connecting',interviewer:'Interviewer speaking',answering:'Me answering',thinking:'Thinking pause',hint:'Hint shown',coaching:'Coaching',paused:'Paused',reconnecting:'Reconnecting',end:'Session end'};
+    return {
+      stateLabel: labels[st]||st, sessionNo, nextSessionNo: sessionNo+1, recapDuration: p.recapDuration || '48:12', recapCount: p.recapCount || 5, recapFixes: p.recapFixes || 3,
+      accentFg, accentFill, onAccent: accent==='cool' ? 'var(--m-on-cool)' : 'var(--m-on-warm)',
+      mono: isCoaching ? 'Co' : isEnd ? 'M' : Q.iv.mono, monoBorder: who==='ai' ? accentFg : 'var(--m-line)',
+      roundLabel: isCoaching ? 'Coach · after '+Q.label : isEnd ? 'Session 14 · complete' : 'Interviewer '+Q.iv.n+' of 5 · '+Q.iv.role,
+      ivName: isCoaching ? 'Coaching' : isEnd ? 'Mock' : Q.iv.name, ivFirst: Q.iv.first,
+      showLp: mode==='lp' && !isCoaching && !isEnd, lpName: Q.lp, notEnd: !isEnd,
+      recon, hint, hintText: Q.hint, notes: Q.notes, notesOpen: nOpen && (isInterviewer||isMine), notesClosed: !nOpen,
+      isConnecting, isInterviewer, isMine, isCoaching, isEnd, isPaused,
+      stInterviewer: isStage && isInterviewer, stMine: isStage && isMine,
+      tlBody: isTL && (isInterviewer||isMine), spBody: isSP && (isInterviewer||isMine),
+      qShown: wordsAll.slice(0, words).join(' '), qFull: Q.text, qLabel: Q.label, revealing: isInterviewer && words < wordsAll.length,
+      vizMain: this.viz(voice, who, accent, 200),
+      vizSmall: this.viz(isCoaching ? 'wave' : voice, who, accent, isCoaching ? 56 : 48, isCoaching ? {w:56,h:22} : {w:48,h:22}),
+      vizBand: this.viz('wave', who, accent, 310, {w:310, h:64}),
+      timer: this.fmt(sec), timerColor: cue ? 'var(--m-warm)' : 'var(--m-fg)',
+      timerNote: isThinking ? 'Still listening — coaching starts when you’re done' : cue ? '3:00 passed · start wrapping up' : 'Your answer',
+      nextAuto: drv ? (p.nextAuto || 'or just say “next”') : live ? (shown>=total ? 'auto in '+(this.state.cd||5)+' s · say “redo” to retry' : 'auto after coaching') : 'auto in 5 s · say “redo” to retry',
+      timerNoteColor: cue ? 'var(--m-warm)' : 'var(--m-fg2)', listenDot: isThinking ? 'var(--m-fg3)' : who==='me' ? 'var(--m-fg)' : accentFg,
+      nowText: isInterviewer ? Q.iv.first+' is speaking' : isThinking ? 'Still listening' : 'You’re answering', nowSub: isInterviewer ? Q.iv.role : isThinking ? 'Pause detected · mic open' : 'Mic open',
+      turns: Q.turns.map(t=>({...t, isAi:t.ai, mono:Q.iv.mono, align:t.ai?'flex-start':'flex-end', bg:t.ai?'var(--m-card)':'var(--m-elev)', fg:'var(--m-fg)'})), turnCount: Q.turns.length,
+      sStrength: shown>=1, fixesShown: a.fixes.slice(0, Math.max(0, Math.min(a.fixes.length, shown-1))).map((t,i)=>({n:i+1,t})), sVerdict: shown>=total, coachTyping: drv ? !!p.coachTyping : (live && shown<total),
+      strength: a.strength, vLabel:d[0], vGlyph:d[1], vBg:d[2], vFg:d[3], vBorder:d[4],
+      recap: recapSrc.map(r=>{ const x=this.V[r.v]||this.V[0]; return {...r, vLabel:x[0], vGlyph:x[1], vBg:x[2], vFg:x[3], vBorder:x[4]}; }),
+      showHandles: (isInterviewer||isMine||isConnecting===false&&isPaused) && !isCoaching && !isEnd && !isConnecting,
+      transcriptOpen: tOpen && !isEnd,
+      onEnd: act('end', ()=>this.go('end')), onRestart: act('restart', ()=>this.start()), onReview: ()=>{ if (drv) { p.onAction && p.onAction('review'); } else if (p.onReview) p.onReview(); },
+      onPause: act('pause', ()=>{ this.clear(); this.setState({prev:this.state.st, st:'paused'}); }),
+      onResume: act('resume', ()=>this.go(this.state.prev||'answering')),
+      onHint: act('hint', ()=>{ this.setState({hint:true}); this.after(6000,()=>this.setState({hint:false})); }),
+      onDismissHint: ()=>{ if (drv) { p.onAction && p.onAction('dismissHint'); } else this.setState({hint:false}); },
+      onRedo: act('redo', ()=>this.go('interviewer',{words:0,sec:0,hint:false,shown:0,pass:0,recon:false})),
+      onFeedback: act('feedback', ()=>this.go('coaching',{shown:0,hint:false,recon:false})),
+      onNext: act('next', ()=>this.next()),
+      onToggleTranscript: ()=>this.setState({tOpen:!tOpen}), onToggleNotes: ()=>this.setState({nOpen:!nOpen}),
+    };
+  }
+}
+</script>
+</body>
+</html>

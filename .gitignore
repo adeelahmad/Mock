@@ -3,3 +3,5 @@ dist
 .DS_Store
 *.log
 test-results
+tests/design-refs
+tests/screenshots

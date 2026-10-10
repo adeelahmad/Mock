@@ -2,7 +2,7 @@
   "name": "mock",
   "private": true,
   "version": "0.1.0",
-  "description": "Mock — a voice app for rehearsing an AWS interview loop. A live interviewer asks Leadership Principle questions; between answers a coach tells you what to fix, judged against your own prep.",
+  "description": "Mock \u2014 a voice app for rehearsing an AWS interview loop. A live interviewer asks Leadership Principle questions; between answers a coach tells you what to fix, judged against your own prep.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
-    "check": "npm run typecheck && npm run test && npm run build"
+    "check": "npm run typecheck && npm run test && npm run build",
+    "refs": "node scripts/design-refs.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",
