@@ -1,0 +1,80 @@
+/* Mock — design tokens.
+   Aladdin design system tokens (colors, type, spacing, effects) plus the Mock
+   application palette (--m-*) in light and dark. Light is the default; dark reuses
+   Aladdin's terminal palette. Two mode accents only: gold = interview, blue = coaching. */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..800;1,9..40,400..700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* Aladdin core brand */
+  --aladdin-blue: #1A73E8; --aladdin-green: #34A853; --aladdin-red: #EA4335; --aladdin-gold: #F9AB00;
+  --blue-dark: #1558B0; --red-dark: #C5221F; --green-dark: #1E7E43; --gold-dark: #B06000;
+  --text-primary: #202124; --text-strong: #3C4043; --text-secondary: #5F6368; --text-muted: #80868B; --text-on-color: #FFFFFF;
+  --background: #FFFFFF; --surface: #F8F9FA; --surface-neutral: #F1F3F4;
+  --intent-surface: #E8F0FE; --red-surface: #FCE8E6; --green-surface: #E6F4EA; --gate-surface: #FEF7E0;
+  --border: #DADCE0; --graph-edge: #A8C7FA;
+  --intent-border: #A8C7FA; --red-border: #F6AEA9; --green-border: #A8DAB5; --gate-border: #FDE293;
+
+  /* Elevation — soft, neutral, low. Never colored glows. */
+  --shadow-1: 0 1px 2px rgba(60,64,67,.12), 0 1px 3px 1px rgba(60,64,67,.08);
+  --shadow-2: 0 1px 3px rgba(60,64,67,.14), 0 4px 8px 3px rgba(60,64,67,.08);
+  --shadow-3: 0 4px 8px rgba(60,64,67,.12), 0 12px 28px 6px rgba(60,64,67,.10);
+  --ring-focus: 0 0 0 3px var(--graph-edge);
+  --ease-standard: cubic-bezier(.2,0,0,1); --ease-exit: cubic-bezier(.3,0,1,1);
+  --dur-fast: 120ms; --dur-base: 200ms; --dur-slow: 320ms;
+
+  /* Spacing + radii */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px;
+  --radius-xs: 4px; --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px; --radius-pill: 999px;
+
+  /* Type */
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Mock palette — light */
+  --m-canvas: #FFFFFF; --m-bg: #F8F9FA; --m-card: #FFFFFF; --m-elev: #F1F3F4; --m-line: #DADCE0; --m-line2: #BDC1C6;
+  --m-fg: #202124; --m-fg2: #5F6368; --m-fg3: #80868B;
+  --m-warm: #B06000; --m-warm-fill: #F9AB00; --m-on-warm: #202124; --m-warm-tint: #FEF7E0; --m-warm-line: #FDE293;
+  --m-cool: #1A73E8; --m-cool-fill: #1A73E8; --m-on-cool: #FFFFFF; --m-cool-tint: #E8F0FE; --m-cool-line: #A8C7FA;
+  --m-green: #1E7E43; --m-green-fill: #34A853; --m-green-tint: #E6F4EA; --m-green-line: #A8DAB5;
+  --m-blue: #1558B0; --m-blue-fill: #1A73E8; --m-blue-tint: #E8F0FE; --m-blue-line: #A8C7FA;
+  --m-gold: #B06000; --m-gold-fill: #F9AB00; --m-gold-tint: #FEF7E0; --m-gold-line: #FDE293;
+  --m-red: #C5221F; --m-red-fill: #EA4335; --m-red-tint: #FCE8E6; --m-red-line: #F6AEA9;
+  --m-scrim: rgba(32,33,36,.32);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --m-canvas: #18191B; --m-bg: #202124; --m-card: #292A2D; --m-elev: #303134; --m-line: #3C4043; --m-line2: #5F6368;
+  --m-fg: #E8EAED; --m-fg2: #9AA0A6; --m-fg3: #80868B;
+  --m-warm: #FDD663; --m-warm-fill: #F9AB00; --m-on-warm: #202124; --m-warm-tint: rgba(249,171,0,.14); --m-warm-line: rgba(253,214,99,.45);
+  --m-cool: #8AB4F8; --m-cool-fill: #1A73E8; --m-on-cool: #FFFFFF; --m-cool-tint: rgba(138,180,248,.14); --m-cool-line: rgba(138,180,248,.45);
+  --m-green: #81C995; --m-green-fill: #34A853; --m-green-tint: rgba(52,168,83,.18); --m-green-line: rgba(129,201,149,.5);
+  --m-blue: #8AB4F8; --m-blue-fill: #1A73E8; --m-blue-tint: rgba(138,180,248,.14); --m-blue-line: rgba(138,180,248,.45);
+  --m-gold: #FDD663; --m-gold-fill: #F9AB00; --m-gold-tint: rgba(249,171,0,.18); --m-gold-line: rgba(253,214,99,.5);
+  --m-red: #F28B82; --m-red-fill: #EA4335; --m-red-tint: rgba(234,67,53,.18); --m-red-line: rgba(242,139,130,.5);
+  --m-scrim: rgba(0,0,0,.55);
+  --background: #202124; --surface: #292A2D; --surface-neutral: #303134; --border: #3C4043;
+  --text-primary: #E8EAED; --text-strong: #E8EAED; --text-secondary: #9AA0A6; --text-muted: #80868B;
+  --aladdin-blue: #8AB4F8; --blue-dark: #A8C7FA;
+  --intent-surface: rgba(138,180,248,.14); --intent-border: rgba(138,180,248,.45);
+  --green-surface: rgba(52,168,83,.18); --green-border: rgba(129,201,149,.5); --green-dark: #81C995;
+  --red-surface: rgba(234,67,53,.18); --red-border: rgba(242,139,130,.5); --red-dark: #F28B82;
+  --gate-surface: rgba(249,171,0,.18); --gate-border: rgba(253,214,99,.5); --gold-dark: #FDD663;
+  --shadow-1: 0 1px 2px rgba(0,0,0,.4); --shadow-2: 0 2px 6px rgba(0,0,0,.45); --shadow-3: 0 8px 28px rgba(0,0,0,.5);
+  color-scheme: dark;
+}
+
+/* Motion — calm and deterministic. */
+@keyframes mock-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes mock-spin { to { transform: rotate(360deg); } }
+@keyframes mock-ping { 0% { transform: scale(.45); opacity: .75; } 100% { transform: scale(1); opacity: 0; } }
+@keyframes mock-pulse { 0%, 100% { transform: scale(.94); } 50% { transform: scale(1.06); } }
+@keyframes mock-breathe { 0%, 100% { transform: scale(.8); opacity: .35; } 50% { transform: scale(1); opacity: .9; } }
+@keyframes mock-bar { from { transform: scaleY(.22); } to { transform: scaleY(1); } }
+@keyframes mock-idle { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+@keyframes mock-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

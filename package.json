@@ -1,0 +1,21 @@
+{
+  "name": "mock",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Mock — a voice app for rehearsing an AWS interview loop. A live interviewer asks Leadership Principle questions; between answers a coach tells you what to fix, judged against your own prep.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^5.0.0",
+    "vite": "^7.1.0"
+  }
+}
