@@ -113,6 +113,7 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
   }, [repo, refresh]);
 
   useEffect(() => { applyTheme(prefs.theme); writePrefs(prefs); }, [prefs]);
+  useEffect(() => { setSheet({ setup: false, answer: null, addQuestion: false, addStory: false }); }, [route.path]);
   useEffect(() => { if (route.tab !== prefs.lastTab && ['practice', 'library', 'history', 'progress'].includes(route.tab)) setPrefs((p) => ({ ...p, lastTab: route.tab })); }, [route.tab]);
 
   const toast = useCallback((message: string) => {

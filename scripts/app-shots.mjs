@@ -57,7 +57,7 @@ for (const theme of ['light', 'dark']) {
     // Sheets on the home screen
     const trySheet = async (name, open) => {
       if (ONLY && !ONLY.test(name)) return;
-      try { await page.goto(BASE + '/#/practice'); await settle(page); await open(); await page.waitForTimeout(600); await shoot(page, dir, name); } catch (e) { report.push(`FAIL ${theme}-${device}/${name}: ${String(e).slice(0, 120)}`); }
+      try { await page.goto(BASE + '/#/practice'); await page.reload(); await settle(page); await open(); await page.waitForTimeout(600); await shoot(page, dir, name); await page.keyboard.press('Escape').catch(() => {}); } catch (e) { report.push(`FAIL ${theme}-${device}/${name}: ${String(e).slice(0, 120)}`); }
     };
     await trySheet('sheet-setup', () => page.getByRole('button', { name: /^Change$/ }).first().click());
     await trySheet('sheet-answer', async () => { await page.goto(BASE + '/#/library/questions'); await settle(page); await page.getByRole('button', { name: /Model answer/ }).first().click(); });
@@ -66,7 +66,7 @@ for (const theme of ['light', 'dark']) {
     // The live session: start the suggested drill and capture states as the demo plays.
     if (!ONLY || ONLY.test('live')) {
       try {
-        await page.goto(BASE + '/#/practice'); await settle(page);
+        await page.goto(BASE + '/#/practice'); await page.reload(); await settle(page);
         await page.getByRole('button', { name: /^Start$/ }).first().click();
         const t0 = Date.now();
         const want = ['connecting', 'interviewer', 'answering', 'thinking', 'coaching', 'ended'];
