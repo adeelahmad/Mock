@@ -1,6 +1,6 @@
 // File preview — what the interviewer sees when the file is included.
 import React from 'react';
-import { BackHead } from '../components/ui.jsx';
+import { BackHead } from '../components/ui.tsx';
 
 export default function FilePreview({ file, onBack, onRemove }) {
   return (

@@ -1,6 +1,6 @@
 // Library — LPs, stories, questions, files. One list per segment; desktop shows master-detail.
 import React, { useState } from 'react';
-import { Seg, VerdictChip, Switch, Dropzone, Icon } from '../components/ui.jsx';
+import { Seg, VerdictChip, Switch, Dropzone, Icon } from '../components/ui.tsx';
 
 export function LpList({ lps, onOpen, selected }) {
   return (

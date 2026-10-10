@@ -1,7 +1,7 @@
 // History — the session list and the session detail (recording, transcript, analysis cards).
 import React from 'react';
-import { BackHead, Seg, VerdictCell } from '../components/ui.jsx';
-import AnalysisCard from '../components/AnalysisCard.jsx';
+import { BackHead, Seg, VerdictCell } from '../components/ui.tsx';
+import AnalysisCard from '../components/AnalysisCard.tsx';
 
 export function SessionList({ sessions, selected, onOpen }) {
   return (

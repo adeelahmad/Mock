@@ -1,6 +1,6 @@
 // First run — drop → say hello → start. Three steps, choices remembered, never re-asked.
 import React from 'react';
-import { Input, Select, Dropzone } from '../components/ui.jsx';
+import { Input, Select, Dropzone } from '../components/ui.tsx';
 
 export default function Onboarding(p) {
   const { step, lps, importInfo, gem, gemStatus, models, voices, nextN, focusLp, covered, questionCount, dbBadge, gemBadge } = p;

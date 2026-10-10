@@ -1,6 +1,6 @@
 // Sheets — new session setup (3 decisions), the model answer, add question, add story.
 import React, { useState } from 'react';
-import { Sheet, Seg, Input, Select } from '../components/ui.jsx';
+import { Sheet, Seg, Input, Select } from '../components/ui.tsx';
 
 export function SetupSheet({ open, onClose, nextN, options, pick, setPick, coaching, setCoaching, seed, onSeed, onNewSeed, gem, onOpenSettings, onStart }) {
   return (

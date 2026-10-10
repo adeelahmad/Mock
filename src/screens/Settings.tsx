@@ -1,6 +1,6 @@
 // Settings — Gemini Live, interview date, pause length, system instruction, appearance, library & data.
 import React from 'react';
-import { BackHead, Input, Select, Seg } from '../components/ui.jsx';
+import { BackHead, Input, Select, Seg } from '../components/ui.tsx';
 
 export default function Settings(p) {
   const { gem, gemStatus, models, voices, interviewDate, pauseMs, systemText, dbBadge, storageNote, recCount, ui } = p;

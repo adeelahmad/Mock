@@ -1,6 +1,6 @@
 // LP detail — mapped stories, the question bank for this LP, verdict history, practise.
 import React from 'react';
-import { BackHead, VerdictChip, VerdictCell, v } from '../components/ui.jsx';
+import { BackHead, VerdictChip, VerdictCell, v } from '../components/ui.tsx';
 
 export default function LpDetail({ lp, lpStories, lpQs, lpHist, onBack, onOpenStory, onOpenGrid, onAsk, onAnswer, onStart, embedded = false }) {
   return (

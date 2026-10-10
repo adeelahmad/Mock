@@ -1,6 +1,6 @@
 // Practice home — Start is the home screen. Mock already knows what you should practise.
 import React from 'react';
-import { Icon, VerdictChip } from '../components/ui.jsx';
+import { Icon, VerdictChip } from '../components/ui.tsx';
 
 export default function Home({ nextN, daysLeft, focusLp, focusWhy, liveHint, weak, lps, covered, onStartFocus, onOpenSheet, onStartLoop, onStartWeak, onOpenGrid, onOpenLp, onOpenSettings }) {
   return (

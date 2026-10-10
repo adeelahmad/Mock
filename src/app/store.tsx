@@ -1,0 +1,178 @@
+// Mock — the app store. One context carries the repository reads, derived rows, UI
+// preferences, navigation, toasts, the Gemini configuration and the live session. Screens
+// read what they need with `useApp()`; writes go through `repo` and then `refresh()`.
+
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import type { Exchange, Lp, PrepFile, Question, Session, Settings, Story, TranscriptEvent, UiPrefs } from '../domain/types.ts';
+import type { Repo, RepoMode } from '../db/repo.ts';
+import { MemoryRepo } from '../db/memory.ts';
+import { lpRows, storyRows, questionRows, coveredLpIds, heatmap, trend, weakestAnswer, type LpRow, type StoryRow, type QuestionRow } from '../domain/selectors.ts';
+import type { SessionState } from '../domain/session-machine.ts';
+import { SessionController, type ControllerMeta, type StartOptions } from '../live/controller.ts';
+import { SimulatedTransport } from '../live/simulated.ts';
+import { SimulatedAnalyzer } from '../live/analyzer.ts';
+import { DEMO_SCRIPT } from '../live/scripts/demo.ts';
+import { INTERVIEWERS } from '../fixtures/sample.ts';
+import { buildContext, prioritiseQuestions } from '../live/context.ts';
+import { readPrefs, writePrefs } from './prefs.ts';
+import { applyTheme } from './theme.ts';
+import { go as routerGo, back as routerBack, useRoute, type Route } from './router.ts';
+
+export interface AppData {
+  lps: Lp[]; stories: Story[]; questions: Question[]; files: PrepFile[]; sessions: Session[]; exchanges: Exchange[]; settings: Settings;
+  /** derived */
+  lpRows: LpRow[]; storyRows: StoryRow[]; questionRows: QuestionRow[]; covered: Set<string>;
+  heat: ReturnType<typeof heatmap>; trend: ReturnType<typeof trend>; weakest: Exchange | null;
+}
+
+export interface GeminiConfig { key: string; hasKey: boolean; model: string; voice: string }
+
+export interface LiveStart {
+  mode: StartOptions['mode'];
+  focus?: string | null;
+  focusLabel?: string;
+  questionText?: string | null;
+  coaching?: Settings['coaching'];
+}
+
+export interface AppStore {
+  ready: boolean;
+  status: string;
+  dbMode: RepoMode;
+  repo: Repo;
+  data: AppData;
+  refresh: () => Promise<void>;
+  prefs: UiPrefs;
+  setPref: <K extends keyof UiPrefs>(k: K, v: UiPrefs[K]) => void;
+  route: Route;
+  go: (path: string, replace?: boolean) => void;
+  back: (fallback: string) => void;
+  toast: (message: string) => void;
+  toastText: string;
+  gemini: GeminiConfig;
+  setGemini: (patch: Partial<Pick<GeminiConfig, 'key' | 'model' | 'voice'>>) => Promise<void>;
+  live: {
+    state: SessionState | null; meta: ControllerMeta | null; controller: SessionController | null;
+    /** The options of the running (or last) session, for "Start session N+1". */
+    lastStart: LiveStart | null;
+    start: (o: LiveStart) => Promise<void>;
+    /** Leave the live screen (the controller is destroyed; the session stays saved). */
+    exit: () => void;
+  };
+  transcript: (sessionId: string) => Promise<TranscriptEvent[]>;
+  /** Sheets shared across screens (open from Practice, Library, Progress…). */
+  sheet: { setup: boolean; answer: QuestionRow | null; addQuestion: boolean; addStory: boolean };
+  openSheet: (name: keyof AppStore['sheet'], value?: unknown) => void;
+  closeSheets: () => void;
+}
+
+const Ctx = createContext<AppStore | null>(null);
+export const useApp = (): AppStore => { const v = useContext(Ctx); if (!v) throw new Error('useApp outside AppProvider'); return v; };
+
+function derive(d: Omit<AppData, 'lpRows' | 'storyRows' | 'questionRows' | 'covered' | 'heat' | 'trend' | 'weakest'>): AppData {
+  const rows = lpRows(d.lps, d.stories, d.questions, d.sessions, d.exchanges);
+  return { ...d, lpRows: rows, storyRows: storyRows(d.stories, d.lps, d.exchanges), questionRows: questionRows(d.questions, d.lps), covered: coveredLpIds(d.stories), heat: heatmap(d.lps, d.sessions, d.exchanges), trend: trend(d.sessions, d.exchanges), weakest: weakestAnswer(d.sessions, d.exchanges) };
+}
+
+const EMPTY: AppData = derive({ lps: [], stories: [], questions: [], files: [], sessions: [], exchanges: [], settings: { interviewDate: '2026-10-30', liveModel: 'gemini-3.8-live', textModel: 'gemini-3.8-flash', voice: 'Aoede', pauseMs: 2500, systemInstruction: '', loopSize: 5, coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 12345, lastBackupAt: null, onboarded: false } });
+
+export function AppProvider({ repo: given, children }: { repo?: Repo; children: React.ReactNode }) {
+  const repo = useMemo(() => given ?? new MemoryRepo(), [given]);
+  const [ready, setReady] = useState(false);
+  const [status, setStatus] = useState('Starting…');
+  const [dbMode, setDbMode] = useState<RepoMode>('none');
+  const [data, setData] = useState<AppData>(EMPTY);
+  const [prefs, setPrefs] = useState<UiPrefs>(readPrefs);
+  const [toastText, setToastText] = useState('');
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [gemini, setGem] = useState<GeminiConfig>({ key: '', hasKey: false, model: 'gemini-3.8-live', voice: 'Aoede' });
+  const [liveState, setLiveState] = useState<SessionState | null>(null);
+  const [liveMeta, setLiveMeta] = useState<ControllerMeta | null>(null);
+  const controller = useRef<SessionController | null>(null);
+  const [lastStart, setLastStart] = useState<LiveStart | null>(null);
+  const [sheet, setSheet] = useState<AppStore['sheet']>({ setup: false, answer: null, addQuestion: false, addStory: false });
+  const route = useRoute();
+
+  const refresh = useCallback(async () => {
+    const [lps, stories, questions, files, sessions, exchanges, settings] = await Promise.all([repo.lps(), repo.stories(), repo.questions(), repo.files(), repo.sessions(), repo.exchanges(), repo.settings()]);
+    setData(derive({ lps, stories, questions, files, sessions, exchanges, settings }));
+    const key = (await repo.getSecret('gemini.key')) ?? '';
+    setGem({ key, hasKey: !!key, model: settings.liveModel, voice: settings.voice });
+  }, [repo]);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const mode = await repo.init((s) => alive && setStatus(s));
+      if (!alive) return;
+      setDbMode(mode);
+      await refresh();
+      if (alive) setReady(true);
+    })();
+    return () => { alive = false; };
+  }, [repo, refresh]);
+
+  useEffect(() => { applyTheme(prefs.theme); writePrefs(prefs); }, [prefs]);
+  useEffect(() => { if (route.tab !== prefs.lastTab && ['practice', 'library', 'history', 'progress'].includes(route.tab)) setPrefs((p) => ({ ...p, lastTab: route.tab })); }, [route.tab]);
+
+  const toast = useCallback((message: string) => {
+    setToastText(message);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToastText(''), 5000);
+  }, []);
+
+  const setPref = useCallback(<K extends keyof UiPrefs>(k: K, v: UiPrefs[K]) => setPrefs((p) => ({ ...p, [k]: v })), []);
+
+  const setGemini = useCallback(async (patch: Partial<Pick<GeminiConfig, 'key' | 'model' | 'voice'>>) => {
+    if (patch.key !== undefined) await repo.setSecret('gemini.key', patch.key || null);
+    const s: Partial<Settings> = {};
+    if (patch.model !== undefined) s.liveModel = patch.model;
+    if (patch.voice !== undefined) s.voice = patch.voice;
+    if (Object.keys(s).length) await repo.setSettings(s);
+    await refresh();
+  }, [repo, refresh]);
+
+  const exitLive = useCallback(() => {
+    controller.current?.destroy();
+    controller.current = null;
+    setLiveState(null); setLiveMeta(null);
+  }, []);
+
+  const startLive = useCallback(async (o: LiveStart) => {
+    exitLive();
+    setLastStart(o);
+    const s = data.settings;
+    // M1: both the "live" and the "demo" paths run on the simulated transport. M3 swaps in
+    // the Gemini transport when a key is configured.
+    const demo = !gemini.hasKey;
+    const transport = new SimulatedTransport(DEMO_SCRIPT);
+    const analyzer = new SimulatedAnalyzer(DEMO_SCRIPT);
+    const c = new SessionController(transport, analyzer, repo, () => Date.now(), demo);
+    controller.current = c;
+    c.subscribe((st, meta) => { setLiveState(st); setLiveMeta(meta); });
+    const focusLp = o.mode === 'lp' && o.focus ? data.lps.find((l) => l.id === o.focus) : null;
+    const weak = data.lpRows.slice().sort((a, b) => (a.readiness ?? 0.35) - (b.readiness ?? 0.35)).map((l) => l.id);
+    const questions = prioritiseQuestions(data.questions, { mode: o.mode, focusLpId: focusLp?.id ?? null, weakLpIds: weak.slice(0, 5) });
+    const previous = await repo.reports(8);
+    const ctx = buildContext({ sessionNumber: await repo.nextSessionNumber(), date: new Date().toISOString().slice(0, 10), mode: o.mode, focus: o.focusLabel ?? focusLp?.name ?? o.questionText ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, previous, lps: data.lps, stories: data.stories, questions, files: data.files, userInstruction: s.systemInstruction });
+    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: s.liveModel, voice: s.voice, questionText: o.questionText ?? null });
+    setSheet({ setup: false, answer: null, addQuestion: false, addStory: false });
+    routerGo('/live');
+  }, [data, gemini.hasKey, repo, exitLive]);
+
+  // Refresh the library when a live session writes.
+  useEffect(() => {
+    if (repo instanceof MemoryRepo) { repo.onChange = () => { void refresh(); }; return () => { repo.onChange = null; }; }
+  }, [repo, refresh]);
+
+  const value: AppStore = useMemo(() => ({
+    ready, status, dbMode, repo, data, refresh, prefs, setPref, route, go: routerGo, back: routerBack, toast, toastText, gemini, setGemini,
+    live: { state: liveState, meta: liveMeta, controller: controller.current, lastStart, start: startLive, exit: exitLive },
+    transcript: (id: string) => repo.transcript(id),
+    sheet,
+    openSheet: (name, v) => setSheet((x) => ({ ...x, [name]: name === 'answer' ? (v as QuestionRow) : true })),
+    closeSheets: () => setSheet({ setup: false, answer: null, addQuestion: false, addStory: false }),
+  }), [ready, status, dbMode, repo, data, refresh, prefs, setPref, route, toast, toastText, gemini, setGemini, liveState, liveMeta, lastStart, startLive, exitLive, sheet]);
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}

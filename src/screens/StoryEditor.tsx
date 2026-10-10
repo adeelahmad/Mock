@@ -1,6 +1,6 @@
 // Story editor — STAR + learning, key numbers, LP mapping (changed in the grid).
 import React, { useEffect, useState } from 'react';
-import { BackHead, Input } from '../components/ui.jsx';
+import { BackHead, Input } from '../components/ui.tsx';
 
 const FIELDS = [['situation', 'Situation', 112], ['task', 'Task', 112], ['action', 'Action', 112], ['result', 'Result', 112], ['learning', 'Learning', 88]];
 

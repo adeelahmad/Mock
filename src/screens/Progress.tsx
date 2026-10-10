@@ -1,6 +1,6 @@
 // Progress — LP × session heatmap, weakest LPs, readiness now, trend, story usage.
 import React from 'react';
-import { VerdictCell } from '../components/ui.jsx';
+import { VerdictCell } from '../components/ui.tsx';
 
 export default function Progress({ sessionCount, daysLeft, cols, heatRows, weakest, cnt, pct, trendDots, usage, onDrill, covered }) {
   const points = trendDots.map((d) => d.x + ',' + d.y).join(' ');

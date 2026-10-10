@@ -1,6 +1,6 @@
 // Story × LP grid — one tap cycles none → primary → secondary. Gaps are gold.
 import React from 'react';
-import { BackHead } from '../components/ui.jsx';
+import { BackHead } from '../components/ui.tsx';
 
 export default function Grid({ lps, stories, coveredIds, covered, onBack, onCycle, embedded = false }) {
   const gaps = lps.filter((l) => !coveredIds.has(l.id)).map((l) => l.name);

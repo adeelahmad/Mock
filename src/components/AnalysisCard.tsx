@@ -1,7 +1,7 @@
 // Mock — the analysis card. One per answer: verdict, better story, missed numbers,
 // STAR split, I-vs-we, delivery, one strength and up to three fixes.
 import React from 'react';
-import { v, Icon } from './ui.jsx';
+import { v, Icon } from './ui.tsx';
 
 export default function AnalysisCard({ data, compact = false, onPlay, onDrill, onSaveBest, style }) {
   const a = data;

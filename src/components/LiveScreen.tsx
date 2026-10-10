@@ -5,8 +5,8 @@
 //   driven  — the app owns the state (a real Gemini Live session) and passes it in via props.
 //   demo    — no API key: a scripted run-through of every state, timed on its own.
 import React, { useEffect, useRef, useState } from 'react';
-import Viz from './Viz.jsx';
-import { v, fmt, Icon } from './ui.jsx';
+import Viz from './Viz.tsx';
+import { v, fmt, Icon } from './ui.tsx';
 
 const DEMO_QS = [
   { label: 'Q3', iv: { name: 'Dana Whitfield', first: 'Dana', role: 'Bar Raiser', n: 3, mono: 'DW' }, lp: 'Dive Deep', text: 'Tell me about a time you found a problem that others had missed. How did you find it?', hint: 'Try the Payments outage story — 41 min, $1.2M.',
