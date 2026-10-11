@@ -18,6 +18,7 @@ import { DEFAULT_SYSTEM_INSTRUCTION, GENERIC_SYSTEM_INSTRUCTION, isAwsAreas } fr
 import '../styles/screens/settings.css';
 import { BackupSheet, RestoreSheet } from './BackupSheets.tsx';
 import { AccountSection } from './Account.tsx';
+import { VaultSection } from './VaultSync.tsx';
 import { BudgetSettings } from '../components/Budget.tsx';
 
 export { VOICES, personaFor, previewToast, MODELS, type VoicePersona } from '../domain/voices.ts';
@@ -266,6 +267,8 @@ export default function Settings() {
             </div>
 
             <BudgetSettings />
+
+            <VaultSection />
 
             <AccountSection />
 

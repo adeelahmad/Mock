@@ -51,7 +51,9 @@ feedback you need is specific: *you said "significant" when your notes say $1.2M
 - **Your areas, your library.** Import areas, stories and questions from CSV, or load the
   built-in AWS Leadership Principles set to start.
 - **Local-first.** Everything lives in your browser and works offline. Your Gemini key stays
-  on your device and goes only to Google. Self-host the binary to sync across browsers.
+  on your device and goes only to Google.
+- **Sync with a passphrase, no account.** Your devices sync directly over WebRTC, end-to-end
+  encrypted, even from GitHub Pages. Pair a phone with a short code or a QR code.
 - **Interview in a real Google Meet call**, with a friend sitting in as a second interviewer.
 - **Know what it costs.** Every token is counted and priced, per area.
 
@@ -318,6 +320,16 @@ unprivileged Debian 13 container (2 vCPU, 2 GiB, 8 GB), installs Caddy, builds t
 in `/var/lib/mock`; Postgres or `AUTH_URL` via `/etc/mock/server.env`) and serves it through Caddy on `https://<ip>/` (Caddy's internal CA: trust its root, printed at the end,
 since the microphone needs trusted HTTPS) and `http://<ip>/`. Run `update` inside the container
 to pull and rebuild the binary when `main` moves.
+
+## Sync with a passphrase (no server)
+
+Settings → Sync → **Sync with a passphrase**. Argon2id turns the passphrase into a key in the
+browser. The library is mirrored into a [Yjs](https://yjs.dev) CRDT, and devices trade updates
+over WebRTC data channels, sealed with AES-GCM. Devices find each other through public Nostr
+relays, or through your own Mock server's `/signal` (signed-in users only, and it works behind
+a Cloudflare Tunnel). A new device can pair with a Wormhole-style code (`42-violet-anchor`, a
+CPace-style PAKE on ristretto255) or a QR code instead of the passphrase. Code: `src/vault/`.
+Details and limits: [docs](https://adeelahmad.github.io/Mock/guide/passphrase-sync).
 
 ## Sign-in and sync (Mock server)
 

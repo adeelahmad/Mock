@@ -36,7 +36,7 @@ export default defineConfig({
   ],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   // `npm run dev` with `make server` (the Go server) alongside: the API and sign-in go to the Mock server.
-  server: { proxy: { '/api': 'http://localhost:8787', '/auth': 'http://localhost:8787' } },
+  server: { proxy: { '/api': 'http://localhost:8787', '/auth': 'http://localhost:8787', '/signal': { target: 'http://localhost:8787', ws: true } } },
   build: { target: 'es2022', chunkSizeWarningLimit: 1200 },
   optimizeDeps: { exclude: ['@duckdb/duckdb-wasm'] },
   test: {

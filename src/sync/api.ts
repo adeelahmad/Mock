@@ -6,7 +6,7 @@ import type { MockBackup } from '../db/backup.ts';
 import type { PushResult, RemoteLibrary, SyncApi } from './engine.ts';
 
 export interface ServerUser { id: string; name: string | null; email: string | null; image: string | null; admin: boolean }
-export interface ServerStatus { server: true; version: string; db: string; configured: boolean; providers: { id: string; name: string }[]; user: ServerUser | null }
+export interface ServerStatus { server: true; version: string; db: string; configured: boolean; providers: { id: string; name: string }[]; user: ServerUser | null; signal?: 'auth' | 'open' | 'off' }
 export interface ClientView { clientId: string; hasSecret: boolean }
 export interface SetupView { configured: boolean; providers: { github: ClientView | null; google: ClientView | null; oidc: (ClientView & { issuer: string; name: string }) | null }; allowedEmails: string[]; hasAdmin: boolean }
 export interface SetupInput {

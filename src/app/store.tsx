@@ -30,6 +30,7 @@ import { applyTheme } from './theme.ts';
 import { buildBackup } from '../db/backup.ts';
 import { SyncEngine, localMemo, type SyncStatus } from '../sync/engine.ts';
 import { httpSync, status as serverStatus, type ServerStatus } from '../sync/api.ts';
+import { Vault, idbPersist, localSaved, type ServerHint, type VaultStatus } from '../vault/vault.ts';
 import { go as routerGo, back as routerBack, useRoute, type Route } from './router.ts';
 
 export interface AppData {
@@ -68,6 +69,11 @@ export interface Account {
   /** Re-reads the server status (after setup, sign-in) and starts or stops sync. */
   reload: () => Promise<void>;
   syncNow: () => Promise<void>;
+  /** Passphrase sync (src/vault): peer-to-peer, no account needed. */
+  vault: Vault;
+  vaultStatus: VaultStatus;
+  /** What the vault needs to know about the Mock server serving this app (null on a static host). */
+  hint: ServerHint | null;
 }
 
 export interface AppStore {
@@ -138,6 +144,24 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
   // Library sync with the Mock server: pushes after local writes, pulls on start, focus and every minute.
   const sync = useMemo(() => new SyncEngine(httpSync, { build: () => buildBackup(repo), apply: (doc) => repo.importBackup(doc) }, localMemo, { busy: () => !!liveRef.current && liveRef.current.phase !== 'ended' }), [repo]);
   useEffect(() => sync.subscribe(setSyncStatus), [sync]);
+  // Passphrase sync: the library as a CRDT, traded directly between this user's devices.
+  const vault = useMemo(() => new Vault({
+    local: { build: () => buildBackup(repo), apply: (doc) => repo.importBackup(doc) },
+    secrets: {
+      read: async (): Promise<Record<string, string>> => { const k = await repo.getSecret('gemini.key'); return k ? { 'gemini.key': k } : {}; },
+      write: async (s) => { if (s['gemini.key']) { await repo.setSecret('gemini.key', s['gemini.key']); await refreshRef.current?.(); } },
+    },
+    busy: () => !!liveRef.current && liveRef.current.phase !== 'ended',
+    persist: idbPersist, saved: localSaved,
+  }), [repo]);
+  const refreshRef = useRef<(() => Promise<void>) | null>(null);
+  const [vaultStatus, setVaultStatus] = useState<VaultStatus>(vault.status);
+  useEffect(() => vault.subscribe(setVaultStatus), [vault]);
+  useEffect(() => {
+    const flush = () => { void vault.flush(); };
+    addEventListener('pagehide', flush);
+    return () => removeEventListener('pagehide', flush);
+  }, [vault]);
   const index = useRef<KnowledgeIndex | null>(null);
   const [kb, setKb] = useState<Omit<KnowledgeState, 'rebuild' | 'search'>>({ status: { files: 0, chunks: 0, embedded: 0 }, indexing: false, error: null });
 
@@ -167,10 +191,12 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
       if (!alive) return;
       setServer(st);
       if (st?.user) { setStatus('Syncing your library…'); await sync.start(st.user.id); }
+      if (alive) void vault.start(st ? { signal: st.signal ?? 'off', signedIn: !!st.user } : null);
       if (alive) setReady(true);
     })();
-    return () => { alive = false; sync.stop(); };
-  }, [repo, refresh, sync]);
+    return () => { alive = false; sync.stop(); void vault.stop(); };
+  }, [repo, refresh, sync, vault]);
+  useEffect(() => { refreshRef.current = refresh; }, [refresh]);
 
   useEffect(() => {
     const again = () => { if (sync.active && document.visibilityState === 'visible') void sync.sync(); };
@@ -194,13 +220,13 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
   const setPref = useCallback(<K extends keyof UiPrefs>(k: K, v: UiPrefs[K]) => setPrefs((p) => ({ ...p, [k]: v })), []);
 
   const setGemini = useCallback(async (patch: Partial<Pick<GeminiConfig, 'key' | 'model' | 'voice'>>) => {
-    if (patch.key !== undefined) await repo.setSecret('gemini.key', patch.key || null);
+    if (patch.key !== undefined) { await repo.setSecret('gemini.key', patch.key || null); vault.changed(); }
     const s: Partial<Settings> = {};
     if (patch.model !== undefined) s.liveModel = patch.model;
     if (patch.voice !== undefined) s.voice = patch.voice;
     if (Object.keys(s).length) await repo.setSettings(s);
     await refresh();
-  }, [repo, refresh]);
+  }, [repo, refresh, vault]);
 
   // ---- knowledge index: follows the included prep files; embeds with the Gemini key when there is one
   const embedder = useMemo<Embedder | null>(() => (gemini.key ? geminiEmbedder({ key: gemini.key }) : null), [gemini.key]);
@@ -289,9 +315,9 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
 
   // Refresh the library when a live session writes.
   useEffect(() => {
-    repo.onChange = () => { sync.changed(); void refresh(); };
+    repo.onChange = () => { sync.changed(); vault.changed(); void refresh(); };
     return () => { repo.onChange = null; };
-  }, [repo, refresh, sync]);
+  }, [repo, refresh, sync, vault]);
   useEffect(() => { liveRef.current = liveState; }, [liveState]);
 
   const account: Account = useMemo(() => ({
@@ -299,7 +325,9 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     skip: (on: boolean) => { writeFlag('account.skip', on); setSkipped(on); },
     reload: reloadAccount,
     syncNow: () => sync.sync(),
-  }), [server, syncStatus, skipped, reloadAccount, sync]);
+    vault, vaultStatus,
+    hint: server ? { signal: server.signal ?? 'off', signedIn: !!server.user } : null,
+  }), [server, syncStatus, skipped, reloadAccount, sync, vault, vaultStatus]);
 
   const value: AppStore = useMemo(() => ({
     ready, status, dbMode, repo, data, refresh, prefs, setPref, route, go: routerGo, back: routerBack, toast, toastText, gemini, setGemini,

@@ -672,3 +672,28 @@ func (a *Auth) errorPage(w http.ResponseWriter, r *http.Request) {
 <body style="font:16px 'DM Sans',system-ui,sans-serif;background:#18191B;color:#E8EAED;display:grid;place-items:center;min-height:90vh"><main style="max-width:28rem">%s<h1 style="letter-spacing:-.025em">Sign-in failed.</h1><p style="color:#9AA0A6">%s</p><p><a style="color:#8AB4F8;font-weight:700" href="%s">Back to Mock</a></p></main>`,
 		robotMark, html.EscapeString(msg), html.EscapeString(a.origin(r)+"/"))
 }
+
+// ---- signaling tokens
+
+type signalClaim struct {
+	UID  string `json:"uid"`
+	Kind string `json:"k"`
+}
+
+// SignalTokenTTL is how long a signaling token lasts; the app asks for a new one well before.
+const SignalTokenTTL = 30 * 24 * time.Hour
+
+// SignalToken lets an app served elsewhere (GitHub Pages) use this server's signaling relay as
+// the user who signed in here. It grants that and nothing else.
+func (a *Auth) SignalToken(uid string) string {
+	return a.sign(signalClaim{UID: uid, Kind: "signal"}, SignalTokenTTL)
+}
+
+// SignalUser is the user a signaling token was issued to, or "".
+func (a *Auth) SignalUser(token string) string {
+	var c signalClaim
+	if token == "" || !a.verify(token, &c) || c.Kind != "signal" {
+		return ""
+	}
+	return c.UID
+}

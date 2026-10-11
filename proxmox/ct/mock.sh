@@ -10,6 +10,7 @@
 #   CTID (next free)  MOCK_HOSTNAME (mock)  MOCK_STORAGE (local-lvm)  MOCK_TEMPLATE_STORAGE (local)
 #   MOCK_DISK (8)  MOCK_CORES (2)  MOCK_RAM (2048)  MOCK_BRIDGE (vmbr0)  MOCK_TAG (latest)
 #   MOCK_SSH_KEYS (a public key file for root)
+#   MOCK_CF_TOKEN, MOCK_CF_HOSTNAME  publish through a Cloudflare Tunnel (asked for when interactive)
 # Update: run `update` inside the container (or this script there).
 
 MOCK_REPO="${MOCK_REPO:-adeelahmad/Mock}"
@@ -55,6 +56,15 @@ mock_from_template() {
       ip="$(pct exec "$ctid" -- hostname -I 2>/dev/null | awk '{print $1}')" && [[ -n "$ip" ]] && break
     sleep 2
   done
+  local cf="${MOCK_CF_TOKEN:-}" cfhost="${MOCK_CF_HOSTNAME:-}"
+  if [[ -z "$cf" ]] && command -v whiptail >/dev/null && [[ -t 0 ]]; then
+    cf="$(whiptail --title "Mock" --inputbox "Cloudflare Tunnel token (optional). Publishes Mock without opening ports. Leave empty to skip." 10 74 3>&1 1>&2 2>&3 || true)"
+    [[ -n "$cf" ]] && cfhost="$(whiptail --title "Mock" --inputbox "The tunnel's public hostname (e.g. mock.example.com)" 10 74 3>&1 1>&2 2>&3 || true)"
+  fi
+  if [[ -n "$cf" ]]; then
+    echo "Connecting the Cloudflare Tunnel"
+    pct exec "$ctid" -- mock-tunnel "$cf" "$cfhost"
+  fi
   echo
   echo "Mock ${tag} is running in container ${ctid}. Open (HTTPS is needed for the microphone):"
   echo "  https://${ip:-<container ip>}"
@@ -62,6 +72,8 @@ mock_from_template() {
   echo "  pct pull ${ctid} /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt mock-root.crt"
   echo "Setup token for the sign-in wizard:"
   echo "  pct exec ${ctid} -- mock-token"
+  [[ -n "$cfhost" ]] && echo "Through the tunnel: https://${cfhost#https://}"
+  echo "Publish through a Cloudflare Tunnel later: pct exec ${ctid} -- mock-tunnel <token> <hostname>"
   echo "Root has no password; set one with: pct exec ${ctid} -- passwd"
 }
 
@@ -188,3 +200,5 @@ echo -e "${INFO}${YW}The certificate comes from Caddy's internal CA; trust it on
 echo -e "${TAB}pct pull ${CTID} /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt mock-root.crt"
 echo -e "${INFO}${YW}Sign-in and library sync: the app opens a setup wizard that asks for this token:${CL}"
 echo -e "${TAB}pct exec ${CTID} -- mock-token"
+echo -e "${INFO}${YW}Optional: publish it through a Cloudflare Tunnel (no open ports):${CL}"
+echo -e "${TAB}pct exec ${CTID} -- mock-tunnel <tunnel-token> <public-hostname>"

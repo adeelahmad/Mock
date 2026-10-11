@@ -9,6 +9,7 @@
 //	PUT  /api/library         { baseRev, doc } → { rev } or 409 { current } when another browser won
 //	DELETE /api/library       forget the synced copy (the browsers keep theirs)
 //	/auth/*                   sign-in, OAuth callbacks, sign-out, csrf, session
+//	/signal, /signal/connect  the passphrase-sync relay (signal.go)
 //	WebSocket upgrades        the Meet bridge, when enabled
 //	everything else           the app (embedded in the binary, or a directory)
 package server
@@ -27,6 +28,7 @@ import (
 	"time"
 
 	"github.com/adeelahmad/mock/internal/auth"
+	"github.com/adeelahmad/mock/internal/signal"
 	"github.com/adeelahmad/mock/internal/store"
 	"github.com/klauspost/compress/gzhttp"
 )
@@ -42,6 +44,10 @@ type Options struct {
 	Version string
 	// Bridge, when set, takes WebSocket upgrades (the Meet bridge).
 	Bridge http.Handler
+	// Signal is the passphrase-sync relay mode: "auth" (default), "open" or "off".
+	Signal string
+	// SignalOrigins are app origins /signal/connect hands tokens to (nil: DefaultSignalOrigins).
+	SignalOrigins []string
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
@@ -171,7 +177,7 @@ func New(o Options) http.Handler {
 	}
 
 	mux.HandleFunc("GET /api/status", func(w http.ResponseWriter, r *http.Request) {
-		writeJSON(w, 200, map[string]any{"server": true, "version": o.Version, "db": o.Store.Kind, "configured": len(auth.ProviderList(a.Setup())) > 0, "providers": auth.ProviderList(a.Setup()), "user": user(r)})
+		writeJSON(w, 200, map[string]any{"server": true, "version": o.Version, "db": o.Store.Kind, "configured": len(auth.ProviderList(a.Setup())) > 0, "providers": auth.ProviderList(a.Setup()), "user": user(r), "signal": signalMode(o.Signal)})
 	})
 
 	mux.HandleFunc("POST /api/setup/verify", func(w http.ResponseWriter, r *http.Request) {
@@ -332,6 +338,8 @@ func New(o Options) http.Handler {
 		w.WriteHeader(204)
 	}))
 
+	sig := signalRoutes(mux, o, a, signal.NewHub())
+
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) { errJSON(w, 404, "not_found", "") })
 	mux.Handle(auth.BasePath+"/", a)
 
@@ -346,6 +354,10 @@ func New(o Options) http.Handler {
 		w.Header().Del("X-Powered-By")
 		if strings.HasPrefix(r.URL.Path, "/api/") {
 			w.Header().Set("Cache-Control", "no-store")
+		}
+		if r.URL.Path == "/signal" {
+			sig.ServeHTTP(w, r)
+			return
 		}
 		if o.Bridge != nil && strings.EqualFold(r.Header.Get("Upgrade"), "websocket") {
 			o.Bridge.ServeHTTP(w, r)

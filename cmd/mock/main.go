@@ -19,6 +19,8 @@
 //	                    (WebSocket upgrades, for the app this server serves)
 //	MOCK_BRIDGE_CODE    a fixed pairing code; MOCK_BRIDGE_ORIGINS extra app origins (comma-separated)
 //	MOCK_BRIDGE_CHROMIUM  the Chrome/Chromium the Meet bot runs (else found on PATH)
+//	MOCK_SIGNAL         the passphrase-sync relay at /signal: auth (signed-in users, default), open, off
+//	MOCK_SIGNAL_ORIGINS app origins that may borrow the relay after signing in here (GitHub Pages)
 package main
 
 import (
@@ -92,7 +94,7 @@ const usage = `Mock — rehearse an interview loop with a live interviewer and a
 
 Settings come from the environment too: PORT, HOST, MOCK_DB, DATABASE_URL, AUTH_URL,
 AUTH_SECRET, MOCK_SETUP_TOKEN, MOCK_STATIC, MOCK_MEET, MOCK_BRIDGE_PORT, MOCK_BRIDGE_CODE,
-MOCK_BRIDGE_ORIGINS, MOCK_BRIDGE_CHROMIUM.
+MOCK_BRIDGE_ORIGINS, MOCK_BRIDGE_CHROMIUM, MOCK_SIGNAL, MOCK_SIGNAL_ORIGINS.
 `
 
 func openStore() (*store.Store, error) {
@@ -247,7 +249,10 @@ func serve(args []string) error {
 	}
 
 	var br *meet.Bridge
-	o := server.Options{Store: st, Auth: a, SetupToken: tok, Static: static, Version: version}
+	o := server.Options{Store: st, Auth: a, SetupToken: tok, Static: static, Version: version, Signal: os.Getenv("MOCK_SIGNAL")}
+	if v := os.Getenv("MOCK_SIGNAL_ORIGINS"); v != "" {
+		o.SignalOrigins = strings.Split(v, ",")
+	}
 	if *withMeet {
 		br = newBridge(bf, true)
 		o.Bridge = br

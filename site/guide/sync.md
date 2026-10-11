@@ -5,8 +5,9 @@ data between devices. Run the small **Mock server** and sign in, and your librar
 spend follow you to every browser you sign in on.
 
 ::: info Static hosting has no server
-The hosted app on GitHub Pages has no server, so it stays local-only. Sync needs the
-server: the [Go binary](/run/go-binary) (`make serve`) or [Proxmox](/run/proxmox).
+The hosted app on GitHub Pages has no server. To sync it anyway, use
+[Sync with a passphrase](/guide/passphrase-sync): your devices sync directly, with no account.
+Server sync needs the [Go binary](/run/go-binary) (`make serve`) or [Proxmox](/run/proxmox).
 :::
 
 ## Set it up
@@ -48,5 +49,7 @@ Recordings, clips, uploaded originals and the Gemini key stay on each device.
 | `MOCK_BRIDGE_CODE` | random | a fixed pairing code |
 | `MOCK_BRIDGE_ORIGINS` | dev, preview, GitHub Pages | app origins allowed to use the bridge |
 | `MOCK_BRIDGE_CHROMIUM` | found on `PATH` | the Chrome/Chromium the Meet bot runs |
+| `MOCK_SIGNAL` | `auth` | the [passphrase-sync](/guide/passphrase-sync) relay at `/signal`: `auth` (signed-in users), `open`, `off` |
+| `MOCK_SIGNAL_ORIGINS` | GitHub Pages | app origins that may borrow the relay after signing in here (comma-separated) |
 
 Run it behind HTTPS in production: the microphone and service worker need it.
