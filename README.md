@@ -64,6 +64,24 @@ widget; a PWA can't add lock-screen widgets itself.
 Once loaded, the app shell, library, History and Progress work offline (service worker).
 Live sessions need a connection: Practice says so and disables Start. The demo runs offline.
 
+### Google Meet
+
+Mock can run the interview inside a Google Meet call: it joins as a participant, asks the
+questions out loud, hears everyone in the call (a friend can sit in as a second interviewer),
+and coaches as usual. The session still runs in the app, with your library, tools, cards and
+History; the call is only where the audio goes. See `docs/meet.md`.
+
+1. On the same computer: `npm run meet-bridge` (add `-- --headed` to watch the bot's browser,
+   `--chrome` to use installed Chrome, `--profile DIR` for a signed-in bot profile). It prints a
+   pairing code.
+2. Practice → **Interview in Google Meet** → enter the code → paste a Meet link, or sign in with
+   Google to create one (needs an OAuth client id: `VITE_GOOGLE_CLIENT_ID` at build time or typed
+   in the sheet, with the Meet REST API enabled and the app's origin allowed).
+3. **Invite Mock**, let it in if Meet asks, then **Start drill in Meet**. Needs a Gemini key.
+
+The bridge only listens on 127.0.0.1, only accepts the app's origins (`MOCK_BRIDGE_ORIGINS` to
+change), and only after the pairing code. The Gemini key never leaves the app.
+
 ## Develop
 
 With `make` (run `make help` for the list):
@@ -96,6 +114,7 @@ npm run shots          # app screenshots → tests/screenshots (dev server runni
 npm run icons          # re-render public/icons/*.png from the SVG sources
 npm run server         # the Mock server on :8787 (sign-in + sync); `npm run dev` proxies to it
 npm start              # build, then serve the app + API from the Mock server
+npm run meet-bridge    # the local Google Meet bridge on :8788 (Node 22.18+, runs the TypeScript directly)
 ```
 
 Dev-only: Settings → Library & data → *Load sample data*.
@@ -173,13 +192,16 @@ Static hosts (GitHub Pages) have no server: the app sees that and stays local-on
 
 React 19 · TypeScript · Vite · DuckDB-Wasm on IndexedDB snapshots · Gemini Live and Flash ·
 Workbox service worker · web app manifest with shortcuts · optional Node server: Express,
-Auth.js, SQLite (`node:sqlite`) or Postgres.
+Auth.js, SQLite (`node:sqlite`) or Postgres · optional Meet bridge on your own computer (Node,
+Playwright, ws).
 
 ## Layout
 
 ```
 src/domain   types, state machine, readiness, parsers, selectors (pure, unit-tested)
-src/live     transport interface, simulated + Gemini transports, session controller
+src/live     transport interface, simulated + Gemini transports, session controller, context tools
+src/meet     Google Meet: bridge client, Meet audio, sign-in and meeting creation
+meet-bridge  the local bridge: WebSocket server, Playwright bot, in-page audio for Meet
 src/db       Repo interface and implementations, backup
 src/app      router, store, theme, prefs, install / offline / deep links
 src/sync     sync engine (pull / push / merge) and the server API client

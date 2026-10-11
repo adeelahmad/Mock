@@ -17,7 +17,8 @@
     "check": "npm run typecheck && npm run test && npm run build",
     "refs": "node scripts/design-refs.mjs",
     "shots": "node scripts/app-shots.mjs",
-    "icons": "node scripts/icons.mjs"
+    "icons": "node scripts/icons.mjs",
+    "meet-bridge": "node meet-bridge/main.ts"
   },
   "dependencies": {
     "@auth/express": "^0.12.3",
@@ -38,11 +39,13 @@
     "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/ws": "^8.18.2",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.9",
     "vite": "^7.1.0",
     "vite-plugin-pwa": "2.0.0",
     "vitest": "^3",
-    "workbox-window": "7.4.1"
+    "workbox-window": "7.4.1",
+    "ws": "^8.22.0"
   }
 }

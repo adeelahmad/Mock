@@ -13,6 +13,7 @@ import { NEW_QUESTION_TOOL, SAVE_STORY_TOOL, SEARCH_PREP_TOOL, type LiveTranspor
 import type { Hit } from '../rag/knowledge.ts';
 import type { Analyzer } from './analyzer.ts';
 import { LocalReporter, reportInput, type Reporter } from './reporter.ts';
+import type { ToolHandler } from './context-tools.ts';
 import { reportUsage } from '../gemini/usage.ts';
 
 export interface StartOptions {
@@ -34,6 +35,8 @@ export interface StartOptions {
   questionText?: string | null;
   /** Search over the prep files (the knowledge index): the hint's source and the search_prep tool. */
   retriever?: Retriever | null;
+  /** Extra tools next to the built-in ones (the library lookups in context-tools.ts). */
+  tools?: ToolHandler[];
 }
 
 export type Retriever = (query: string, k: number) => Promise<Hit[]>;
@@ -113,7 +116,7 @@ export class SessionController {
     this.dispatch({ type: 'CONNECT', now: this.now() });
     this.off = this.transport.on((e) => this.onTransport(e));
     try {
-      await this.transport.connect({ model: opts.model, voice: opts.voice, systemInstruction: opts.systemInstruction, tools: [NEW_QUESTION_TOOL, ...(opts.retriever ? [SEARCH_PREP_TOOL] : []), SAVE_STORY_TOOL], silenceDurationMs: opts.pauseMs, resumptionHandle: null, seed: opts.seed });
+      await this.transport.connect({ model: opts.model, voice: opts.voice, systemInstruction: opts.systemInstruction, tools: [NEW_QUESTION_TOOL, ...(opts.retriever ? [SEARCH_PREP_TOOL] : []), SAVE_STORY_TOOL, ...(opts.tools ?? []).map((t) => t.declaration)], silenceDurationMs: opts.pauseMs, resumptionHandle: null, seed: opts.seed });
     } catch (err) {
       this.dispatch({ type: 'ERROR', now: this.now(), message: (err as Error).message || 'Could not connect' });
       await this.end('');
@@ -262,7 +265,11 @@ export class SessionController {
           responses.push({ id: c.id, name: c.name, response: { ok: false, error: (err as Error).message || 'save failed' } });
         }
       } else {
-        responses.push({ id: c.id, name: c.name, response: { ok: false, error: 'unknown tool' } });
+        const tool = this.opts?.tools?.find((t) => t.declaration.name === c.name);
+        let response: Record<string, unknown>;
+        try { response = tool ? await tool.handle(c.args ?? {}) : { ok: false, error: 'unknown tool' }; }
+        catch (err) { response = { ok: false, error: (err as Error).message || 'lookup failed' }; }
+        responses.push({ id: c.id, name: c.name, response });
       }
     }
     this.transport.sendToolResponse(responses);

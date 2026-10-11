@@ -35,6 +35,8 @@ export interface BrowserAudioOptions {
   mic?: boolean;
   /** Record the mixed track and clips (false for hello/preview). */
   record?: boolean;
+  /** Play model audio out loud (false when it plays somewhere else, e.g. a Meet call). */
+  speakers?: boolean;
 }
 
 // The worklet batches 128-sample render quanta into ~2048-sample frames and posts them.
@@ -83,6 +85,7 @@ export class BrowserAudio implements AudioIO {
   private chunks: Blob[] = [];
   private clip: { rec: MediaRecorder; chunks: Blob[] } | null = null;
   private wake: WakeLockLike | null = null;
+  private nextMixTime = 0;
   private closed = false;
   private mic: boolean;
   private record: boolean;
@@ -95,7 +98,10 @@ export class BrowserAudio implements AudioIO {
     this.ctx = new AC({ latencyHint: 'interactive' });
     void this.ctx.resume().catch(() => undefined);
     this.out = this.ctx.createGain();
-    this.out.connect(this.ctx.destination);
+    // Silent output still reaches the destination, so playback timing (and onended) runs.
+    const speakers = this.ctx.createGain();
+    speakers.gain.value = opts.speakers === false ? 0 : 1;
+    this.out.connect(speakers); speakers.connect(this.ctx.destination);
     document.addEventListener('visibilitychange', this.onVisible);
     document.addEventListener('pointerdown', this.unlock, true);
     document.addEventListener('keydown', this.unlock, true);
@@ -164,14 +170,33 @@ export class BrowserAudio implements AudioIO {
     this.stream?.getAudioTracks().forEach((t) => { t.enabled = !muted; });
   }
 
-  play(base64Pcm: string, rate: number): void {
-    if (this.closed) return;
+  private buffer(base64Pcm: string, rate: number): AudioBuffer | null {
     const bin = atob(base64Pcm);
     const n = bin.length >> 1;
-    if (!n) return;
+    if (!n) return null;
     const buf = this.ctx.createBuffer(1, n, rate);
     const ch = buf.getChannelData(0);
     for (let i = 0; i < n; i++) { let v = bin.charCodeAt(i * 2) | (bin.charCodeAt(i * 2 + 1) << 8); if (v >= 0x8000) v -= 0x10000; ch[i] = v / (v < 0 ? 0x8000 : 0x7fff); }
+    return buf;
+  }
+
+  /** Other audio for the recording only (a Meet call's participants), queued in order. */
+  mixIn(base64Pcm: string, rate: number): void {
+    if (this.closed || !this.mix) return;
+    const buf = this.buffer(base64Pcm, rate);
+    if (!buf) return;
+    const src = this.ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(this.mix);
+    const at = Math.max(this.ctx.currentTime + 0.04, this.nextMixTime);
+    src.start(at);
+    this.nextMixTime = at + buf.duration;
+  }
+
+  play(base64Pcm: string, rate: number): void {
+    if (this.closed) return;
+    const buf = this.buffer(base64Pcm, rate);
+    if (!buf) return;
     const src = this.ctx.createBufferSource();
     src.buffer = buf;
     src.connect(this.out);
