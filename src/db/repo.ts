@@ -4,8 +4,10 @@
 // The shapes are the domain types; derived numbers (counts, latest verdicts, heat, trend)
 // are computed by `domain/selectors.ts` from these reads, or by SQL in the DuckDB repo.
 
-import type { Analysis, Exchange, Lp, LpRole, PrepFile, Question, Report, Session, Settings, Story, TranscriptEvent } from '../domain/types.ts';
+import type { Analysis, Exchange, Lp, LpRole, PrepFile, Question, Report, Session, Settings, Story, TokenUsage, TranscriptEvent } from '../domain/types.ts';
 import type { MockBackup } from './backup.ts';
+
+export interface UsageEntry { model: string; lpId: string | null; usage: TokenUsage }
 
 export type RepoMode = 'memory' | 'duckdb' | 'none';
 
@@ -45,6 +47,8 @@ export interface Repo {
 
   // ---- writes
   setSettings(patch: Partial<Settings>): Promise<void>;
+  /** Adds Gemini token counts to the budget ledger (read-modify-write in one step). */
+  addUsage(entries: UsageEntry[]): Promise<void>;
   /** Areas back to the AWS Leadership Principles preset. */
   resetLps(): Promise<void>;
   /** Replace the areas (a custom interview's own list); links to removed ids stay but show nowhere. */

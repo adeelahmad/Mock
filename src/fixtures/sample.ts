@@ -4,6 +4,7 @@
 
 import type { Analysis, Exchange, Interviewer, Lp, PrepFile, Question, Session, Settings, Story, TranscriptEvent, Verdict } from '../domain/types.ts';
 import { CODE_VERDICT } from '../domain/types.ts';
+import { DEFAULT_PRICING } from '../domain/budget.ts';
 
 const T0 = Date.UTC(2026, 8, 27, 9, 0); // Sun 27 Sep 2026
 const iso = (d: number, h = 9) => new Date(Date.UTC(2026, 8, 27) + d * 86400000 + h * 3600000).toISOString();
@@ -204,7 +205,14 @@ export const isAwsAreas = (areas: { id: string }[]): boolean => areas.length > 0
 export const SETTINGS: Settings = {
   interviewDate: '2026-10-30', liveModel: 'gemini-3.8-live', textModel: 'gemini-3.8-flash', voice: 'Aoede', pauseMs: 2500,
   systemInstruction: DEFAULT_SYSTEM_INSTRUCTION, loopSize: 5, coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 12345, lastBackupAt: null, onboarded: true,
+  pricing: DEFAULT_PRICING,
+  usage: [
+    { model: 'gemini-3.8-live', lpId: 'own', calls: 14, input: 182_000, output: 2_100, audioInput: 61_000, audioOutput: 48_000 },
+    { model: 'gemini-3.8-live', lpId: 'deep', calls: 9, input: 120_000, output: 1_400, audioInput: 39_000, audioOutput: 30_000 },
+    { model: 'gemini-3.8-flash', lpId: 'own', calls: 6, input: 52_000, output: 7_800, audioInput: 0, audioOutput: 0 },
+    { model: 'gemini-3.8-flash', lpId: null, calls: 3, input: 21_000, output: 4_200, audioInput: 0, audioOutput: 0 },
+  ],
 };
 
 /** What a brand-new install starts with: the LPs and settings only (plan D3). */
-export const EMPTY_SETTINGS: Settings = { ...SETTINGS, onboarded: false };
+export const EMPTY_SETTINGS: Settings = { ...SETTINGS, onboarded: false, usage: [] };

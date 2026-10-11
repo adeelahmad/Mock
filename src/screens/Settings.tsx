@@ -17,6 +17,7 @@ import CsvSamples from '../components/CsvSamples.tsx';
 import { DEFAULT_SYSTEM_INSTRUCTION, GENERIC_SYSTEM_INSTRUCTION, isAwsAreas } from '../fixtures/sample.ts';
 import '../styles/screens/settings.css';
 import { BackupSheet, RestoreSheet } from './BackupSheets.tsx';
+import { BudgetSettings } from '../components/Budget.tsx';
 
 export { VOICES, personaFor, previewToast, MODELS, type VoicePersona } from '../domain/voices.ts';
 import { VOICES, personaFor, previewToast, MODELS, type VoicePersona } from '../domain/voices.ts';
@@ -262,6 +263,8 @@ export default function Settings() {
                 <div className="row pref-row"><span className="srow-title">Live layout</span><Seg className="appear" value={prefs.liveLayout} options={LAYOUTS} onChange={(v) => setPref('liveLayout', v)} /></div>
               </div>
             </div>
+
+            <BudgetSettings />
 
             {/* Library & data */}
             <div className="stack g8"><span className="label">Library &amp; data</span>

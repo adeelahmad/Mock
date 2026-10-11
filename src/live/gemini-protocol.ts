@@ -104,6 +104,7 @@ export function parseServerMessage(msg: unknown): ParsedServer {
     const u = m.sessionResumptionUpdate;
     out.events.push({ type: 'resumption', handle: u.newHandle ?? null, resumable: !!u.resumable });
   }
+  if (m.usageMetadata) out.events.push({ type: 'usage', usageMetadata: m.usageMetadata });
   if (m.error) out.events.push({ type: 'error', message: String(m.error.message ?? m.error) });
   return out;
 }

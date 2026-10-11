@@ -58,7 +58,7 @@ export class GeminiAnalyzer implements Analyzer {
     const audio = await audioPart(input.clip);
     const parts: Part[] = [{ text: analysisPrompt(input, this.o.lps, this.o.stories, !!audio) }];
     if (audio) parts.push(audio);
-    const raw = await generateJson({ key: this.o.key, model: this.o.model, system: ANALYSIS_SYSTEM, parts, schema: ANALYSIS_SCHEMA, temperature: 0.2, fetch: this.o.fetch });
+    const raw = await generateJson({ key: this.o.key, model: this.o.model, system: ANALYSIS_SYSTEM, parts, schema: ANALYSIS_SCHEMA, temperature: 0.2, fetch: this.o.fetch, lpId: input.exchange.lpId });
     const lpName = this.o.lps.find((l) => l.id === input.exchange.lpId)?.name ?? '';
     return normalizeAnalysis(raw, { measured: measureDelivery(input.transcript, input.durationSec), stories: this.o.stories, lpName, coachText: input.coachText });
   }
