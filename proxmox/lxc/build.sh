@@ -45,7 +45,7 @@ mmdebstrap \
   --customize-hook="upload '$ROOT/proxmox/install/mock-server.sh' /usr/local/lib/mock/mock-server.sh" \
   --customize-hook="upload '$ROOT/proxmox/banner.sh' /usr/local/lib/mock/banner.sh" \
   --customize-hook="sync-in '$ROOT/proxmox/lxc/rootfs' /" \
-  --customize-hook='chroot "$1" chown -R root:root /usr/local/bin/mock /usr/local/lib/mock /etc/systemd/system/mock-firstboot.service /etc/profile.d/mock.sh /usr/bin/update' \
+  --customize-hook='chroot "$1" chown -R root:root /usr/local/bin/mock /usr/local/lib/mock /etc/systemd/system/mock-firstboot.service /etc/profile.d/mock.sh /etc/hosts /etc/systemd/system/caddy.service.d /usr/bin/update' \
   --customize-hook='chmod 0755 "$1/usr/local/bin/mock" "$1/usr/local/lib/mock/mock-server.sh" "$1/usr/local/lib/mock/mock-firstboot" "$1/usr/bin/update"' \
   --customize-hook='chroot "$1" systemctl enable mock-firstboot.service' \
   --customize-hook="echo '$VERSION' >\"\$1/etc/mock-release\"" \

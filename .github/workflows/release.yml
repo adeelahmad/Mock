@@ -59,6 +59,7 @@ jobs:
   lxc:
     needs: binaries
     strategy:
+      fail-fast: false
       matrix:
         include:
           - arch: amd64

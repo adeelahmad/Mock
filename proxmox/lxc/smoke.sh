@@ -16,7 +16,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-tar --zstd -xpf "$TEMPLATE" -C "$DIR"
+tar --zstd --numeric-owner -xpf "$TEMPLATE" -C "$DIR"
 systemd-nspawn --boot --quiet --machine="$NAME" -D "$DIR" </dev/null >"$LOG" 2>&1 &
 
 run() { systemd-run --quiet --machine="$NAME" --wait --pipe "$@"; }
