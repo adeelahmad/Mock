@@ -137,5 +137,6 @@ pct exec "$var_ctid" -- rm -f /root/mock-install.sh
 IP=$(pct exec "$var_ctid" -- hostname -I | awk '{print $1}')
 msg_ok "Completed successfully!"
 echo -e "${BL}${APP} is running at:${CL}  http://${IP}/   https://${IP}/"
+echo -e "${BL}Sign-in and sync:${CL} open the app; the setup wizard asks for the token printed above (\`pct exec ${var_ctid} mock-token\` shows it again)."
 echo -e "${BL}Update later:${CL} rerun this command inside CT ${var_ctid}, or run \`update\` there."
 echo -e "${YW}HTTPS uses Caddy's internal CA. Trust it (pct pull ${var_ctid} /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt root.crt) or put your own reverse proxy in front; the microphone needs a trusted HTTPS origin.${CL}"

@@ -17,8 +17,11 @@ import { buildContext, confirmTokens, prioritiseQuestions } from '../live/contex
 import { GeminiLiveTransport } from '../live/gemini.ts';
 import { BrowserAudio } from '../live/audio.ts';
 import { countTokens } from '../live/gemini-rest.ts';
-import { readPrefs, writePrefs } from './prefs.ts';
+import { readPrefs, writePrefs, readFlag, writeFlag } from './prefs.ts';
 import { applyTheme } from './theme.ts';
+import { buildBackup } from '../db/backup.ts';
+import { SyncEngine, localMemo, type SyncStatus } from '../sync/engine.ts';
+import { httpSync, status as serverStatus, type ServerStatus } from '../sync/api.ts';
 import { go as routerGo, back as routerBack, useRoute, type Route } from './router.ts';
 
 export interface AppData {
@@ -36,6 +39,18 @@ export interface LiveStart {
   focusLabel?: string;
   questionText?: string | null;
   coaching?: Settings['coaching'];
+}
+
+export interface Account {
+  /** The Mock server behind this site, or null (static hosting / offline / no server). */
+  server: ServerStatus | null;
+  sync: SyncStatus;
+  /** The user chose to use Mock without an account on this device. */
+  skipped: boolean;
+  skip: (on: boolean) => void;
+  /** Re-reads the server status (after setup, sign-in) and starts or stops sync. */
+  reload: () => Promise<void>;
+  syncNow: () => Promise<void>;
 }
 
 export interface AppStore {
@@ -67,6 +82,7 @@ export interface AppStore {
   sheet: { setup: boolean; answer: QuestionRow | null; addQuestion: boolean; addStory: boolean };
   openSheet: (name: keyof AppStore['sheet'], value?: unknown) => void;
   closeSheets: () => void;
+  account: Account;
 }
 
 const Ctx = createContext<AppStore | null>(null);
@@ -95,6 +111,13 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
   const [lastStart, setLastStart] = useState<LiveStart | null>(null);
   const [sheet, setSheet] = useState<AppStore['sheet']>({ setup: false, answer: null, addQuestion: false, addStory: false });
   const route = useRoute();
+  const [server, setServer] = useState<ServerStatus | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>({ phase: 'off', lastSyncedAt: null, error: null, pending: false });
+  const [skipped, setSkipped] = useState(() => readFlag('account.skip'));
+  const liveRef = useRef<SessionState | null>(null);
+  // Library sync with the Mock server: pushes after local writes, pulls on start, focus and every minute.
+  const sync = useMemo(() => new SyncEngine(httpSync, { build: () => buildBackup(repo), apply: (doc) => repo.importBackup(doc) }, localMemo, { busy: () => !!liveRef.current && liveRef.current.phase !== 'ended' }), [repo]);
+  useEffect(() => sync.subscribe(setSyncStatus), [sync]);
 
   const refresh = useCallback(async () => {
     const [lps, stories, questions, files, sessions, exchanges, settings] = await Promise.all([repo.lps(), repo.stories(), repo.questions(), repo.files(), repo.sessions(), repo.exchanges(), repo.settings()]);
@@ -103,17 +126,36 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     setGem({ key, hasKey: !!key, model: settings.liveModel, voice: settings.voice });
   }, [repo]);
 
+  const applyServer = useCallback((st: ServerStatus | null) => {
+    setServer(st);
+    if (st?.user) void sync.start(st.user.id); else sync.stop();
+  }, [sync]);
+  const reloadAccount = useCallback(async () => { applyServer(await serverStatus()); }, [applyServer]);
+
   useEffect(() => {
     let alive = true;
     (async () => {
+      const probe = serverStatus();
       const mode = await repo.init((s) => alive && setStatus(s));
       if (!alive) return;
       setDbMode(mode);
       await refresh();
+      const st = await probe;
+      if (!alive) return;
+      setServer(st);
+      if (st?.user) { setStatus('Syncing your library…'); await sync.start(st.user.id); }
       if (alive) setReady(true);
     })();
-    return () => { alive = false; };
-  }, [repo, refresh]);
+    return () => { alive = false; sync.stop(); };
+  }, [repo, refresh, sync]);
+
+  useEffect(() => {
+    const again = () => { if (sync.active && document.visibilityState === 'visible') void sync.sync(); };
+    const t = setInterval(again, 60_000);
+    document.addEventListener('visibilitychange', again);
+    addEventListener('online', again);
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', again); removeEventListener('online', again); };
+  }, [sync]);
 
   useEffect(() => { applyTheme(prefs.theme); writePrefs(prefs); }, [prefs]);
   useEffect(() => { setSheet({ setup: false, answer: null, addQuestion: false, addStory: false }); }, [route.path]);
@@ -174,9 +216,17 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
 
   // Refresh the library when a live session writes.
   useEffect(() => {
-    repo.onChange = () => { void refresh(); };
+    repo.onChange = () => { sync.changed(); void refresh(); };
     return () => { repo.onChange = null; };
-  }, [repo, refresh]);
+  }, [repo, refresh, sync]);
+  useEffect(() => { liveRef.current = liveState; }, [liveState]);
+
+  const account: Account = useMemo(() => ({
+    server, sync: syncStatus, skipped,
+    skip: (on: boolean) => { writeFlag('account.skip', on); setSkipped(on); },
+    reload: reloadAccount,
+    syncNow: () => sync.sync(),
+  }), [server, syncStatus, skipped, reloadAccount, sync]);
 
   const value: AppStore = useMemo(() => ({
     ready, status, dbMode, repo, data, refresh, prefs, setPref, route, go: routerGo, back: routerBack, toast, toastText, gemini, setGemini,
@@ -185,7 +235,8 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     sheet,
     openSheet: (name, v) => setSheet((x) => ({ ...x, [name]: name === 'answer' ? (v as QuestionRow) : true })),
     closeSheets: () => setSheet({ setup: false, answer: null, addQuestion: false, addStory: false }),
-  }), [ready, status, dbMode, repo, data, refresh, prefs, setPref, route, toast, toastText, gemini, setGemini, liveState, liveMeta, lastStart, startLive, exitLive, sheet, transcript]);
+    account,
+  }), [account, ready, status, dbMode, repo, data, refresh, prefs, setPref, route, toast, toastText, gemini, setGemini, liveState, liveMeta, lastStart, startLive, exitLive, sheet, transcript]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

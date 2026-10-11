@@ -16,6 +16,7 @@ import { detectFileType, parseExponentRows, parseQuestionsFromCsv, parseStoriesF
 import { DEFAULT_SYSTEM_INSTRUCTION } from '../fixtures/sample.ts';
 import '../styles/screens/settings.css';
 import { BackupSheet, RestoreSheet } from './BackupSheets.tsx';
+import { AccountSection } from './Account.tsx';
 
 export { VOICES, personaFor, previewToast, MODELS, type VoicePersona } from '../domain/voices.ts';
 import { VOICES, personaFor, previewToast, MODELS, type VoicePersona } from '../domain/voices.ts';
@@ -84,7 +85,7 @@ const LAYOUTS: [UiPrefs['liveLayout'], string][] = [['stage', 'Stage'], ['transc
 
 // ---------- The screen ----------
 export default function Settings() {
-  const { data, repo, refresh, prefs, setPref, back, go, toast, gemini, setGemini, dbMode } = useApp();
+  const { data, repo, refresh, prefs, setPref, back, go, toast, gemini, setGemini, dbMode, account } = useApp();
   const { settings } = data;
   const [scrolled, setScrolled] = useState(false);
 
@@ -262,6 +263,8 @@ export default function Settings() {
               </div>
             </div>
 
+            <AccountSection />
+
             {/* Library & data */}
             <div className="stack g8"><span className="label">Library &amp; data</span>
               <div className="list r12">
@@ -306,7 +309,7 @@ export default function Settings() {
           </div>
 
           {storage && <span className="foot-line">{storage}</span>}
-          <span className="foot-line">Mock 0.9 · everything stays on this device unless you export it.</span>
+          <span className="foot-line">Mock 0.9 · {account.server?.user ? 'your library syncs to your Mock server; recordings and the Gemini key stay on this device.' : 'everything stays on this device unless you export it.'}</span>
         </div>
       </div>
       <BackupSheet open={!!backupSheet} onClose={() => setBackupSheet(null)} recordingsDefault={backupSheet === 'export'} recordingCount={recKeys.length} />

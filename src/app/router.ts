@@ -41,6 +41,7 @@ export function useRoute(): Route {
 
 export const paths = {
   practice: '/practice', settings: '/practice/settings', onboarding: '/practice/setup',
+  serverSetup: '/practice/server-setup', signIn: '/practice/sign-in',
   library: (seg: 'lps' | 'stories' | 'questions' | 'files' = 'lps') => '/library/' + seg,
   lp: (id: string) => '/library/lps/' + id,
   story: (id: string) => '/library/stories/' + id,

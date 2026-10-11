@@ -20,6 +20,7 @@ import Settings from '../screens/Settings.tsx';
 import { usePwa } from './pwa.ts';
 import Onboarding from '../screens/Onboarding.tsx';
 import Live from '../screens/Live.tsx';
+import { ServerSetup, SignIn } from '../screens/Account.tsx';
 import { SetupSheet, AnswerSheet, AddQuestionSheet, AddStorySheet } from '../screens/Sheets.tsx';
 
 function Sidebar() {
@@ -60,9 +61,21 @@ function TabBar() {
   );
 }
 
+/** On a Mock server: the setup wizard until sign-in is set up, then sign-in, unless the user chose local-only. */
+export function accountGate(account: ReturnType<typeof useApp>['account']): 'setup' | 'signin' | null {
+  const s = account.server;
+  if (!s || account.skipped || s.user) return null;
+  return s.configured ? 'signin' : 'setup';
+}
+
 function Screen() {
-  const { route, data } = useApp();
+  const { route, data, account } = useApp();
   const [a, b, c] = route.parts;
+  if (a === 'practice' && b === 'server-setup') return <ServerSetup />;
+  if (a === 'practice' && b === 'sign-in') return <SignIn />;
+  const gate = accountGate(account);
+  if (gate === 'setup') return <ServerSetup />;
+  if (gate === 'signin') return <SignIn />;
   if (a === 'practice' && b === 'settings') return <Settings />;
   if (a === 'practice' && b === 'setup') return <Onboarding />;
   if (a === 'library') {
@@ -79,12 +92,12 @@ function Screen() {
 }
 
 export default function App() {
-  const { ready, status, toastText, live, route, sheet, closeSheets, data } = useApp();
+  const { ready, status, toastText, live, route, sheet, closeSheets, data, account } = useApp();
   useDeepLinks();
   const pwa = usePwa();
   const inLive = route.path === paths.live && live.state;
-  const firstRun = !data.settings.onboarded || route.path === paths.onboarding;
-  const showTabs = !inLive && ['practice', 'library', 'history', 'progress'].includes(route.tab) && route.parts.length <= 2 && route.path !== paths.settings && route.path !== paths.onboarding;
+  const firstRun = !data.settings.onboarded || route.path === paths.onboarding || route.path === paths.serverSetup || route.path === paths.signIn || !!accountGate(account);
+  const showTabs = !inLive && ['practice', 'library', 'history', 'progress'].includes(route.tab) && route.parts.length <= 2 && route.path !== paths.settings && route.path !== paths.onboarding && !firstRun;
   return (
     <div className="app">
       {!inLive && !firstRun && <Sidebar />}
