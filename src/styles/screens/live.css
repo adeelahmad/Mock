@@ -193,3 +193,8 @@ button.live-notes-head:hover { background: var(--m-elev); }
   .live-side-title { font: 700 15px/1.2 var(--font-sans); }
   .live-side-scroll { flex: 1; min-height: 0; overflow: auto; padding: 0 16px 16px; display: flex; flex-direction: column; gap: 10px; }
 }
+
+/* Context debug panel (D on the live screen) */
+.ctx-debug { position: fixed; z-index: 60; left: 16px; bottom: calc(env(safe-area-inset-bottom) + 16px); max-width: min(420px, calc(100vw - 32px)); padding: 10px 12px; border-radius: 10px; background: var(--m-card); color: var(--m-fg); border: 1px solid var(--m-line); box-shadow: 0 6px 24px rgba(0,0,0,.18); font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; display: grid; gap: 4px; }
+.ctx-debug-head { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+.ctx-debug-head button { background: none; border: 0; color: inherit; font-size: 16px; cursor: pointer; }

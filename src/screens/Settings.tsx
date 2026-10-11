@@ -18,6 +18,7 @@ import '../styles/screens/settings.css';
 
 export { VOICES, personaFor, previewToast, MODELS, type VoicePersona } from '../domain/voices.ts';
 import { VOICES, personaFor, previewToast, MODELS, type VoicePersona } from '../domain/voices.ts';
+import { helloTest, previewVoice, type HelloResult } from '../live/hello.ts';
 const OTHER = '__other__';
 
 // ---------- Small formatters ----------
@@ -130,21 +131,41 @@ export const importSummary = (r: PrepImport): string => {
   return 'Imported ' + bits.join(' · ');
 };
 
-// ---------- "Test · say hello" (M3: a real Live hello; M1 reports the demo transport) ----------
-export type HelloState = 'idle' | 'nokey' | 'connecting' | 'ok';
-export function useHelloTest(): { state: HelloState; text: string; run: (key: string) => void } {
+// ---------- "Test · say hello" and the voice preview: one real live turn each ----------
+export type HelloState = 'idle' | 'nokey' | 'connecting' | 'ok' | 'failed';
+export function useHelloTest(): { state: HelloState; text: string; result: HelloResult | null; run: (key: string) => void } {
+  const { gemini } = useApp();
   const [state, setState] = useState<HelloState>('idle');
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  const [result, setResult] = useState<HelloResult | null>(null);
+  const [error, setError] = useState('');
+  const alive = useRef(true);
+  useEffect(() => () => { alive.current = false; }, []);
   const run = useCallback((key: string) => {
-    if (timer.current) clearTimeout(timer.current);
     if (!key.trim()) { setState('nokey'); return; }
-    setState('connecting');
-    // M3: open a Live session, send "say hello", measure the mic level and the pause from the first turn.
-    timer.current = setTimeout(() => { setState('ok'); timer.current = null; }, 1500);
-  }, []);
-  const text = state === 'nokey' ? 'Paste an API key first.' : state === 'connecting' ? 'Connecting…' : state === 'ok' ? '✓ Connected — demo transport' : '';
-  return { state, text, run };
+    setState('connecting'); setResult(null);
+    const p = personaFor(gemini.voice);
+    helloTest(key.trim(), gemini.model, gemini.voice, p?.full ?? 'the interviewer')
+      .then((r) => { if (!alive.current) return; setResult(r); setState(r.heard ? 'ok' : 'failed'); setError(r.heard ? '' : 'Connected, but no audio came back.'); })
+      .catch((err: Error) => { if (!alive.current) return; setState('failed'); setError(err.message || 'Could not connect'); });
+  }, [gemini.model, gemini.voice]);
+  const pause = result?.suggestedPauseMs ? ' · suggested pause ' + fmtPause(result.suggestedPauseMs) : '';
+  const text = state === 'nokey' ? 'Paste an API key first.' : state === 'connecting' ? 'Connecting…' : state === 'ok' ? '✓ Connected' + pause : state === 'failed' ? error : '';
+  return { state, text, result, run };
+}
+
+/** Plays one persona's live greeting; a toast when there is no key or the call fails. */
+export function useVoicePreview(): (p: VoicePersona) => void {
+  const { gemini, toast } = useApp();
+  const busy = useRef(false);
+  return useCallback((p: VoicePersona) => {
+    if (!gemini.hasKey) { toast(previewToast(p)); return; }
+    if (busy.current) return;
+    busy.current = true;
+    previewVoice(gemini.key, gemini.model, p.voice, p.full, p.short)
+      .then((r) => { if (!r.heard) toast('No audio came back for ' + p.name); })
+      .catch((err: Error) => toast('Preview failed: ' + (err.message || 'could not connect')))
+      .finally(() => { busy.current = false; });
+  }, [gemini.hasKey, gemini.key, gemini.model, toast]);
 }
 
 // ---------- Shared fields ----------
@@ -195,6 +216,7 @@ export default function Settings() {
   useEffect(() => { setKeyDraft(gemini.key); }, [gemini.key]);
   const commitKey = () => { const k = keyDraft.trim(); if (k !== gemini.key) void setGemini({ key: k }); };
   const hello = useHelloTest();
+  const preview = useVoicePreview();
 
   // Pause slider: local value, written 150 ms after the last change.
   const [pause, setPause] = useState(settings.pauseMs);
@@ -344,7 +366,7 @@ export default function Settings() {
                         <span className="voice-mono">{p.mono}</span>
                         <span className="voice-text"><span className="voice-name">{p.name}</span><span className="voice-desc">{p.desc}</span></span>
                       </button>
-                      <button type="button" className="voice-play" aria-label={'Preview ' + p.name} onClick={() => toast(previewToast(gemini.hasKey, p))}><Icon.Play size={14} /></button>
+                      <button type="button" className="voice-play" aria-label={'Preview ' + p.name} onClick={() => preview(p)}><Icon.Play size={14} /></button>
                       <span className="voice-check" aria-hidden="true">{on ? '✓' : ''}</span>
                     </div>
                   );
