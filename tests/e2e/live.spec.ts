@@ -47,6 +47,8 @@ test.describe('live session on the simulated transport', () => {
     if (isPhone(page)) await page.getByRole('button', { name: /^Hint$/ }).click();
     else await page.keyboard.press('h');
     await expect(page.getByText(/Try the Payments outage story/)).toBeVisible();
+    // The closest passage from the prep files rides along with the hint.
+    await expect(page.locator('.live-hint').getByText(/From loop-2024-notes\.md/)).toBeVisible();
     await page.getByRole('button', { name: /Dismiss hint/ }).click();
     await expect(page.getByText(/Try the Payments outage story/)).toBeHidden();
     await page.getByRole('button', { name: /^End/ }).first().click();

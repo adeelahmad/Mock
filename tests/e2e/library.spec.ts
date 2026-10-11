@@ -55,6 +55,15 @@ test.describe('library', () => {
     await expect(page).toHaveURL(/#\/library\/files\/f3/);
     await expect(page.getByText(/AWS loop — March 2024/)).toBeVisible();
   });
+
+  test('files: the knowledge index finds the passage for a question', async ({ page }) => {
+    await open(page, '#/library/files');
+    await expect(page.getByText(/passages from 4 files/)).toBeVisible();
+    await page.getByRole('textbox', { name: 'Search your files' }).fill('a problem others had missed');
+    await page.getByRole('button', { name: /^Search$/ }).click();
+    await expect(page.locator('.kb-hit').first()).toContainText('loop-2024-notes.md › Round 3 · Bar raiser');
+  });
+
   test('areas: download the sample CSV, import it, then load the AWS defaults back', async ({ page }) => {
     await open(page, '#/library/lps');
     const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Sample CSV' }).first().click()]);

@@ -17,6 +17,8 @@ import ImportReview, { prepareReview, type ReviewData } from './ImportReview.tsx
 import ImportStories from './ImportStories.tsx';
 import { areasFromParsed, fileText } from '../domain/prep-import.ts';
 import { tagWithGemini } from '../gemini/tagging.ts';
+import { isPdf, pdfToMarkdown } from '../gemini/pdf.ts';
+import type { Hit } from '../rag/knowledge.ts';
 import '../styles/screens/library.css';
 
 export type LibrarySeg = 'lps' | 'stories' | 'questions' | 'files';
@@ -146,6 +148,41 @@ export function FileList({ files, onOpen, onToggle }: { files: PrepFile[]; onOpe
   );
 }
 
+// ---------- Knowledge index (hints and the coach's search_prep) ----------
+
+function KnowledgePanel({ knowledge, hasKey }: { knowledge: ReturnType<typeof useApp>['knowledge']; hasKey: boolean }) {
+  const { status, indexing, error } = knowledge;
+  const [q, setQ] = useState('');
+  const [hits, setHits] = useState<Hit[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const run = async () => { if (!q.trim()) return; setBusy(true); try { setHits(await knowledge.search(q, 3)); } finally { setBusy(false); } };
+  const mode = status.chunks === 0 ? '' : status.embedded === status.chunks ? 'semantic search' : hasKey ? 'keyword search until embedded' : 'keyword search · add a Gemini key for semantic search';
+  return (
+    <div className="card pad stack g2 kb-panel" aria-label="Knowledge index">
+      <div className="hstack between wrap" style={{ gap: 8 }}>
+        <span className="label">Knowledge · hints in sessions</span>
+        <button type="button" className="btn xs" disabled={indexing || status.files === 0} onClick={() => void knowledge.rebuild()}>{indexing ? 'Indexing…' : 'Rebuild'}</button>
+      </div>
+      <span className="sub" role="status">
+        {indexing ? 'Indexing your files…' : status.chunks ? plural(status.chunks, 'passage') + ' from ' + plural(status.files, 'file') + ' · ' + mode : 'Nothing indexed yet. Included files are indexed automatically.'}
+        {error ? ' · embedding failed: ' + error : ''}
+      </span>
+      {status.chunks > 0 && (
+        <form className="hstack" style={{ gap: 8 }} onSubmit={(e) => { e.preventDefault(); void run(); }}>
+          <input className="input grow" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Try a question, e.g. Tell me about a time you disagreed" aria-label="Search your files" />
+          <button type="submit" className="btn sm" disabled={busy || !q.trim()}>Search</button>
+        </form>
+      )}
+      {hits && (hits.length ? hits.map((h, i) => (
+        <div key={i} className="kb-hit stack" style={{ gap: 2 }}>
+          <span className="q-meta">{h.fileName}{h.heading ? ' › ' + h.heading : ''} · {h.score.toFixed(2)}</span>
+          <span className="kb-hit-text">{h.text.length > 320 ? h.text.slice(0, 319) + '…' : h.text}</span>
+        </div>
+      )) : <span className="sub">No match.</span>)}
+    </div>
+  );
+}
+
 // ---------- Question filters ----------
 
 interface FilterChipProps { label: string; value: string; options?: { value: string; label: string }[]; onChange: (v: string) => void; current?: string }
@@ -180,7 +217,7 @@ export function applyFilters(rows: QuestionRow[], f: Filters): QuestionRow[] {
 interface Importing { pct: number; msg: string }
 
 export default function Library({ seg }: { seg: LibrarySeg }) {
-  const { data, repo, refresh, go, route, toast, live, openSheet, dbMode, gemini } = useApp();
+  const { data, repo, refresh, go, route, toast, live, openSheet, dbMode, gemini, knowledge } = useApp();
   const { lpRows, storyRows, questionRows, files, covered, lps } = data;
   const selected = route.parts[2];
 
@@ -215,7 +252,11 @@ export default function Library({ seg }: { seg: LibrarySeg }) {
     for (const [i, f] of list.entries()) {
       const kind = fileKind(f.name);
       let text: string;
-      try { text = await fileText(f); } catch { toast(f.name + ' could not be read'); continue; }
+      const pdf = isPdf(f);
+      if (pdf && !keep) { toast(f.name + ': add PDFs under Files'); continue; }
+      if (pdf && !gemini.hasKey) { toast(f.name + ': reading a PDF needs your Gemini key (Settings)'); continue; }
+      if (pdf) setImporting({ pct: Math.round(((i + 0.2) / list.length) * 100), msg: 'Reading ' + f.name + ' with Gemini…' });
+      try { text = pdf ? await pdfToMarkdown({ key: gemini.key, model: data.settings.textModel, file: f }) : await fileText(f); } catch (e) { toast(f.name + ' could not be read' + (pdf ? ' · ' + (e as Error).message : '')); continue; }
       setImporting({ pct: Math.round(((i + 0.5) / list.length) * 100), msg: 'Scanning ' + f.name + '…' });
       await tick();
       let found: ParsedQuestion[];
@@ -228,7 +269,9 @@ export default function Library({ seg }: { seg: LibrarySeg }) {
         if (keep) {
           const now = new Date().toISOString();
           const existing = files.find((x) => x.name === f.name);
-          await repo.upsertFile({ id: existing?.id ?? newId('f'), name: f.name, type, content: text, included: true, size: f.size || text.length, updatedAt: now, summary: null });
+          const id = existing?.id ?? newId('f');
+          await repo.upsertFile({ id, name: f.name, type, content: text, included: true, size: pdf ? text.length : f.size || text.length, updatedAt: now, summary: null });
+          if (pdf) await repo.putBlob('upload:' + id, f);
           kept++;
         }
         found = parsedQuestionsFromText(text, src, lps);
@@ -244,7 +287,7 @@ export default function Library({ seg }: { seg: LibrarySeg }) {
     if (!rows.length) { if (!kept) toast('No questions found in ' + names.join(', ')); return; }
     const fileName = names.length === 1 ? names[0] : names[0] + ' + ' + (names.length - 1) + ' more';
     setReview(prepareReview(await geminiTags(rows), { fileName, source, existing: data.questions }));
-  }, [data.questions, files, lps, refresh, repo, toast, geminiTags]);
+  }, [data.questions, data.settings.textModel, files, gemini.hasKey, gemini.key, lps, refresh, repo, toast, geminiTags]);
 
   const importStoryFiles = useCallback(async (list: File[]) => {
     const all: ParsedStory[] = [];
@@ -409,9 +452,9 @@ export default function Library({ seg }: { seg: LibrarySeg }) {
 
         {seg === 'files' && (
           <>
-            <Dropzone id="lib-files" accept=".md,.txt,.csv" multiple onFiles={(l) => void importFiles(l, true)}
-              title={<><span className="drop-ic"><Icon.Upload size={20} /></span>Drop markdown here</>}
-              sub={<>JD, background, notes from past loops. <span className="drop-link">Browse</span></>} />
+            <Dropzone id="lib-files" accept=".md,.markdown,.txt,.csv,.pdf" multiple onFiles={(l) => void importFiles(l, true)}
+              title={<><span className="drop-ic"><Icon.Upload size={20} /></span>Drop files here</>}
+              sub={<>JD, resume, notes from past loops · markdown, text or PDF. <span className="drop-link">Browse</span></>} />
             <button type="button" className="btn sm folder-btn" style={{ alignSelf: 'flex-start' }} onClick={() => folderInput.current?.click()}>Add a folder</button>
             {importing && (
               <div className="import-bar" role="status">
@@ -420,6 +463,7 @@ export default function Library({ seg }: { seg: LibrarySeg }) {
               </div>
             )}
             <FileList files={files} onOpen={(id) => go(paths.file(id))} onToggle={(id, on) => void toggleFile(id, on)} />
+            <KnowledgePanel knowledge={knowledge} hasKey={gemini.hasKey} />
             <span className="lib-foot">Dropping is the whole action: type detected from content, included by default. Toggle off only what’s stale.</span>
           </>
         )}

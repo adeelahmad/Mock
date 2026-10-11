@@ -17,6 +17,8 @@ import { buildContext, confirmTokens, prioritiseQuestions } from '../live/contex
 import { GeminiLiveTransport } from '../live/gemini.ts';
 import { BrowserAudio } from '../live/audio.ts';
 import { countTokens } from '../live/gemini-rest.ts';
+import { KnowledgeIndex, type Hit, type IndexStatus } from '../rag/knowledge.ts';
+import { geminiEmbedder, type Embedder } from '../rag/embed.ts';
 import { readPrefs, writePrefs } from './prefs.ts';
 import { DEFAULT_PRICING } from '../domain/budget.ts';
 import { setUsageSink } from '../gemini/usage.ts';
@@ -32,6 +34,15 @@ export interface AppData {
 }
 
 export interface GeminiConfig { key: string; hasKey: boolean; model: string; voice: string }
+
+export interface KnowledgeState {
+  status: IndexStatus;
+  indexing: boolean;
+  error: string | null;
+  /** Re-embeds every file from scratch. */
+  rebuild: () => Promise<void>;
+  search: (query: string, k?: number) => Promise<Hit[]>;
+}
 
 export interface LiveStart {
   mode: StartOptions['mode'];
@@ -66,6 +77,8 @@ export interface AppStore {
     exit: () => void;
   };
   transcript: (sessionId: string) => Promise<TranscriptEvent[]>;
+  /** The knowledge index over the prep files (hints, search_prep). */
+  knowledge: KnowledgeState;
   /** Sheets shared across screens (open from Practice, Library, Progress…). */
   sheet: { setup: boolean; answer: QuestionRow | null; addQuestion: boolean; addStory: boolean };
   openSheet: (name: keyof AppStore['sheet'], value?: unknown) => void;
@@ -98,6 +111,8 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
   const [lastStart, setLastStart] = useState<LiveStart | null>(null);
   const [sheet, setSheet] = useState<AppStore['sheet']>({ setup: false, answer: null, addQuestion: false, addStory: false });
   const route = useRoute();
+  const index = useRef<KnowledgeIndex | null>(null);
+  const [kb, setKb] = useState<Omit<KnowledgeState, 'rebuild' | 'search'>>({ status: { files: 0, chunks: 0, embedded: 0 }, indexing: false, error: null });
 
   const refresh = useCallback(async () => {
     const [lps, stories, questions, files, sessions, exchanges, settings] = await Promise.all([repo.lps(), repo.stories(), repo.questions(), repo.files(), repo.sessions(), repo.exchanges(), repo.settings()]);
@@ -112,6 +127,7 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
       const mode = await repo.init((s) => alive && setStatus(s));
       if (!alive) return;
       setDbMode(mode);
+      index.current = await KnowledgeIndex.load(repo);
       await refresh();
       if (alive) setReady(true);
     })();
@@ -139,6 +155,31 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     if (Object.keys(s).length) await repo.setSettings(s);
     await refresh();
   }, [repo, refresh]);
+
+  // ---- knowledge index: follows the included prep files; embeds with the Gemini key when there is one
+  const embedder = useMemo<Embedder | null>(() => (gemini.key ? geminiEmbedder({ key: gemini.key }) : null), [gemini.key]);
+  const syncing = useRef(false);
+  const syncIndex = useCallback(async () => {
+    const k = index.current;
+    if (!k || syncing.current) return;
+    if (!k.stale(data.files, !!embedder)) { setKb((x) => ({ ...x, status: k.status() })); return; }
+    syncing.current = true;
+    setKb((x) => ({ ...x, indexing: true }));
+    try { setKb({ status: await k.sync(data.files, embedder), indexing: false, error: null }); }
+    catch (e) { setKb({ status: k.status(), indexing: false, error: (e as Error).message || 'Embedding failed' }); }
+    finally { syncing.current = false; }
+  }, [data.files, embedder]);
+  useEffect(() => {
+    if (!ready) return;
+    const t = setTimeout(() => { void syncIndex(); }, 600);
+    return () => clearTimeout(t);
+  }, [ready, syncIndex]);
+  const rebuildIndex = useCallback(async () => {
+    index.current = new KnowledgeIndex(repo);
+    await syncIndex();
+  }, [repo, syncIndex]);
+  const searchIndex = useCallback((q: string, k = 3) => index.current ? index.current.search(q, k, embedder) : Promise.resolve([]), [embedder]);
+  const knowledge: KnowledgeState = useMemo(() => ({ ...kb, rebuild: rebuildIndex, search: searchIndex }), [kb, rebuildIndex, searchIndex]);
 
   const exitLive = useCallback(() => {
     controller.current?.destroy();
@@ -172,8 +213,8 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     // Show the connecting screen while the mic is granted and the connection opens.
     setSheet({ setup: false, answer: null, addQuestion: false, addStory: false });
     routerGo('/live');
-    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: s.liveModel, voice: s.voice, questionText: o.questionText ?? null });
-  }, [data, gemini.hasKey, gemini.key, repo, exitLive, toast]);
+    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: s.liveModel, voice: s.voice, questionText: o.questionText ?? null, retriever: index.current ? searchIndex : null });
+  }, [data, gemini.hasKey, gemini.key, repo, exitLive, toast, searchIndex]);
 
   // Budget: every Gemini call's tokens go to the ledger, batched so a live session writes at
   // most every two seconds.
@@ -197,10 +238,11 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     ready, status, dbMode, repo, data, refresh, prefs, setPref, route, go: routerGo, back: routerBack, toast, toastText, gemini, setGemini,
     live: { state: liveState, meta: liveMeta, controller: controller.current, lastStart, start: startLive, exit: exitLive },
     transcript,
+    knowledge,
     sheet,
     openSheet: (name, v) => setSheet((x) => ({ ...x, [name]: name === 'answer' ? (v as QuestionRow) : true })),
     closeSheets: () => setSheet({ setup: false, answer: null, addQuestion: false, addStory: false }),
-  }), [ready, status, dbMode, repo, data, refresh, prefs, setPref, route, toast, toastText, gemini, setGemini, liveState, liveMeta, lastStart, startLive, exitLive, sheet, transcript]);
+  }), [ready, status, dbMode, repo, data, refresh, prefs, setPref, route, toast, toastText, gemini, setGemini, liveState, liveMeta, lastStart, startLive, exitLive, sheet, transcript, knowledge]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
