@@ -2,7 +2,7 @@
 // deep links for PWA shortcuts (#/start, #/last).
 import { useEffect, useState } from 'react';
 
-export type Tab = 'practice' | 'library' | 'history' | 'progress';
+export type Tab = 'practice' | 'library' | 'history' | 'progress' | 'game';
 
 export interface Route {
   path: string;
@@ -16,7 +16,7 @@ export function parseRoute(hash: string): Route {
   const [p, q = ''] = raw.split('?');
   const parts = p.split('/').filter(Boolean).map(decodeURIComponent);
   const first = parts[0] ?? 'practice';
-  const tab: Tab = first === 'library' ? 'library' : first === 'history' ? 'history' : first === 'progress' ? 'progress' : 'practice';
+  const tab: Tab = first === 'library' ? 'library' : first === 'history' ? 'history' : first === 'progress' ? 'progress' : first === 'game' ? 'game' : 'practice';
   return { path: '/' + parts.join('/'), parts, tab, query: new URLSearchParams(q) };
 }
 
@@ -53,4 +53,5 @@ export const paths = {
   importFile: (fileId: string) => '/library/questions?import=' + fileId,
   progress: '/progress',
   live: '/live',
+  game: '/game',
 };

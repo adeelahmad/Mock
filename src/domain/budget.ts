@@ -10,6 +10,7 @@ export const DEFAULT_PRICING: ModelPrice[] = [
   { model: 'gemini-3.8-live', input: 0.75, output: 4.5, audioInput: 3, audioOutput: 12 },
   { model: 'gemini-3.8-live-extended-thinking', input: 0.75, output: 4.5, audioInput: 3, audioOutput: 12 },
   { model: 'gemini-3.8-flash', input: 0.75, output: 3.75, audioInput: 0.75, audioOutput: 3.75 },
+  { model: 'gemini-embedding-001', input: 0.15, output: 0, audioInput: 0, audioOutput: 0 },
 ];
 
 /** The price row for a model: exact id, else the longest listed id it starts with, else the first row. */
@@ -18,7 +19,8 @@ export function priceFor(model: string, pricing: ModelPrice[]): ModelPrice | nul
   const exact = pricing.find((p) => p.model === id);
   if (exact) return exact;
   const prefix = pricing.filter((p) => p.model && id.startsWith(p.model)).sort((a, b) => b.model.length - a.model.length)[0];
-  return prefix ?? pricing[0] ?? null;
+  // A model added to the defaults after the table was saved (the embedding model) prices at its default, not the first row.
+  return prefix ?? DEFAULT_PRICING.find((p) => p.model === id) ?? pricing[0] ?? null;
 }
 
 /** USD for some token counts at one model's prices (prices are per 1M tokens). */
