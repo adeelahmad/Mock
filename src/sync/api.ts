@@ -1,4 +1,4 @@
-// Mock — the browser side of the Mock server API (server/app.ts). Every call is same-origin
+// Mock — the browser side of the Mock server API (internal/server, the Go binary). Every call is same-origin
 // (the server serves the app, or Vite proxies /api and /auth in dev). On a static host with no
 // server, `status()` resolves null and the app stays local-only.
 

@@ -81,7 +81,7 @@ export function MeetSheet({ open, onClose, onStart }: { open: boolean; onClose: 
             </div>
           ) : (
             <>
-              <span className="sub pretty">On this computer run <code className="mono">npm run meet-bridge</code>. It opens a browser that joins the call as Mock, and prints a pairing code.</span>
+              <span className="sub pretty">On this computer run <code className="mono">mock bridge</code> (or <code className="mono">make bridge</code>). It opens a browser that joins the call as Mock, and prints a pairing code.</span>
               <Input label="Bridge address" mono value={url} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value)} />
               <Input label="Pairing code" mono value={code} autoComplete="off" onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCode(e.target.value)} placeholder="from the bridge’s first line" />
             </>

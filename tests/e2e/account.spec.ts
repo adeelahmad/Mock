@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { open } from './helpers.ts';
 
-// The Mock server's API is stubbed here (server/app.test.ts covers the real one): these flows
+// The Mock server's API is stubbed here (internal/server tests and server.spec.ts cover the real one): these flows
 // check the wizard, the sign-in gate and Settings → Account & sync.
 
 interface Fake { configured: boolean; user: null | { id: string; name: string; email: string; image: null; admin: boolean }; saved: unknown[] }

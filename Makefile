@@ -1,11 +1,19 @@
-# Mock — shortcuts for the npm scripts. `make help` lists them.
+# Mock — shortcuts for the npm scripts and the Go binary. `make help` lists them.
 # NODE_ENV=production would make npm skip devDependencies, so install always includes them.
+#
+# The binary (bin/mock) is the whole app: the built web app embedded with go:embed, the sign-in
+# and sync server, and the Google Meet bridge. Pure Go (CGO_ENABLED=0), so it cross-compiles.
 
 PORT ?= 5173
+GO ?= go
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+LDFLAGS := -s -w -X main.version=$(VERSION)
+PLATFORMS := linux/amd64 linux/arm64 darwin/amd64 darwin/arm64
+EMBED := internal/web/dist
 
 .DEFAULT_GOAL := help
 
-.PHONY: server start token help install dev typecheck test test-watch build preview e2e check verify refs shots icons clean
+.PHONY: server serve start token bridge binary binaries embed go-test help install dev typecheck test test-watch build preview e2e check verify refs shots icons clean
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-11s %s\n", $$1, $$2}'
@@ -20,14 +28,38 @@ install: ## Install dependencies (dev included)
 dev: node_modules ## Run the dev server (PORT=5173)
 	npx vite --port $(PORT)
 
-server: node_modules ## Run the Mock server on :8787 (sign-in + sync; dev proxies /api, /auth to it)
-	npm run server
+server: ## Run the Mock server API on :8787 (sign-in + sync; `make dev` proxies /api, /auth to it)
+	MOCK_STATIC=- $(GO) run ./cmd/mock
 
-start: node_modules ## Build, then serve the app + API from the Mock server
-	npm start
+serve: binary ## Build the binary, then serve the app + API on :8787
+	./bin/mock
 
-token: node_modules ## Print the setup token the sign-in wizard asks for
-	@npm run --silent server -- token
+start: serve
+
+token: ## Print the setup token the sign-in wizard asks for
+	@$(GO) run ./cmd/mock token
+
+bridge: ## Run only the Google Meet bridge on 127.0.0.1:8788 (needs Chrome or Chromium)
+	$(GO) run ./cmd/mock bridge
+
+embed: build ## Copy the built app into the Go embed directory
+	find $(EMBED) -mindepth 1 ! -name .gitkeep -delete
+	cp -a dist/. $(EMBED)/
+
+binary: embed ## Build bin/mock: one self-contained binary for this machine
+	CGO_ENABLED=0 $(GO) build -trimpath -ldflags "$(LDFLAGS)" -o bin/mock ./cmd/mock
+	@ls -lh bin/mock
+
+binaries: embed ## Cross-compile bin/mock-<os>-<arch> for linux and darwin, amd64 and arm64
+	@for p in $(PLATFORMS); do \
+		os=$${p%/*}; arch=$${p#*/}; \
+		echo "bin/mock-$$os-$$arch"; \
+		CGO_ENABLED=0 GOOS=$$os GOARCH=$$arch $(GO) build -trimpath -ldflags "$(LDFLAGS)" -o bin/mock-$$os-$$arch ./cmd/mock || exit 1; \
+	done
+
+go-test: ## Go vet + tests (the Meet bot test runs when Chrome or Chromium is found)
+	$(GO) vet ./...
+	$(GO) test ./...
 
 typecheck: node_modules ## Type-check
 	npm run typecheck
@@ -44,11 +76,12 @@ build: node_modules ## Build the static site into dist/
 preview: build ## Serve the built site
 	npm run preview
 
-e2e: node_modules ## Playwright tests (PW_CHROMIUM=/path/to/chromium for a local browser)
+e2e: node_modules binary ## Playwright tests, the production build served by bin/mock (PW_CHROMIUM=/path/to/chromium)
 	npm run e2e
 
-check: node_modules ## Typecheck + unit tests + build
+check: node_modules ## Typecheck + unit tests + build, then Go vet + tests
 	npm run check
+	$(MAKE) go-test
 
 verify: check e2e ## Everything: check, then Playwright
 
@@ -62,4 +95,5 @@ icons: node_modules ## Re-render public/icons/*.png
 	npm run icons
 
 clean: ## Remove build output and test results
-	rm -rf dist test-results playwright-report
+	rm -rf dist bin test-results playwright-report
+	find $(EMBED) -mindepth 1 ! -name .gitkeep -delete

@@ -5,6 +5,8 @@ import { test, expect } from '@playwright/test';
 
 test('opens offline after the first visit, with the library in DuckDB', async ({ page, context }) => {
   test.setTimeout(180_000);
+  // Served by the Mock server (bin/mock), which offers sign-in: use Mock on this device only.
+  await page.addInitScript(() => localStorage.setItem('mock.account.skip', '1'));
   await page.goto('./#/library/lps');
   await page.waitForSelector('.splash', { state: 'detached', timeout: 90_000 });
   await expect(page.getByText('DuckDB-WASM ✓').first()).toBeVisible();
