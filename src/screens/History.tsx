@@ -9,6 +9,7 @@ import { useApp } from '../app/store.tsx';
 import { paths } from '../app/router.ts';
 import { Icon, Input, Seg, download, fmt, v } from '../components/ui.tsx';
 import AnalysisCard, { cardFromExchange, iNote, starNote, type AnalysisCardData } from '../components/AnalysisCard.tsx';
+import Transcript from '../components/Transcript.tsx';
 import Player, { usePlayback, useWaveform, type Chapter, type PlaybackSpan } from '../components/Player.tsx';
 import { fmtDuration, fmtSessionDate, sessionModeLabel } from '../domain/selectors.ts';
 import { buildBackup, backupFileName } from '../db/backup.ts';
@@ -190,7 +191,7 @@ function Detail({ id, desktop }: { id: string; desktop: boolean }) {
   const [menu, setMenu] = useState(false);
   const [pendingCard, setPendingCard] = useState<number | null>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const lineRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const lineRefs = useRef<(HTMLDivElement | null)[]>([]);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<HTMLDivElement | null>(null);
 
@@ -315,14 +316,7 @@ function Detail({ id, desktop }: { id: string; desktop: boolean }) {
     </>
   ) : writeButton;
 
-  const transcriptRows = events.length ? (
-    events.map((t, i) => (
-      <button key={t.id} type="button" ref={(el) => { lineRefs.current[i] = el; }} className={'tr-row' + (i === curLine ? ' now' : '') + (t.speaker === 'coach' ? ' coach' : '')} aria-current={i === curLine ? 'true' : undefined} onClick={() => pb.seek(t.tMs)} title="Seek to this line">
-        <span className="tr-time">{fmt(t.tMs / 1000)}</span>
-        <span className="tr-body"><span className={'tr-who ' + t.speaker}>{whoOf(t, xs)}</span><span className="tr-text">{t.text}</span></span>
-      </button>
-    ))
-  ) : <span className="sub hist-none">No transcript stored for this session.</span>;
+  const transcriptRows = <Transcript sessionId={id} events={events} xs={xs} lps={data.lps} curLine={curLine} who={(t) => whoOf(t, xs)} onSeek={pb.seek} lineRef={(i, el) => { lineRefs.current[i] = el; }} />;
 
   const card = (i: number, compact: boolean) => {
     const e = xs[i]; const c = cards[i]; if (!e || !c) return null;
