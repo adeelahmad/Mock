@@ -104,8 +104,8 @@ Or download a binary from [Releases](https://github.com/adeelahmad/Mock/releases
 `MOCK_VERSION=v0.1.0` pins a release; `MOCK_INSTALL_DIR` picks where it goes.
 
 **No install:** open the [hosted app](https://adeelahmad.github.io/Mock/app/) and add it to your
-home screen. **From source:** `make binary` (Node 22, Go 1.26+). **Proxmox:** a
-community-scripts helper, see [Deploy](#deploy).
+home screen. **From source:** `make binary` (Node 22, Go 1.26+). **Proxmox:** a prebuilt
+LXC template or a community-scripts helper, see [Deploy](#deploy).
 
 ## How it works
 
@@ -281,12 +281,31 @@ Pages → Source: **GitHub Actions** (on a private repo, Pages needs a paid GitH
 **Anywhere else:** `npm run build` and upload `dist/` (Netlify, Cloudflare Pages, S3, any web
 server). Serve it over HTTPS: the microphone, service worker and install prompt require it.
 
-**Proxmox VE** ([community-scripts](https://community-scripts.github.io/ProxmoxVE/) helper
-script, using their engine): on the Proxmox host shell run
+**Proxmox VE**: on the Proxmox host shell run
 
 ```
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/adeelahmad/Mock/main/proxmox/ct/mock.sh)"
 ```
+
+It asks **Prebuilt** or **From source**. Prebuilt (the fast path) downloads the release's LXC
+template, `mock-lxc-debian13-<amd64|arm64>.tar.zst` (Debian 13 with the Mock binary, Caddy
+`tls internal` and the services), checks it against `checksums.txt`, and runs `pct create`; on
+first boot the container sets itself up and the script prints the URL. `MOCK_MODE=template` or
+`MOCK_MODE=source` skips the question; the script's header lists the template options (`CTID`,
+`MOCK_STORAGE`, `MOCK_BRIDGE`, …). By hand:
+
+```
+wget -P /var/lib/vz/template/cache https://github.com/adeelahmad/Mock/releases/latest/download/mock-lxc-debian13-amd64.tar.zst
+pct create 120 local:vztmpl/mock-lxc-debian13-amd64.tar.zst --hostname mock --ostype debian \
+  --unprivileged 1 --features nesting=1 --cores 2 --memory 2048 --rootfs local-lvm:8 \
+  --net0 name=eth0,bridge=vmbr0,ip=dhcp --onboot 1 --start 1
+pct exec 120 -- mock-token
+```
+
+Inside a template container, `update` installs the latest release's binary. `make lxc` builds
+the templates locally (mmdebstrap, as root or with subuids); tagged releases build and attach
+them. From source uses the [community-scripts](https://community-scripts.github.io/ProxmoxVE/)
+engine:
 
 From a private fork, either clone it on the host and run `bash proxmox/ct/mock.sh`, or
 `export MOCK_GITHUB_TOKEN=<read-only token>` and add

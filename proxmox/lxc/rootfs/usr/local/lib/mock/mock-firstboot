@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Mock (prebuilt LXC template): runs at every boot. The first boot makes the SSH host keys and the
+# mock user, service and data directory; every boot rewrites the Caddyfile for the current IPs.
+set -euo pipefail
+ls /etc/ssh/ssh_host_*_key >/dev/null 2>&1 || ssh-keygen -A
+# DHCP can lag network-online in a container; give it a moment to hand out an address.
+for _ in $(seq 20); do [[ -n "$(hostname -I 2>/dev/null | tr -d ' ')" ]] && break; sleep 1; done
+exec bash /usr/local/lib/mock/mock-server.sh

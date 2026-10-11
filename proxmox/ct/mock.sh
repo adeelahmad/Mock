@@ -1,19 +1,91 @@
 #!/usr/bin/env bash
-# Mock: Proxmox VE Helper-Scripts style LXC (community-scripts engine).
-#
-# On the Proxmox host shell:
+# Mock: Proxmox VE LXC. On the Proxmox host shell:
 #   bash -c "$(curl -fsSL https://raw.githubusercontent.com/adeelahmad/Mock/main/proxmox/ct/mock.sh)"
-# From a checkout (also works while the repo is private):
-#   bash proxmox/ct/mock.sh
-# Private repo over curl: export MOCK_GITHUB_TOKEN=<read-only token> and add
-#   -H "Authorization: Bearer $MOCK_GITHUB_TOKEN" to the curl above.
+#
+# It offers two ways in:
+#   Prebuilt template (fast)  downloads the release's Debian 13 template with Mock, Caddy and the
+#                             services inside, and runs `pct create`. Ready in under a minute.
+#   Build from source         the community-scripts helper wizard; builds Mock in the container.
+# Skip the question with MOCK_MODE=template or MOCK_MODE=source. Template options (env):
+#   CTID (next free)  MOCK_HOSTNAME (mock)  MOCK_STORAGE (local-lvm)  MOCK_TEMPLATE_STORAGE (local)
+#   MOCK_DISK (8)  MOCK_CORES (2)  MOCK_RAM (2048)  MOCK_BRIDGE (vmbr0)  MOCK_TAG (latest)
+#   MOCK_SSH_KEYS (a public key file for root)
 # Update: run `update` inside the container (or this script there).
 
-# This repo is the "scripts root" for the community-scripts engine: it fetches
-# install/mock-install.sh from here instead of community-scripts/ProxmoxVE.
 MOCK_REPO="${MOCK_REPO:-adeelahmad/Mock}"
 MOCK_BRANCH="${MOCK_BRANCH:-main}"
+
+# Prebuilt template: download it into the template storage, then pct create and start.
+mock_from_template() {
+  set -euo pipefail
+  local arch tag base file tstore path ctid store
+  arch="$(dpkg --print-architecture)"
+  case "$arch" in amd64 | arm64) ;; *) echo "No prebuilt template for $arch; use MOCK_MODE=source" >&2; return 1 ;; esac
+  tag="${MOCK_TAG:-latest}"
+  if [[ "$tag" == latest ]]; then
+    tag="$(curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/${MOCK_REPO}/releases/latest")"
+    tag="${tag##*/}"
+  fi
+  base="https://github.com/${MOCK_REPO}/releases/download/${tag}"
+  tstore="${MOCK_TEMPLATE_STORAGE:-local}"
+  file="mock-lxc-debian13-${tag}-${arch}.tar.zst"
+  path="$(pvesm path "${tstore}:vztmpl/${file}")"
+  if [[ ! -s "$path" ]]; then
+    echo "Downloading the Mock ${tag} template (${arch})"
+    mkdir -p "$(dirname "$path")"
+    curl -fL --progress-bar "${base}/mock-lxc-debian13-${arch}.tar.zst" -o "${path}.part"
+    curl -fsSL "${base}/checksums.txt" | grep " mock-lxc-debian13-${arch}.tar.zst\$" | sed "s#  .*#  ${path}.part#" | sha256sum -c --quiet
+    mv "${path}.part" "$path"
+  fi
+
+  ctid="${CTID:-$(pvesh get /cluster/nextid)}"
+  store="${MOCK_STORAGE:-local-lvm}"
+  local extra=()
+  [[ -n "${MOCK_SSH_KEYS:-}" ]] && extra+=(--ssh-public-keys "$MOCK_SSH_KEYS")
+  echo "Creating container ${ctid}"
+  pct create "$ctid" "${tstore}:vztmpl/${file}" \
+    --hostname "${MOCK_HOSTNAME:-mock}" --ostype debian --unprivileged 1 --features nesting=1 \
+    --cores "${MOCK_CORES:-2}" --memory "${MOCK_RAM:-2048}" --swap 512 \
+    --rootfs "${store}:${MOCK_DISK:-8}" --net0 "name=eth0,bridge=${MOCK_BRIDGE:-vmbr0},ip=dhcp,ip6=auto" \
+    --tags "interview;pwa" --onboot 1 --start 1 "${extra[@]}"
+
+  local ip=""
+  for _ in $(seq 60); do
+    [[ "$(pct exec "$ctid" -- systemctl is-active mock-firstboot 2>/dev/null)" == active ]] &&
+      ip="$(pct exec "$ctid" -- hostname -I 2>/dev/null | awk '{print $1}')" && [[ -n "$ip" ]] && break
+    sleep 2
+  done
+  echo
+  echo "Mock ${tag} is running in container ${ctid}. Open (HTTPS is needed for the microphone):"
+  echo "  https://${ip:-<container ip>}"
+  echo "Trust Caddy's internal CA on your devices:"
+  echo "  pct pull ${ctid} /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt mock-root.crt"
+  echo "Setup token for the sign-in wizard:"
+  echo "  pct exec ${ctid} -- mock-token"
+  echo "Root has no password; set one with: pct exec ${ctid} -- passwd"
+}
+
+if [[ -z "${MOCK_MODE:-}" && ! -d /opt/mock ]] && command -v pct >/dev/null; then
+  if command -v whiptail >/dev/null && [[ -t 0 ]]; then
+    if whiptail --title "Mock" --yes-button "Prebuilt" --no-button "From source" --yesno \
+      "Use the prebuilt template (fast: download and pct create), or build Mock from source with the helper-script wizard?" 10 70; then
+      MOCK_MODE=template
+    else
+      MOCK_MODE=source
+    fi
+  else
+    MOCK_MODE=template
+  fi
+fi
+if [[ "${MOCK_MODE:-}" == template ]]; then
+  (mock_from_template)
+  exit $?
+fi
+
+# Build from source: the community-scripts engine and install/mock-install.sh.
 export MOCK_REPO MOCK_BRANCH MOCK_GITHUB_TOKEN
+# This repo is the "scripts root" for the community-scripts engine: it fetches
+# install/mock-install.sh from here instead of community-scripts/ProxmoxVE.
 _mock_dir="$(cd "$(dirname "${BASH_SOURCE[0]:-.}")/.." 2>/dev/null && pwd || true)"
 if [[ -n "$_mock_dir" && -f "$_mock_dir/install/mock-install.sh" ]]; then
   export COMMUNITY_SCRIPTS_ROOT="$_mock_dir"

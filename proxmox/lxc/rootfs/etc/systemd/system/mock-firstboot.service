@@ -1,0 +1,13 @@
+[Unit]
+Description=Mock setup (service, Caddy sites for this container's IPs, SSH host keys)
+Wants=network-online.target
+After=network-online.target
+Before=ssh.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/mock/mock-firstboot
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
