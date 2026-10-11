@@ -38,13 +38,20 @@ export interface ControllerMeta {
   /** Who is about to speak first (for the connecting copy) — the Bar Raiser unless the mode says otherwise. */
   interviewer: Interviewer | null;
   mode: Mode;
+  /** The system prompt's token budget, for the debug panel. */
+  context: ContextInfo | null;
 }
+
+export interface ContextInfo { estimated: number; counted: number | null; budget: number; trimmed: string[] }
+
+/** Longest the controller waits for the spoken recap after [END] before closing. */
+const RECAP_MAX_MS = 100_000;
 
 const SPEECH_ON = 0.05, SPEECH_OFF = 0.025; // mic level hysteresis
 
 export class SessionController {
   state: SessionState = initialState(0);
-  meta: ControllerMeta = { sessionId: null, sessionNumber: 0, storyNotes: true, notes: [], demo: false, interviewer: null, mode: 'loop' };
+  meta: ControllerMeta = { sessionId: null, sessionNumber: 0, storyNotes: true, notes: [], demo: false, interviewer: null, mode: 'loop', context: null };
   private listeners = new Set<Listener>();
   private off: (() => void) | null = null;
   private tick: ReturnType<typeof setInterval> | null = null;
@@ -57,13 +64,17 @@ export class SessionController {
   private lastTranscriptAt = 0;
   private resumptionHandle: string | null = null;
   private ended = false;
+  private startSent = false;
+  private turnsAfterEnd = 0;
+  private recordingParts: string[] = [];
+  private pendingParts: Promise<unknown>[] = [];
   /** Analyses in flight, by exchange id; the report waits for them. */
   private pending = new Map<string, Promise<void>>();
   private exchangeIndexById = new Map<string, number>();
 
   private tickMs: number;
   private reporter: Reporter;
-  constructor(private transport: LiveTransport, private analyzer: Analyzer, private repo: Repo, private now: () => number = () => Date.now(), demo = false, opts: { tickMs?: number; reporter?: Reporter } = {}) {
+  constructor(private transport: LiveTransport, private analyzer: Analyzer | null, private repo: Repo, private now: () => number = () => Date.now(), demo = false, opts: { tickMs?: number; reporter?: Reporter } = {}) {
     this.meta.demo = demo;
     this.tickMs = opts.tickMs ?? 250;
     this.reporter = opts.reporter ?? new LocalReporter();
@@ -76,6 +87,10 @@ export class SessionController {
   async start(opts: StartOptions): Promise<void> {
     this.opts = opts;
     this.ended = false;
+    this.startSent = false;
+    this.turnsAfterEnd = 0;
+    this.recordingParts = [];
+    this.pendingParts = [];
     const number = await this.repo.nextSessionNumber();
     const session: Session = {
       id: newId('s'), number, mode: opts.mode, focus: opts.focus, coaching: opts.coaching, questionSource: opts.questionSource, storyNotes: opts.storyNotes, seed: opts.seed,
@@ -106,6 +121,8 @@ export class SessionController {
   hint(): void { this.dispatch({ type: 'HINT', now: this.now(), text: this.hintFor(this.state.lpName) }); this.transport.sendText('[HINT]'); }
   dismissHint(): void { this.dispatch({ type: 'DISMISS_HINT', now: this.now() }); }
   clearError(): void { this.dispatch({ type: 'CLEAR_ERROR', now: this.now() }); }
+  /** The context builder's numbers (and the countTokens confirmation when it lands). */
+  setContext(info: ContextInfo): void { this.meta = { ...this.meta, context: info }; this.emit(); }
 
   async end(focus = ''): Promise<void> {
     if (this.ended) return;
@@ -116,15 +133,44 @@ export class SessionController {
     await this.closeExchange(now);
     await this.flushTranscript();
     this.dispatch({ type: 'END', now, focus: focus || this.state.focus });
-    if (this.session) {
-      const blob = this.transport.recordingBlob ? await this.transport.recordingBlob() : null;
-      let recordingKey: string | null = null, recordingMime: string | null = null;
-      if (blob && blob.size) { recordingKey = 'rec:' + this.session.id; recordingMime = blob.type; await this.repo.putBlob(recordingKey, blob); }
-      await this.repo.updateSession(this.session.id, { endedAt: new Date(now).toISOString(), recordingKey, recordingMime });
-      await this.writeReport(this.session.id);
+    if (!this.session) { setTimeout(() => this.destroy(), 2500); return; }
+    const session = this.session;
+    await this.repo.updateSession(session.id, { endedAt: new Date(now).toISOString() });
+    // The report runs alongside the recap; it waits for every card, not for the audio.
+    const report = this.writeReport(session.id);
+    if (this.transport.kind === 'gemini') {
+      // The model speaks the recap after [END]: keep the connection (and the recording) open
+      // until that turn completes and its audio drains.
+      await this.waitForRecap();
+      await this.saveRecording(session);
+      this.destroy();
+      await report;
+    } else {
+      await this.saveRecording(session);
+      // Let the goodbye play out, then close.
+      setTimeout(() => this.destroy(), 2500);
+      await report;
     }
-    // Let the goodbye play out, then close.
-    setTimeout(() => this.destroy(), 2500);
+  }
+
+  private async waitForRecap(): Promise<void> {
+    const t0 = this.now();
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    while (this.now() - t0 < RECAP_MAX_MS && this.off) {
+      if (this.turnsAfterEnd > 0 && !this.transport.isSpeaking()) return;
+      await sleep(200);
+    }
+  }
+
+  /** The whole mixed recording replaces the chunks written during the session. */
+  private async saveRecording(session: Session): Promise<void> {
+    const blob = this.transport.recordingBlob ? await this.transport.recordingBlob() : null;
+    if (!blob || !blob.size) return;
+    const recordingKey = 'rec:' + session.id;
+    await this.repo.putBlob(recordingKey, blob);
+    await this.repo.updateSession(session.id, { recordingKey, recordingMime: blob.type || null });
+    await Promise.allSettled(this.pendingParts.splice(0));
+    for (const k of this.recordingParts.splice(0)) await this.repo.deleteBlob(k);
   }
 
   destroy(): void {
@@ -139,7 +185,8 @@ export class SessionController {
     switch (e.type) {
       case 'ready':
         this.dispatch({ type: 'READY', now });
-        if (this.state.questionsAsked === 0 && !this.ended) this.transport.sendText('[START]');
+        // Once per session: a reconnect before the first question must not restart the intro.
+        if (!this.startSent && this.state.questionsAsked === 0 && !this.ended) { this.startSent = true; this.transport.sendText('[START]'); }
         break;
       case 'aiSpeaking': this.dispatch({ type: 'AI_SPEAKING', now, speaking: e.speaking }); break;
       case 'level': {
@@ -164,7 +211,8 @@ export class SessionController {
       case 'closed': if (!this.ended) this.dispatch({ type: 'DISCONNECTED', now, reason: e.reason }); break;
       case 'sessionEnd': void this.end(e.focus ?? ''); break;
       case 'error': this.dispatch({ type: 'ERROR', now, message: e.message }); break;
-      case 'turnComplete': break;
+      case 'turnComplete': if (this.ended) this.turnsAfterEnd++; break;
+      case 'recordingChunk': void this.saveChunk(e.blob, e.index); break;
       case 'toolCallCancellation': break;
     }
   }
@@ -188,6 +236,16 @@ export class SessionController {
     this.transport.sendToolResponse(responses);
   }
 
+  /** Chunks land in storage as they arrive, so a crash loses at most a second of audio. */
+  private async saveChunk(blob: Blob, index: number): Promise<void> {
+    if (!this.session) return;
+    const key = 'recpart:' + this.session.id + ':' + String(index).padStart(6, '0');
+    this.recordingParts.push(key);
+    const put = this.repo.putBlob(key, blob);
+    this.pendingParts.push(put);
+    await put;
+  }
+
   // ---- exchanges
   private openExchange(question: string, lp: string, questionId: string | null, iv: Interviewer, now: number): void {
     if (!this.session) return;
@@ -200,6 +258,7 @@ export class SessionController {
     this.exchange = ex;
     this.exchangeIndexById.set(ex.id, this.state.qIndex);
     void this.repo.insertExchange(ex);
+    this.transport.beginClip?.();
   }
 
   private async closeExchange(now: number): Promise<void> {
@@ -209,8 +268,13 @@ export class SessionController {
     const endMs = now - this.state.startedAt;
     ex.endedAt = new Date(now).toISOString(); ex.endMs = endMs;
     await this.repo.updateExchange(ex.id, { endedAt: ex.endedAt, endMs });
+    const clip = this.transport.endClip ? await this.transport.endClip() : null;
+    if (clip && clip.size) {
+      const clipKey = 'clip:' + ex.id;
+      if (await this.repo.putBlob(clipKey, clip)) { ex.clipKey = clipKey; await this.repo.updateExchange(ex.id, { clipKey }); }
+    }
     // No coaching came (recap-only, or skipped with "next"): the card is written on close.
-    if (!ex.analysis && !this.pending.has(ex.id)) {
+    if (this.analyzer && !ex.analysis && !this.pending.has(ex.id)) {
       // Still the current question in the machine (the next one is dispatched after this close).
       const transcript = this.state.turns.filter((t) => t.tMs >= ex.startMs && t.tMs <= endMs);
       const durationSec = this.state.answerSec || Math.max(1, (endMs - ex.startMs) / 1000);
@@ -220,7 +284,7 @@ export class SessionController {
 
   /** Called when coaching starts: the candidate's answer (with follow-ups) is complete. */
   private analyseCurrent(now: number): Promise<void> {
-    const ex = this.exchange; if (!ex || ex.analysis || this.pending.has(ex.id)) return Promise.resolve();
+    const ex = this.exchange; if (!ex || ex.analysis || !this.analyzer || this.pending.has(ex.id)) return Promise.resolve();
     const transcript = this.state.turns.filter((t) => t.tMs >= ex.startMs);
     const durationSec = this.state.answerSec || Math.max(0, (now - this.state.startedAt - ex.startMs) / 1000);
     return this.track(ex, this.analyse(ex, transcript, this.state.coachText, durationSec));
@@ -236,7 +300,7 @@ export class SessionController {
     try {
       // The per-exchange clip, when the transport recorded one (plan §3: blob `clip:{exchangeId}`).
       const clip = await this.repo.getBlob(ex.clipKey ?? 'clip:' + ex.id).catch(() => null);
-      const analysis: Analysis = await this.analyzer.analyze({ exchange: ex, transcript, coachText, clip, durationSec });
+      const analysis: Analysis = await this.analyzer!.analyze({ exchange: ex, transcript, coachText, clip, durationSec });
       ex.analysis = analysis; ex.verdict = analysis.verdict;
       if (analysis.storyUsed) { const st = this.opts?.stories.find((s) => s.title === analysis.storyUsed); ex.storyId = st?.id ?? null; ex.storyTitle = analysis.storyUsed; }
       await this.repo.setAnalysis(ex.id, analysis);

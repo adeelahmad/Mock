@@ -139,7 +139,8 @@ export default function LiveScreen(p: LiveScreenProps) {
   const isCoaching = phase === 'coaching';
   const isEnd = phase === 'end';
   const accent: VizAccent = isCoaching || isEnd ? 'cool' : 'warm';
-  const who: VizWho = isEnd || paused ? 'none' : p.speaker;
+  // Nobody is speaking while connecting, in the thinking pause, paused or after the end (Foundations 1a–1c).
+  const who: VizWho = isEnd || paused || isConnecting || isThinking ? 'none' : p.speaker;
 
   const words = p.qText.split(/\s+/).filter(Boolean);
   const revealing = isInterviewer && p.revealedWords < words.length;
@@ -373,7 +374,7 @@ export default function LiveScreen(p: LiveScreenProps) {
           <>
             {!desktop && (
               <div className="live-handles">
-                <button type="button" className="live-handle grow" onClick={() => setTOpen(!tOpen)} aria-expanded={tOpen}>Transcript · {p.turns.length} turns<Icon.Up size={14} /></button>
+                <button type="button" className="live-handle grow" onClick={() => setTOpen(!tOpen)} aria-expanded={tOpen}><span className="live-handle-t">Transcript · {p.turns.length} {p.turns.length === 1 ? 'turn' : 'turns'}</span><Icon.Up size={14} /></button>
                 {p.notesAllowed && !nOpen && <button type="button" className="live-handle" onClick={() => setNOpen(true)}>Notes</button>}
                 <button type="button" className="live-handle" onClick={() => p.onAction('hint')}>Hint</button>
                 {isMine && <button type="button" className="live-handle" onClick={() => p.onAction('feedback')} title="Done — coach me now">Feedback</button>}

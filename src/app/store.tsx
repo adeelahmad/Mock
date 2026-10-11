@@ -13,7 +13,10 @@ import { SimulatedTransport } from '../live/simulated.ts';
 import { analysisPipeline } from '../gemini/setup.ts';
 import { DEMO_SCRIPT } from '../live/scripts/demo.ts';
 import { INTERVIEWERS } from '../fixtures/sample.ts';
-import { buildContext, prioritiseQuestions } from '../live/context.ts';
+import { buildContext, confirmTokens, prioritiseQuestions } from '../live/context.ts';
+import { GeminiLiveTransport } from '../live/gemini.ts';
+import { BrowserAudio } from '../live/audio.ts';
+import { countTokens } from '../live/gemini-rest.ts';
 import { readPrefs, writePrefs } from './prefs.ts';
 import { applyTheme } from './theme.ts';
 import { go as routerGo, back as routerBack, useRoute, type Route } from './router.ts';
@@ -144,12 +147,15 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     exitLive();
     setLastStart(o);
     const s = data.settings;
-    // M1: both the "live" and the "demo" paths run on the simulated transport. M3 swaps in
-    // the Gemini transport when a key is configured.
+    // With a key the session runs on Gemini Live; without one, the scripted demo. The audio
+    // engine is created before the first await so iOS sees the Start tap as its gesture.
     const demo = !gemini.hasKey;
-    const transport = new SimulatedTransport(DEMO_SCRIPT);
-    // M4: with a key the cards and the report come from Flash (falling back to the offline ones).
-    const { analyzer, reporter } = analysisPipeline({ key: gemini.key || null, textModel: s.textModel, lps: data.lps, stories: data.stories, script: DEMO_SCRIPT, onFallback: (what, err) => toast((what === 'analysis' ? 'Flash card failed' : 'Flash report failed') + ' — used the offline one (' + err.message + ')') });
+    const transport = demo
+      ? new SimulatedTransport(DEMO_SCRIPT)
+      : new GeminiLiveTransport({ auth: { kind: 'key', key: gemini.key }, audio: new BrowserAudio() });
+    // With a key the cards and the report come from Flash, falling back to the offline card /
+    // local report; the demo replays the script's cards.
+    const { analyzer, reporter } = analysisPipeline({ key: demo ? null : gemini.key || null, textModel: s.textModel, lps: data.lps, stories: data.stories, script: demo ? DEMO_SCRIPT : null, onFallback: (what, err) => toast((what === 'analysis' ? 'Flash card failed' : 'Flash report failed') + ' — used the offline one (' + err.message + ')') });
     const c = new SessionController(transport, analyzer, repo, () => Date.now(), demo, { reporter });
     controller.current = c;
     c.subscribe((st, meta) => { setLiveState(st); setLiveMeta(meta); });
@@ -158,14 +164,18 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     const questions = prioritiseQuestions(data.questions, { mode: o.mode, focusLpId: focusLp?.id ?? null, weakLpIds: weak.slice(0, 5) });
     const previous = await repo.reports(8);
     const ctx = buildContext({ sessionNumber: await repo.nextSessionNumber(), date: new Date().toISOString().slice(0, 10), mode: o.mode, focus: o.focusLabel ?? focusLp?.name ?? o.questionText ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, previous, lps: data.lps, stories: data.stories, questions, files: data.files, userInstruction: s.systemInstruction });
-    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: s.liveModel, voice: s.voice, questionText: o.questionText ?? null });
+    c.setContext({ estimated: ctx.estimatedTokens, counted: null, budget: ctx.budget, trimmed: ctx.trimmed });
+    if (!demo) void confirmTokens(ctx, (t) => countTokens(gemini.key, s.textModel, t)).then((counted) => { if (counted != null) c.setContext({ estimated: ctx.estimatedTokens, counted, budget: ctx.budget, trimmed: ctx.trimmed }); });
+    // Show the connecting screen while the mic is granted and the connection opens.
     setSheet({ setup: false, answer: null, addQuestion: false, addStory: false });
     routerGo('/live');
+    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: s.liveModel, voice: s.voice, questionText: o.questionText ?? null });
   }, [data, gemini.hasKey, gemini.key, repo, exitLive, toast]);
 
   // Refresh the library when a live session writes.
   useEffect(() => {
-    if (repo instanceof MemoryRepo) { repo.onChange = () => { void refresh(); }; return () => { repo.onChange = null; }; }
+    repo.onChange = () => { void refresh(); };
+    return () => { repo.onChange = null; };
   }, [repo, refresh]);
 
   const value: AppStore = useMemo(() => ({
