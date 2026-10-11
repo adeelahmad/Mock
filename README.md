@@ -73,6 +73,18 @@ host or sub-path with no rewrite rules.
 **Anywhere else:** `npm run build` and upload `dist/` (Netlify, Cloudflare Pages, S3, any web
 server). Serve it over HTTPS: the microphone, service worker and install prompt require it.
 
+**Proxmox VE** (helper-script style LXC): on the Proxmox host shell run
+
+```
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/adeelahmad/Mock/main/proxmox/ct/mock.sh)"
+```
+
+It creates an unprivileged Debian 12 container (2 vCPU, 2 GiB, 8 GB; *Advanced* to change),
+installs Node 22 and Caddy, builds the app and serves it on `http://<ip>/` and `https://<ip>/`
+(Caddy's internal CA; trust its root or put your own proxy in front, since the microphone
+needs trusted HTTPS). To update, run `update` inside the container (or the same one-liner
+there). `MOCK_DEFAULTS=1` and `var_*` variables skip the prompts; see `proxmox/ct/mock.sh`.
+
 ## Stack
 
 React 19 · TypeScript · Vite · DuckDB-Wasm on IndexedDB snapshots · Gemini Live and Flash ·
