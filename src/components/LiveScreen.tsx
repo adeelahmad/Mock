@@ -131,7 +131,7 @@ function SourceBlock({ source, max = 280 }: { source: LiveSource; max?: number }
 }
 
 function NoteRows({ notes, source }: { notes: LiveNote[]; source?: LiveSource | null }) {
-  if (notes.length === 0) return source ? <SourceBlock source={source} /> : <div className="live-note-empty sub">No stories mapped to this LP yet.</div>;
+  if (notes.length === 0) return source ? <SourceBlock source={source} /> : <div className="live-note-empty sub">No stories mapped to this area yet.</div>;
   return (
     <>
       {notes.map((n, i) => (

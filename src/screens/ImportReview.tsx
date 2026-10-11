@@ -89,7 +89,7 @@ export default function ImportReview({ review, onCancel, onSaved }: { review: Re
   const visibleNeed = needYou.slice(0, limit);
 
   const lpSelect = (it: ReviewItem) => (
-    <select className="input lp-select" autoFocus aria-label={'LP for: ' + it.text} value={chosen(it)} onBlur={() => setChoosing(null)} onChange={(e) => pick(it.key, e.target.value)}>
+    <select className="input lp-select" autoFocus aria-label={'Area for: ' + it.text} value={chosen(it)} onBlur={() => setChoosing(null)} onChange={(e) => pick(it.key, e.target.value)}>
       <option value="">Untagged · leave flagged</option>
       {lps.map((l: Lp) => <option key={l.id} value={l.id}>{l.name}</option>)}
     </select>
@@ -113,7 +113,7 @@ export default function ImportReview({ review, onCancel, onSaved }: { review: Re
         ) : (
           <div className="rv-box quiet">
             <span className="rv-count">0</span>
-            <div className="stack g2 grow"><span className="rv-h">tagged with confidence</span><span className="rv-list">Pick the LPs below, or save and tag later.</span></div>
+            <div className="stack g2 grow"><span className="rv-h">tagged with confidence</span><span className="rv-list">Pick the areas below, or save and tag later.</span></div>
           </div>
         )}
         {showConfident && confident.length > 0 && (
@@ -121,7 +121,7 @@ export default function ImportReview({ review, onCancel, onSaved }: { review: Re
             {confident.map((it) => (
               <div key={it.key} className="rv-conf-row">
                 <span className="rv-cq">{it.text}</span>
-                {choosing === it.key ? lpSelect(it) : <button type="button" className="lp-tag" title="Change the LP" onClick={() => setChoosing(it.key)}>{lpName(chosen(it))}</button>}
+                {choosing === it.key ? lpSelect(it) : <button type="button" className="lp-tag" title="Change the area" onClick={() => setChoosing(it.key)}>{lpName(chosen(it))}</button>}
               </div>
             ))}
           </div>
@@ -147,7 +147,7 @@ export default function ImportReview({ review, onCancel, onSaved }: { review: Re
                       <button key={a} type="button" className={'pick' + (cur === a ? ' on' : '')} onClick={() => pick(it.key, a)} aria-pressed={cur === a}>{lpName(a)}{cur === a ? ' ✓' : ''}</button>
                     ))}
                     {!isSkipped && cur && cur !== it.lpId && !alts.includes(cur) && <button type="button" className="pick on" onClick={() => setChoosing(it.key)}>{lpName(cur)} ✓</button>}
-                    {!isSkipped && (choosing === it.key ? lpSelect(it) : <button type="button" className="pick quiet" onClick={() => setChoosing(it.key)}>{it.lpId || alts.length ? 'Other…' : 'Pick an LP…'}</button>)}
+                    {!isSkipped && (choosing === it.key ? lpSelect(it) : <button type="button" className="pick quiet" onClick={() => setChoosing(it.key)}>{it.lpId || alts.length ? 'Other…' : 'Pick an area…'}</button>)}
                     <button type="button" className={'pick' + (isSkipped ? ' on' : ' quiet')} onClick={() => toggleSkip(it.key)} aria-pressed={isSkipped}>{isSkipped ? 'Skipped · undo' : 'Follow-up, not a question'}</button>
                   </div>
                 </div>

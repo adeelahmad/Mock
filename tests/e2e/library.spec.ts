@@ -9,9 +9,9 @@ test.describe('library', () => {
     await expect(page).toHaveURL(/#\/library\/lps\/deep/);
     await expect(page.getByText(/Mapped stories/)).toBeVisible();
     await expect(page.getByText('Payments outage').first()).toBeVisible();
-    await page.getByRole('button', { name: /Practise this LP/ }).click();
+    await page.getByRole('button', { name: /Practise this area/ }).click();
     await expect(page).toHaveURL(/#\/live$/);
-    await expect(page.getByText(/One LP · Dive Deep|Dive Deep/).first()).toBeVisible();
+    await expect(page.getByText(/One area · Dive Deep|Dive Deep/).first()).toBeVisible();
   });
 
   test('stories → editor edits and saves; the grid cycles a mapping', async ({ page }) => {
@@ -25,7 +25,7 @@ test.describe('library', () => {
     await expect(page.getByLabel(/Learning/).first()).toHaveValue('Say the number first.');
 
     await open(page, '#/library/stories/grid');
-    await expect(page.getByText(/of 16 LPs covered/)).toBeVisible();
+    await expect(page.getByText(/of 16 areas covered/)).toBeVisible();
     const cell = page.getByRole('gridcell', { name: /Launch under ambiguity × Think Big/ }).first();
     await cell.click(); // none → primary
     await open(page, '#/library/lps/big');
@@ -62,5 +62,18 @@ test.describe('library', () => {
     await page.getByRole('textbox', { name: 'Search your files' }).fill('a problem others had missed');
     await page.getByRole('button', { name: /^Search$/ }).click();
     await expect(page.locator('.kb-hit').first()).toContainText('loop-2024-notes.md › Round 3 · Bar raiser');
+  });
+
+  test('areas: download the sample CSV, import it, then load the AWS defaults back', async ({ page }) => {
+    await open(page, '#/library/lps');
+    const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Sample CSV' }).first().click()]);
+    expect(dl.suggestedFilename()).toBe('mock-areas-sample.csv');
+    const path = await dl.path();
+    page.on('dialog', (d) => void d.accept());
+    await page.locator('input[type=file][accept=".csv"]').first().setInputFiles(path!);
+    await expect(page.getByRole('button', { name: /Problem Solving/ }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /Dive Deep/ })).toHaveCount(0);
+    await page.getByRole('button', { name: 'AWS defaults' }).first().click();
+    await expect(page.getByRole('button', { name: /Dive Deep/ }).first()).toBeVisible();
   });
 });

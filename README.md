@@ -1,10 +1,15 @@
 # Mock
 
-A personal voice app for rehearsing an AWS interview loop. A live interviewer (Gemini Live)
-asks Leadership Principle questions and probes with follow-ups; between answers a coach says,
-out loud, what to fix — judged against your own stories, numbers and notes. Every session is
-recorded, every answer gets an analysis card, every session a report, and progress builds
-across sessions.
+A personal voice app for rehearsing an interview loop. A live interviewer (Gemini Live)
+asks questions on the **areas** the interview assesses (competencies, values, a company's
+principles) and probes with follow-ups; between answers a coach says, out loud, what to fix —
+judged against your own stories, numbers and notes. Every session is recorded, every answer
+gets an analysis card, every session a report, and progress builds across sessions.
+
+Areas are yours to define: import an areas CSV, or load the **AWS interview defaults** (the 16
+Leadership Principles as areas plus all the sample stories, questions, files and sessions) from
+first-run setup or Settings → Library & data. Areas, stories and questions import from CSV;
+each import offers a sample CSV to download and fill in (`src/domain/csv-templates.ts`).
 
 Local-first: no backend, no account. Everything lives in your browser; backups move data
 between phone and laptop. Your Gemini API key is stored on the device and sent only to Google.
@@ -24,6 +29,21 @@ for the architecture and milestones, `docs/design-inventory.md` for the feature 
 4. Back up after sessions (Settings → Library & data). Practice reminds you when the last
    session isn't in a backup yet.
 
+### What it costs
+
+Every Gemini call reports how many tokens it used, and Mock adds them up. The **Spent** pill
+always shows the total: top-right on phone, in the sidebar on desktop, and in the header during
+a live session. Tap it for the split per area. Live tokens count toward the area
+of the question being asked, analysis cards toward the answer's area, and session reports and
+question tagging go under "Reports & other".
+
+The price is set in **Settings → Budget**: one row per model, in USD per 1M tokens, with text
+and audio input/output priced separately. It comes filled with Google's published prices
+(checked 2026-10-11; Gemini 3.8 Flash doubles on 2027-01-01). Mock stores the token counts, not
+dollars, so a new price re-prices everything already spent. Models without a row use the first
+row. *Reset spend* sets the counter back to $0. The counts live in settings, so backups carry
+them.
+
 ### Shortcuts and deep links
 
 The installed app has two shortcuts (long-press the icon on Android, right-click on desktop):
@@ -42,6 +62,20 @@ Once loaded, the app shell, library, History and Progress work offline (service 
 Live sessions need a connection: Practice says so and disables Start. The demo runs offline.
 
 ## Develop
+
+With `make` (run `make help` for the list):
+
+```
+make install           # npm install, devDependencies included
+make dev               # http://localhost:5173 (PORT=… to change)
+make check             # typecheck + unit tests + build
+make e2e               # Playwright (PW_CHROMIUM=/path/to/chromium for a local browser)
+make verify            # check, then e2e
+make preview           # build, then serve dist/
+make clean             # remove dist/ and test results
+```
+
+Or the npm scripts directly:
 
 ```
 npm install            # add --include=dev if NODE_ENV=production

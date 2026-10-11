@@ -81,7 +81,7 @@ export const NEW_QUESTION_TOOL: ToolDeclaration = {
     properties: {
       interviewer: { type: 'STRING', description: 'The interviewer asking, by name (e.g. "Dana Whitfield")' },
       question: { type: 'STRING', description: 'The exact question you will ask' },
-      lp: { type: 'STRING', description: 'The Leadership Principle being tested, by its full name' },
+      lp: { type: 'STRING', description: 'The area being tested, by its full name' },
       question_id: { type: 'STRING', description: 'The id of the question from the list, if it came from there' },
     },
     required: ['interviewer', 'question', 'lp'],
@@ -115,7 +115,7 @@ export const SAVE_STORY_TOOL: ToolDeclaration = {
       action: { type: 'STRING', description: 'Actions the candidate took, first person' },
       result: { type: 'STRING', description: 'Result, with numbers' },
       learning: { type: 'STRING', description: 'What they learned or would do differently' },
-      lp: { type: 'STRING', description: 'The Leadership Principle it best answers, by its full name' },
+      lp: { type: 'STRING', description: 'The area it best answers, by its full name' },
       numbers: { type: 'ARRAY', items: { type: 'STRING' }, description: 'Key numbers as "label: value", e.g. "latency: -40%"' },
     },
     required: ['title', 'situation', 'task', 'action', 'result'],

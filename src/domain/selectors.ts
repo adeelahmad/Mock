@@ -166,7 +166,7 @@ export function sessionModeLabel(session: Session, lps: Lp[], stories: Story[], 
   const lpName = (id: string | undefined) => (id ? lps.find((l) => l.id === id)?.name : undefined);
   switch (session.mode) {
     case 'loop': return 'Full loop';
-    case 'lp': return 'One LP · ' + (lp?.name ?? session.focus ?? '');
+    case 'lp': return 'One area · ' + (lp?.name ?? session.focus ?? '');
     case 'story': return 'Pressure-test · ' + (st?.title ?? session.focus ?? '');
     case 'question_set': {
       if (!session.focus) return 'Question set';

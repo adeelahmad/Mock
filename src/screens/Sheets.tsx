@@ -123,13 +123,13 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
   };
   const start = () => {
     const o = startOptions();
-    if (!o) { toast(pick === 'replay' ? 'Drop your past-loop notes in Library · Files first.' : pick === 'set' ? 'That set is empty — add questions in Library · Questions first.' : 'Add a Leadership Principle in the Library first.'); return; }
+    if (!o) { toast(pick === 'replay' ? 'Drop your past-loop notes in Library · Files first.' : pick === 'set' ? 'That set is empty — add questions in Library · Questions first.' : 'Add an area in the Library first.'); return; }
     void live.start(o);
   };
 
   const elseLabel = (): string | null => {
     switch (pick) {
-      case 'lp': return lpPick ? 'One LP · ' + lpPick.name : null;
+      case 'lp': return lpPick ? 'One area · ' + lpPick.name : null;
       case 'story': return storyPick ? 'One story · ' + storyPick.title : null;
       case 'set': return 'Question set · ' + setPickObj.label;
       case 'replay': return filePick ? 'Replay · ' + filePick.title : null;
@@ -159,7 +159,7 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
           </button>
           <button type="button" className={'opt' + (elseLabel() ? ' on' : '')} onClick={() => setPage(2)}>
             <Tile plain>…</Tile>
-            <div className="opt-text"><span className="opt-title">Something else</span><span className="opt-sub">{elseLabel() ?? 'One LP · one story · question set · replay · bar raiser'}</span></div>
+            <div className="opt-text"><span className="opt-title">Something else</span><span className="opt-sub">{elseLabel() ?? 'One area · one story · question set · replay · bar raiser'}</span></div>
             <Icon.Forward size={16} style={{ color: 'var(--m-fg3)' }} />
           </button>
         </div>
@@ -208,13 +208,13 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
 
   const page2 = (
     <div className="stack g8">
-      {/* One LP */}
+      {/* One area */}
       <div className={'opt' + (pick === 'lp' ? ' on' : '')}>
         <button type="button" className="opt-main" onClick={() => choose('lp')} aria-pressed={pick === 'lp'}>
-          <div className="opt-text"><span className="opt-title">One LP</span><span className="opt-sub">{lpPick ? lpPick.name + (selLp ? '' : ' · suggested') : 'No LPs yet'}</span></div>
+          <div className="opt-text"><span className="opt-title">One area</span><span className="opt-sub">{lpPick ? lpPick.name + (selLp ? '' : ' · suggested') : 'No areas yet'}</span></div>
         </button>
         {pick === 'lp' && picker !== 'lp' && <span className="opt-check" aria-hidden="true">✓</span>}
-        <button type="button" className="btn link" onClick={() => choose('lp', 'lp')} aria-expanded={picker === 'lp'}>Pick LP</button>
+        <button type="button" className="btn link" onClick={() => choose('lp', 'lp')} aria-expanded={picker === 'lp'}>Pick area</button>
       </div>
       {picker === 'lp' && (
         <div className="list r12 picker" role="listbox" aria-label="Leadership Principles">
@@ -232,14 +232,14 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
       <div className={'opt col' + (pick === 'story' ? ' on' : '')}>
         <div className="hstack between" style={{ gap: 10 }}>
           <button type="button" className="opt-main" onClick={() => choose('story')} aria-pressed={pick === 'story'} disabled={!storyPick}>
-            <div className="opt-text"><span className="opt-title">One story{storyPick ? ' · ' + storyPick.title : ''}</span><span className="opt-sub">{storyPick ? storyLps.length + (storyLps.length === 1 ? ' question' : ' questions') + ', one per mapped LP · ~' + Math.round(estimate('story')) + ' min' : 'Add a story in the Library first'}</span></div>
+            <div className="opt-text"><span className="opt-title">One story{storyPick ? ' · ' + storyPick.title : ''}</span><span className="opt-sub">{storyPick ? storyLps.length + (storyLps.length === 1 ? ' question' : ' questions') + ', one per mapped area · ~' + Math.round(estimate('story')) + ' min' : 'Add a story in the Library first'}</span></div>
           </button>
           {pick === 'story' ? <span className="opt-check" aria-hidden="true">✓</span> : !storyPick ? null : <button type="button" className="btn link" onClick={() => choose('story', 'story')}>Pick story</button>}
         </div>
         {pick === 'story' && storyPick && (
           <>
             {storyLps.length > 0 && <div className="hstack wrap" style={{ gap: 6 }}>{storyLps.map((m) => <span key={m.id} className={'lp-chip' + (m.role === 'primary' ? ' primary' : '')}>{lpById.get(m.id)?.name ?? m.id}</span>)}</div>}
-            {storyLps.length === 0 && <span className="opt-note">Not mapped to any LP yet — the interviewer will probe it on its own terms. <button type="button" className="btn link" onClick={() => { onClose(); go(paths.grid); }}>Map it in the grid</button></span>}
+            {storyLps.length === 0 && <span className="opt-note">Not mapped to any area yet — the interviewer will probe it on its own terms. <button type="button" className="btn link" onClick={() => { onClose(); go(paths.grid); }}>Map it in the grid</button></span>}
             <span className="opt-note">
               {storyPick.uses ? 'Used ' + storyPick.uses + (storyPick.uses === 1 ? ' time' : ' times') + (storyPick.overused ? ' — the coach will push you to vary it.' : '.') : 'Never used in a session yet.'}{' '}
               <button type="button" className="btn link" onClick={() => setPicker((p) => (p === 'story' ? null : 'story'))} aria-expanded={picker === 'story'}>Change story</button>
@@ -304,7 +304,7 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
 
       {/* Bar raiser */}
       <button type="button" className={'opt' + (pick === 'bar' ? ' on' : '')} onClick={() => choose('bar')} aria-pressed={pick === 'bar'}>
-        <div className="opt-text"><span className="opt-title">Bar raiser</span><span className="opt-sub">{barRaiser.name.split(' ')[0]} · 4 questions across LPs</span></div>
+        <div className="opt-text"><span className="opt-title">Bar raiser</span><span className="opt-sub">{barRaiser.name.split(' ')[0]} · 4 questions across areas</span></div>
         {pick === 'bar' && <span className="opt-check" aria-hidden="true">✓</span>}
       </button>
     </div>
@@ -438,7 +438,7 @@ export function AddQuestionSheet({ open, onClose }: { open: boolean; onClose: ()
       <div className="stack g16">
         <Input label="Question" multiline value={text} rows={4} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)} placeholder="Tell me about a time you had to make a call between two of your own priorities." />
         <div className="field">
-          <span className="field-label">LP</span>
+          <span className="field-label">Area</span>
           <div className="lp-field">
             <span className={lpId ? '' : 'muted'}>{lpName}</span>
             <button type="button" className="btn link" style={{ font: '700 11px/1 var(--font-sans)' }} onClick={() => setChanging((c) => !c)} aria-expanded={changing}>
@@ -488,7 +488,7 @@ export function AddStorySheet({ open, onClose }: { open: boolean; onClose: () =>
       <div className="stack g16">
         <Input label="Title" value={title} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)} placeholder="Payments outage" autoFocus />
         <Input label="One-line summary" multiline rows={3} value={summary} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setSummary(e.target.value)} placeholder="Led a Sev-1 recovery on the card-payments path during Black Friday week." />
-        <Select label="Primary LP" value={lp} onChange={setLp} options={[{ value: '', label: 'Map it in the grid later' }, ...data.lps.map((l) => ({ value: l.id, label: l.name }))]} />
+        <Select label="Primary area" value={lp} onChange={setLp} options={[{ value: '', label: 'Map it in the grid later' }, ...data.lps.map((l) => ({ value: l.id, label: l.name }))]} />
         <span className="sub">Situation, Task, Action, Result, the learning and the key numbers go in the editor once the story exists.</span>
       </div>
     </Sheet>

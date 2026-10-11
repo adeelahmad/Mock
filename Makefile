@@ -1,0 +1,55 @@
+# Mock — shortcuts for the npm scripts. `make help` lists them.
+# NODE_ENV=production would make npm skip devDependencies, so install always includes them.
+
+PORT ?= 5173
+
+.DEFAULT_GOAL := help
+.PHONY: help install dev typecheck test test-watch build preview e2e check verify refs shots icons clean
+
+help: ## List the targets
+	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-11s %s\n", $$1, $$2}'
+
+node_modules: package.json package-lock.json
+	npm install --include=dev --no-audit --no-fund
+	@touch node_modules
+
+install: ## Install dependencies (dev included)
+	npm install --include=dev --no-audit --no-fund
+
+dev: node_modules ## Run the dev server (PORT=5173)
+	npx vite --port $(PORT)
+
+typecheck: node_modules ## Type-check
+	npm run typecheck
+
+test: node_modules ## Unit tests (Vitest)
+	npm test
+
+test-watch: node_modules ## Unit tests in watch mode
+	npm run test:watch
+
+build: node_modules ## Build the static site into dist/
+	npm run build
+
+preview: build ## Serve the built site
+	npm run preview
+
+e2e: node_modules ## Playwright tests (PW_CHROMIUM=/path/to/chromium for a local browser)
+	npm run e2e
+
+check: node_modules ## Typecheck + unit tests + build
+	npm run check
+
+verify: check e2e ## Everything: check, then Playwright
+
+refs: node_modules ## Design artboards -> tests/design-refs (needs network)
+	npm run refs
+
+shots: node_modules ## App screenshots -> tests/screenshots (dev server running)
+	npm run shots
+
+icons: node_modules ## Re-render public/icons/*.png
+	npm run icons
+
+clean: ## Remove build output and test results
+	rm -rf dist test-results playwright-report

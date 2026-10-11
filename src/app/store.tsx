@@ -93,7 +93,7 @@ function derive(d: Omit<AppData, 'lpRows' | 'storyRows' | 'questionRows' | 'cove
   return { ...d, lpRows: rows, storyRows: storyRows(d.stories, d.lps, d.exchanges), questionRows: questionRows(d.questions, d.lps), covered: coveredLpIds(d.stories), heat: heatmap(d.lps, d.sessions, d.exchanges), trend: trend(d.sessions, d.exchanges), weakest: weakestAnswer(d.sessions, d.exchanges) };
 }
 
-const EMPTY: AppData = derive({ lps: [], stories: [], questions: [], files: [], sessions: [], exchanges: [], settings: { interviewDate: '2026-10-30', liveModel: 'gemini-3.8-live', textModel: 'gemini-3.8-flash', voice: 'Aoede', pauseMs: 2500, systemInstruction: '', loopSize: 5, coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 12345, lastBackupAt: null, onboarded: false, pricing: DEFAULT_PRICING, usage: [] } });
+const EMPTY: AppData = derive({ lps: [], stories: [], questions: [], files: [], sessions: [], exchanges: [], settings: { interviewDate: '2026-10-30', liveModel: 'gemini-3.8-live', textModel: 'gemini-3.8-flash', voice: 'Aoede', pauseMs: 2500, systemInstruction: '', loopSize: 5, coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 12345, lastBackupAt: null, onboarded: false, pricing: DEFAULT_PRICING, usage: [], gamePlays: [] } });
 
 export function AppProvider({ repo: given, children }: { repo?: Repo; children: React.ReactNode }) {
   const repo = useMemo(() => given ?? new MemoryRepo(), [given]);
@@ -136,7 +136,7 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
 
   useEffect(() => { applyTheme(prefs.theme); writePrefs(prefs); }, [prefs]);
   useEffect(() => { setSheet({ setup: false, answer: null, addQuestion: false, addStory: false }); }, [route.path]);
-  useEffect(() => { if (route.tab !== prefs.lastTab && ['practice', 'library', 'history', 'progress'].includes(route.tab)) setPrefs((p) => ({ ...p, lastTab: route.tab })); }, [route.tab]);
+  useEffect(() => { if (route.tab !== prefs.lastTab && ['practice', 'library', 'history', 'progress', 'game'].includes(route.tab)) setPrefs((p) => ({ ...p, lastTab: route.tab })); }, [route.tab]);
 
   const toast = useCallback((message: string) => {
     setToastText(message);
