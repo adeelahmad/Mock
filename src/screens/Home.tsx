@@ -24,6 +24,8 @@ export const readinessList = (rows: LpRow[]): LpReadiness[] =>
 /** The LP the last report pointed at ("Dive Deep — quantify the blast radius…" → Dive Deep). */
 export function lastFocusLpId(sessions: Session[], lps: Lp[]): string | null {
   const last = sessions.slice().sort((a, b) => b.number - a.number).find((s) => s.report);
+  const id = last?.report?.nextFocusLpId;
+  if (id && lps.some((l) => l.id === id)) return id;
   const text = last?.report?.nextFocus?.toLowerCase() ?? '';
   if (!text) return null;
   return lps.find((l) => text.startsWith(l.name.toLowerCase()))?.id ?? lps.find((l) => text.includes(l.name.toLowerCase()))?.id ?? null;

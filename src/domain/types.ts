@@ -152,6 +152,8 @@ export interface Report {
   fixes: string[];
   storySwaps: { lpName: string; useStory: string; insteadOf: string | null }[];
   nextFocus: string;
+  /** The LP the next focus names, so Practice can pull it to the top of the queue. */
+  nextFocusLpId?: string | null;
   summary: string;
   createdAt: string;
 }

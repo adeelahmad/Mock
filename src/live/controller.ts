@@ -1,7 +1,9 @@
 // Mock — the session controller. Wires a LiveTransport to the state machine and the
 // repository: transport events become machine events; tool calls open exchanges; closing an
-// exchange persists it and asks the Analyzer for the card; the transcript is saved as it
-// arrives; the control buttons send text tags. The UI subscribes to the state.
+// exchange persists it and asks the Analyzer for the card (on coaching start, or on close when
+// coaching never came); at the end every card is awaited and the Reporter writes the session
+// report; the transcript is saved as it arrives; the control buttons send text tags. The UI
+// subscribes to the state.
 
 import { initialState, reduce, type SessionEvent, type SessionState } from '../domain/session-machine.ts';
 import type { Analysis, Coaching, Exchange, Interviewer, Lp, Mode, QuestionSourceSetting, Session, Story, TranscriptEvent } from '../domain/types.ts';
@@ -9,6 +11,7 @@ import type { Repo } from '../db/repo.ts';
 import { newId } from '../db/repo.ts';
 import { NEW_QUESTION_TOOL, type LiveTransport, type ToolCall, type TransportEvent } from './transport.ts';
 import type { Analyzer } from './analyzer.ts';
+import { LocalReporter, reportInput, type Reporter } from './reporter.ts';
 
 export interface StartOptions {
   mode: Mode;
@@ -65,11 +68,16 @@ export class SessionController {
   private turnsAfterEnd = 0;
   private recordingParts: string[] = [];
   private pendingParts: Promise<unknown>[] = [];
+  /** Analyses in flight, by exchange id; the report waits for them. */
+  private pending = new Map<string, Promise<void>>();
+  private exchangeIndexById = new Map<string, number>();
 
   private tickMs: number;
-  constructor(private transport: LiveTransport, private analyzer: Analyzer | null, private repo: Repo, private now: () => number = () => Date.now(), demo = false, opts: { tickMs?: number } = {}) {
+  private reporter: Reporter;
+  constructor(private transport: LiveTransport, private analyzer: Analyzer | null, private repo: Repo, private now: () => number = () => Date.now(), demo = false, opts: { tickMs?: number; reporter?: Reporter } = {}) {
     this.meta.demo = demo;
     this.tickMs = opts.tickMs ?? 250;
+    this.reporter = opts.reporter ?? new LocalReporter();
   }
 
   subscribe(l: Listener): () => void { this.listeners.add(l); l(this.state, this.meta); return () => this.listeners.delete(l); }
@@ -128,16 +136,20 @@ export class SessionController {
     if (!this.session) { setTimeout(() => this.destroy(), 2500); return; }
     const session = this.session;
     await this.repo.updateSession(session.id, { endedAt: new Date(now).toISOString() });
+    // The report runs alongside the recap; it waits for every card, not for the audio.
+    const report = this.writeReport(session.id);
     if (this.transport.kind === 'gemini') {
       // The model speaks the recap after [END]: keep the connection (and the recording) open
       // until that turn completes and its audio drains.
       await this.waitForRecap();
       await this.saveRecording(session);
       this.destroy();
+      await report;
     } else {
       await this.saveRecording(session);
       // Let the goodbye play out, then close.
       setTimeout(() => this.destroy(), 2500);
+      await report;
     }
   }
 
@@ -244,6 +256,7 @@ export class SessionController {
       storyId: null, storyTitle: null, startedAt: new Date(now).toISOString(), endedAt: null, startMs: now - this.state.startedAt, endMs: null, clipKey: null, analysis: null, verdict: null, isBest: false,
     };
     this.exchange = ex;
+    this.exchangeIndexById.set(ex.id, this.state.qIndex);
     void this.repo.insertExchange(ex);
     this.transport.beginClip?.();
   }
@@ -252,29 +265,64 @@ export class SessionController {
     const ex = this.exchange; if (!ex) return;
     this.exchange = null;
     await this.flushTranscript();
-    await this.repo.updateExchange(ex.id, { endedAt: new Date(now).toISOString(), endMs: now - this.state.startedAt });
+    const endMs = now - this.state.startedAt;
+    ex.endedAt = new Date(now).toISOString(); ex.endMs = endMs;
+    await this.repo.updateExchange(ex.id, { endedAt: ex.endedAt, endMs });
     const clip = this.transport.endClip ? await this.transport.endClip() : null;
     if (clip && clip.size) {
       const clipKey = 'clip:' + ex.id;
-      if (await this.repo.putBlob(clipKey, clip)) await this.repo.updateExchange(ex.id, { clipKey });
+      if (await this.repo.putBlob(clipKey, clip)) { ex.clipKey = clipKey; await this.repo.updateExchange(ex.id, { clipKey }); }
+    }
+    // No coaching came (recap-only, or skipped with "next"): the card is written on close.
+    if (this.analyzer && !ex.analysis && !this.pending.has(ex.id)) {
+      // Still the current question in the machine (the next one is dispatched after this close).
+      const transcript = this.state.turns.filter((t) => t.tMs >= ex.startMs && t.tMs <= endMs);
+      const durationSec = this.state.answerSec || Math.max(1, (endMs - ex.startMs) / 1000);
+      if (transcript.some((t) => t.speaker === 'me')) this.track(ex, this.analyse(ex, transcript, '', durationSec));
     }
   }
 
   /** Called when coaching starts: the candidate's answer (with follow-ups) is complete. */
-  private async analyseCurrent(now: number): Promise<void> {
-    const ex = this.exchange; if (!ex || ex.analysis || !this.analyzer) return;
+  private analyseCurrent(now: number): Promise<void> {
+    const ex = this.exchange; if (!ex || ex.analysis || !this.analyzer || this.pending.has(ex.id)) return Promise.resolve();
     const transcript = this.state.turns.filter((t) => t.tMs >= ex.startMs);
     const durationSec = this.state.answerSec || Math.max(0, (now - this.state.startedAt - ex.startMs) / 1000);
+    return this.track(ex, this.analyse(ex, transcript, this.state.coachText, durationSec));
+  }
+
+  private track(ex: Exchange, p: Promise<void>): Promise<void> {
+    const done = p.finally(() => this.pending.delete(ex.id));
+    this.pending.set(ex.id, done);
+    return done;
+  }
+
+  private async analyse(ex: Exchange, transcript: SessionState['turns'], coachText: string, durationSec: number): Promise<void> {
     try {
-      const analysis: Analysis = await this.analyzer.analyze({ exchange: ex, transcript, coachText: this.state.coachText, clip: null, durationSec });
+      // The per-exchange clip, when the transport recorded one (plan §3: blob `clip:{exchangeId}`).
+      const clip = await this.repo.getBlob(ex.clipKey ?? 'clip:' + ex.id).catch(() => null);
+      const analysis: Analysis = await this.analyzer!.analyze({ exchange: ex, transcript, coachText, clip, durationSec });
       ex.analysis = analysis; ex.verdict = analysis.verdict;
       if (analysis.storyUsed) { const st = this.opts?.stories.find((s) => s.title === analysis.storyUsed); ex.storyId = st?.id ?? null; ex.storyTitle = analysis.storyUsed; }
       await this.repo.setAnalysis(ex.id, analysis);
       if (ex.storyTitle) await this.repo.updateExchange(ex.id, { storyId: ex.storyId, storyTitle: ex.storyTitle });
-      // Only land it if we are still on the same question.
-      if (this.state.qText === ex.questionText) this.dispatch({ type: 'ANALYSIS', now: this.now(), analysis });
+      // On screen only while we are still on the same question; otherwise it joins the recap rows.
+      if (this.state.qText === ex.questionText && this.exchange === ex) this.dispatch({ type: 'ANALYSIS', now: this.now(), analysis });
+      else this.dispatch({ type: 'ANALYSIS', now: this.now(), analysis, answer: { qIndex: this.exchangeIndexById.get(ex.id) ?? ex.index, lpName: analysis.lp || this.opts?.lps.find((l) => l.id === ex.lpId)?.name || '', interviewer: ex.interviewer } });
     } catch (err) {
       this.dispatch({ type: 'ERROR', now: this.now(), message: 'Analysis failed: ' + ((err as Error).message || 'unknown') });
+    }
+  }
+
+  /** Once every card is in, the report: Flash prose over local verdicts (or local only). */
+  private async writeReport(sessionId: string): Promise<void> {
+    await Promise.allSettled(Array.from(this.pending.values()));
+    try {
+      const input = await reportInput(this.repo, sessionId);
+      if (!input || !input.exchanges.some((e) => e.verdict)) return;
+      const report = await this.reporter.report(input);
+      await this.repo.updateSession(sessionId, { report });
+    } catch (err) {
+      this.dispatch({ type: 'ERROR', now: this.now(), message: 'Report failed: ' + ((err as Error).message || 'unknown') });
     }
   }
 

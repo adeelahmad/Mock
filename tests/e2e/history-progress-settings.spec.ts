@@ -13,7 +13,7 @@ test.describe('history and progress', () => {
     else await page.getByRole('button', { name: /^All \d+$/ }).click();
     await expect(page.getByText(/Numbers you missed/).first()).toBeVisible();
     await expect(page.getByText(/41 min to mitigate/).first()).toBeVisible();
-    await expect(page.getByText(/Legacy data migration/).first()).toBeVisible();
+    await expect(page.getByText(/Legacy data migration/).filter({ visible: true }).first()).toBeVisible(); // also named in the report's story swaps, on the hidden tab
   });
 
   test('progress shows the heatmap, weakest LPs and the trend', async ({ page }) => {

@@ -154,7 +154,7 @@ export default function Live() {
 
   const recap: LiveRecap = useMemo(() => {
     const answers = state?.answers ?? [];
-    // M4: the Flash recap writes the session report; until then the focus is the weakest answer's first fix.
+    // The written report's focus wins once it lands; until then the spoken recap's, then the weakest answer's first fix.
     const weakest = exchanges.filter((e) => e.analysis).sort((a, b) => verdictPoints(a.analysis!.verdict) - verdictPoints(b.analysis!.verdict) || a.index - b.index)[0];
     const local = weakest?.analysis
       ? (weakest.analysis.lp || data.lps.find((l) => l.id === weakest.lpId)?.name || 'Next time') + ' — ' + lcFirst(weakest.analysis.fixes[0] ?? 'redo it with the numbers first.')
@@ -166,7 +166,7 @@ export default function Live() {
       questions: answers.length,
       fixes: answers.reduce((n, a) => n + a.fixes, 0),
       rows: answers.map((a) => ({ mono: a.interviewer.mono, name: a.interviewer.name, role: a.interviewer.role, lp: a.lpName, verdict: a.verdict })),
-      focus: state?.focus || session?.report?.nextFocus || local,
+      focus: session?.report?.nextFocus || state?.focus || local,
     };
   }, [state, exchanges, data.lps, session, mode, now]);
 
