@@ -1,6 +1,7 @@
 {
   "name": "mock",
   "private": true,
+  "license": "MIT",
   "version": "0.1.0",
   "description": "Mock \u2014 a voice app for rehearsing an AWS interview loop. A live interviewer asks Leadership Principle questions; between answers a coach tells you what to fix, judged against your own prep.",
   "type": "module",
@@ -18,6 +19,7 @@
     "refs": "node scripts/design-refs.mjs",
     "shots": "node scripts/app-shots.mjs",
     "icons": "node scripts/icons.mjs",
+    "media": "node scripts/readme-media.mjs",
     "docs": "vitepress dev site --port 5174",
     "docs:build": "vitepress build site",
     "pages": "npm run build && vitepress build site && rm -rf site/.vitepress/dist/app && cp -R dist site/.vitepress/dist/app"

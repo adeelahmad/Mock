@@ -1,0 +1,61 @@
+name: Bug report
+description: Something in Mock doesn't work the way it should
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting. Please don't paste your Gemini API key, OAuth secrets or private interview prep.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+      placeholder: Started a drill from Practice, answered the first question, the coach never spoke.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Practice
+        2. Start the suggested drill
+        3. …
+  - type: dropdown
+    id: how
+    attributes:
+      label: How you run Mock
+      options:
+        - Hosted app (GitHub Pages)
+        - Mock binary (mock / make serve)
+        - make dev (from source)
+        - Proxmox helper script
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Live mode
+      options:
+        - Demo (no Gemini key)
+        - Gemini Live
+        - Google Meet
+        - Not a live-session issue
+  - type: input
+    id: env
+    attributes:
+      label: Browser, OS and device
+      placeholder: Safari 19, iOS 20, iPhone 16 (installed to home screen)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "`mock version`, or the commit / date of the hosted app"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console output or screenshots
+      description: Browser console errors, server log lines, or a screenshot.
