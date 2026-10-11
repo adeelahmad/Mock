@@ -6,3 +6,6 @@ test-results
 tests/design-refs
 tests/screenshots
 data
+site/public
+site/.vitepress/cache
+site/.vitepress/dist

@@ -1,0 +1,54 @@
+# GitHub Pages: the docs site (VitePress, site/) at the root and the static app at /app/.
+#   https://<user>.github.io/<repo>/      docs and landing page
+#   https://<user>.github.io/<repo>/app/  the app (relative asset paths, hash routing)
+# Runs on every push to main, or from Actions → "Pages" → Run workflow.
+# One-time setup: Settings → Pages → Source: "GitHub Actions". On a private repo, Pages needs a
+# paid plan. DOCS_BASE is the site's sub-path: the repo name here; "/" for a custom domain.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  DOCS_BASE: /${{ github.event.repository.name }}/
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --include=dev
+      - run: npm run typecheck
+      - run: npm test
+      # Builds the app into dist/, the site into site/.vitepress/dist, and copies the app to /app/.
+      - run: npm run pages
+      - run: touch site/.vitepress/dist/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/.vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
