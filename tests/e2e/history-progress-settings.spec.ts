@@ -16,6 +16,27 @@ test.describe('history and progress', () => {
     await expect(page.getByText(/Legacy data migration/).filter({ visible: true }).first()).toBeVisible(); // also named in the report's story swaps, on the hidden tab
   });
 
+  test('transcript: speaker colours, tone per line, Ask AI versions on your lines', async ({ page }) => {
+    await open(page, '#/history/s14');
+    const mine = page.locator('.tr-row.me').filter({ visible: true }).first();
+    await expect(mine).toBeVisible();
+    await expect(page.locator('.tr-row.coach').filter({ visible: true }).first()).toBeVisible();
+    await expect(page.getByText(/^Your tone$/).filter({ visible: true })).toBeVisible();
+    await expect(mine.locator('.tr-sent')).toBeVisible();
+    // only your own lines offer Ask AI
+    await expect(page.locator('.tr-row.coach .tr-ask')).toHaveCount(0);
+    await mine.getByRole('button', { name: /Ask AI/ }).click();
+    await mine.getByRole('button', { name: 'Improve this answer' }).click();
+    await expect(mine.getByText(/Improved answer · v1 of 1/)).toBeVisible();
+    await mine.getByRole('button', { name: 'Better story' }).click();
+    await expect(mine.getByText(/Better story · v2 of 2/)).toBeVisible();
+    await expect(mine.locator('.tr-ai-text')).toContainText('Situation —');
+    await mine.getByRole('button', { name: 'Previous version' }).click();
+    await expect(mine.getByText(/Improved answer · v1 of 2/)).toBeVisible();
+    await mine.getByRole('button', { name: 'Previous version' }).click();
+    await expect(mine.getByText(/Original · 2 versions/)).toBeVisible();
+  });
+
   test('progress shows the heatmap, weakest LPs and the trend', async ({ page }) => {
     await open(page, '#/progress');
     await expect(page.getByText(/Weakest areas/)).toBeVisible();
