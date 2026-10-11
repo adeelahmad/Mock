@@ -18,6 +18,9 @@ import { GeminiLiveTransport } from '../live/gemini.ts';
 import { BrowserAudio } from '../live/audio.ts';
 import { countTokens } from '../live/gemini-rest.ts';
 import { readPrefs, writePrefs, readFlag, writeFlag } from './prefs.ts';
+import { DEFAULT_PRICING } from '../domain/budget.ts';
+import { setUsageSink } from '../gemini/usage.ts';
+import type { UsageEntry } from '../db/repo.ts';
 import { applyTheme } from './theme.ts';
 import { buildBackup } from '../db/backup.ts';
 import { SyncEngine, localMemo, type SyncStatus } from '../sync/engine.ts';
@@ -93,7 +96,7 @@ function derive(d: Omit<AppData, 'lpRows' | 'storyRows' | 'questionRows' | 'cove
   return { ...d, lpRows: rows, storyRows: storyRows(d.stories, d.lps, d.exchanges), questionRows: questionRows(d.questions, d.lps), covered: coveredLpIds(d.stories), heat: heatmap(d.lps, d.sessions, d.exchanges), trend: trend(d.sessions, d.exchanges), weakest: weakestAnswer(d.sessions, d.exchanges) };
 }
 
-const EMPTY: AppData = derive({ lps: [], stories: [], questions: [], files: [], sessions: [], exchanges: [], settings: { interviewDate: '2026-10-30', liveModel: 'gemini-3.8-live', textModel: 'gemini-3.8-flash', voice: 'Aoede', pauseMs: 2500, systemInstruction: '', loopSize: 5, coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 12345, lastBackupAt: null, onboarded: false } });
+const EMPTY: AppData = derive({ lps: [], stories: [], questions: [], files: [], sessions: [], exchanges: [], settings: { interviewDate: '2026-10-30', liveModel: 'gemini-3.8-live', textModel: 'gemini-3.8-flash', voice: 'Aoede', pauseMs: 2500, systemInstruction: '', loopSize: 5, coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 12345, lastBackupAt: null, onboarded: false, pricing: DEFAULT_PRICING, usage: [] } });
 
 export function AppProvider({ repo: given, children }: { repo?: Repo; children: React.ReactNode }) {
   const repo = useMemo(() => given ?? new MemoryRepo(), [given]);
@@ -213,6 +216,18 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     routerGo('/live');
     await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: s.liveModel, voice: s.voice, questionText: o.questionText ?? null });
   }, [data, gemini.hasKey, gemini.key, repo, exitLive, toast]);
+
+  // Budget: every Gemini call's tokens go to the ledger, batched so a live session writes at
+  // most every two seconds.
+  useEffect(() => {
+    let pending: UsageEntry[] = [];
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const flush = () => { timer = null; const batch = pending; pending = []; void repo.addUsage(batch).catch(() => { /* lost: never break a session over accounting */ }); };
+    const off = setUsageSink((model, lpId, usage) => { pending.push({ model, lpId, usage }); timer ??= setTimeout(flush, 2000); });
+    const onHide = () => { if (timer) { clearTimeout(timer); flush(); } };
+    window.addEventListener('pagehide', onHide);
+    return () => { off(); window.removeEventListener('pagehide', onHide); onHide(); };
+  }, [repo]);
 
   // Refresh the library when a live session writes.
   useEffect(() => {

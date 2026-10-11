@@ -5,7 +5,8 @@
 //   pull   the server copy moved past the revision this device last saw:
 //            nothing changed here  → replace the local library with it
 //            changes here too      → merge both (mergeBackups: new items from either side, newer
-//                                    edit wins on the same item) and push the merge
+//                                    edit wins on the same item; spend ledgers merge per bucket)
+//                                    and push the merge
 //   push   local writes mark the device dirty; 1.5 s after the last one the library is pushed
 //          with the revision it was based on. A 409 (another browser pushed first) pulls, merges
 //          and pushes again.
@@ -15,6 +16,7 @@
 // is unit-tested with fakes.
 
 import { isMockBackup, mergeBackups, migrateBackup, type MockBackup } from '../db/backup.ts';
+import type { UsageBucket } from '../domain/types.ts';
 
 export interface RemoteLibrary { rev: number; doc: unknown; updatedAt: string }
 export type PushResult = { ok: true; rev: number; updatedAt: string } | { ok: false; current: RemoteLibrary | null };
@@ -49,6 +51,23 @@ export const hasUserData = (b: MockBackup): boolean => {
   const t = b.tables;
   return t.stories.length > 0 || t.sessions.length > 0 || t.files.length > 0 || t.questions.some((q) => q.source !== 'common');
 };
+
+/** Spend ledgers from two devices that share history: the larger count per bucket, so nothing is counted twice. */
+export function mergeLedgers(a: UsageBucket[] = [], b: UsageBucket[] = []): UsageBucket[] {
+  const out = a.map((x) => ({ ...x }));
+  for (const y of b) {
+    const i = out.findIndex((x) => x.model === y.model && x.lpId === y.lpId);
+    if (i < 0) out.push({ ...y });
+    else if (y.calls > out[i].calls || (y.calls === out[i].calls && y.input + y.output > out[i].input + out[i].output)) out[i] = { ...y };
+  }
+  return out;
+}
+
+/** Server copy + this device's changes: mergeBackups keeps the server's settings; the spend ledger merges. */
+export function mergeLibraries(theirs: MockBackup, mine: MockBackup): MockBackup {
+  const m = mergeBackups(theirs, mine);
+  return { ...m, tables: { ...m.tables, settings: { ...m.tables.settings, usage: mergeLedgers(theirs.tables.settings.usage, mine.tables.settings.usage) } } };
+}
 
 export class SyncEngine {
   private api: SyncApi;
@@ -100,7 +119,9 @@ export class SyncEngine {
     if (!this.m.dirty) { this.m.dirty = true; this.save(); }
     this.set({});
     if (this.timer) clearTimeout(this.timer);
-    this.timer = setTimeout(() => { this.timer = null; void this.sync(); }, this.o.delayMs ?? 1500);
+    // During a live session the spend ledger writes every few seconds: push less often then.
+    const delay = this.o.busy?.() ? 15_000 : this.o.delayMs ?? 1500;
+    this.timer = setTimeout(() => { this.timer = null; void this.sync(); }, delay);
   }
 
   /** One round: pull if the server moved, push if this device changed. Rounds queue. */
@@ -124,7 +145,7 @@ export class SyncEngine {
         const mine = await this.local.build();
         // A fresh device (never synced, nothing made here) simply takes the server copy.
         const mergeMine = this.m.dirty || (this.m.rev === 0 && hasUserData(mine));
-        const doc = mergeMine ? mergeBackups(theirs, mine) : theirs;
+        const doc = mergeMine ? mergeLibraries(theirs, mine) : theirs;
         await this.applyLocal(doc);
         this.m = { ...this.m, rev: remote.rev, dirty: mergeMine };
         this.save();

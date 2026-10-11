@@ -6,8 +6,11 @@ out loud, what to fix — judged against your own stories, numbers and notes. Ev
 recorded, every answer gets an analysis card, every session a report, and progress builds
 across sessions.
 
-Local-first: no backend, no account. Everything lives in your browser; backups move data
-between phone and laptop. Your Gemini API key is stored on the device and sent only to Google.
+Local-first: everything lives in your browser and works offline. Optionally, run the small
+Mock server (below) and sign in with GitHub, Google or any OpenID Connect provider: your
+library, sessions and spend then follow you to every browser you sign in on. Without it,
+backups move data between phone and laptop. Your Gemini API key stays on each device and is
+sent only to Google.
 
 Built to the Claude Design project in `design/` (the design is the spec). See `docs/plan.md`
 for the architecture and milestones, `docs/design-inventory.md` for the feature checklist, and
@@ -54,6 +57,8 @@ npm run e2e            # Playwright; set PW_CHROMIUM=/path/to/chromium to use a 
 npm run refs           # design artboards → tests/design-refs (needs network)
 npm run shots          # app screenshots → tests/screenshots (dev server running)
 npm run icons          # re-render public/icons/*.png from the SVG sources
+npm run server         # the Mock server on :8787 (sign-in + sync); `npm run dev` proxies to it
+npm start              # build, then serve the app + API from the Mock server
 ```
 
 Dev-only: Settings → Library & data → *Load sample data*.
@@ -73,22 +78,65 @@ host or sub-path with no rewrite rules.
 **Anywhere else:** `npm run build` and upload `dist/` (Netlify, Cloudflare Pages, S3, any web
 server). Serve it over HTTPS: the microphone, service worker and install prompt require it.
 
-**Proxmox VE** (helper-script style LXC): on the Proxmox host shell run
+**Proxmox VE** ([community-scripts](https://community-scripts.github.io/ProxmoxVE/) helper
+script, using their engine): on the Proxmox host shell run
 
 ```
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/adeelahmad/Mock/main/proxmox/ct/mock.sh)"
 ```
 
-It creates an unprivileged Debian 12 container (2 vCPU, 2 GiB, 8 GB; *Advanced* to change),
-installs Node 22 and Caddy, builds the app and serves it on `http://<ip>/` and `https://<ip>/`
-(Caddy's internal CA; trust its root or put your own proxy in front, since the microphone
-needs trusted HTTPS). To update, run `update` inside the container (or the same one-liner
-there). `MOCK_DEFAULTS=1` and `var_*` variables skip the prompts; see `proxmox/ct/mock.sh`.
+While the repo is private, either clone it on the host and run `bash proxmox/ct/mock.sh`, or
+`export MOCK_GITHUB_TOKEN=<read-only token>` and add
+`-H "Authorization: Bearer $MOCK_GITHUB_TOKEN"` to the curl (the token is kept in the
+container's git remote so `update` can pull).
+
+You get the usual helper-script wizard (Default / Advanced, `var_*` overrides). It creates an
+unprivileged Debian 13 container (2 vCPU, 2 GiB, 8 GB), installs Node 22 and Caddy, builds the
+app, runs the Mock server (`mock-server` service, SQLite in `/var/lib/mock`; Postgres or
+`AUTH_URL` via `/etc/mock/server.env`) and serves it on `https://<ip>/` (Caddy's internal CA: trust its root, printed at the end,
+since the microphone needs trusted HTTPS) and `http://<ip>/`. Run `update` inside the container
+to pull and rebuild when `main` moves.
+
+## Sign-in and sync (Mock server)
+
+`server/` is a small Node 22 server: Auth.js (`@auth/express`) for OAuth sign-in, a database
+for the synced libraries, and the built app. Run it with `npm start` (or `npm run server`
+after `npm run build`), behind HTTPS in production.
+
+1. **First run.** Open the app; it finds an unconfigured server and opens the setup wizard.
+   Paste the **setup token** from the server log (`npm run server -- token` prints it again;
+   on Proxmox `mock-token`).
+2. **Providers.** Add an OAuth client for GitHub, Google and/or an OIDC issuer. The wizard shows
+   the callback URL to register (`https://<host>/auth/callback/<provider>`). Secrets are stored
+   on the server only and never sent back to the browser.
+3. **Who can sign in.** An email allowlist (recommended on the internet). The first account to
+   sign in becomes the admin and can change the setup from Settings → Account & sync.
+4. **Sign in** on each browser. The first upload is this device's library; a fresh browser
+   takes the server copy; a browser with its own library merges into it.
+
+Sync: the library (stories, questions, files' text, sessions, transcripts, reports, settings,
+spend) is one document per user with a revision. Writes push 1.5 s later; the app pulls on
+start, on focus and every minute; when two browsers both changed, the merge keeps new items
+from both and the newer edit of the same item. Recordings, clips, uploaded originals and the
+Gemini key stay on each device. "Use without an account" keeps Mock local-only.
+
+| Variable | Default | |
+|---|---|---|
+| `PORT` / `HOST` | `8787` / `0.0.0.0` | listen address |
+| `MOCK_DB` | `data/mock.db` | SQLite file (`node:sqlite`, no native build) |
+| `DATABASE_URL` | – | `postgres://…` to use Postgres instead |
+| `MOCK_STATIC` | `dist` | the built app to serve; empty for API only |
+| `AUTH_SECRET` | generated, kept in the DB | cookie/JWT secret |
+| `AUTH_URL` | from the request | public URL, if your proxy hides it |
+| `MOCK_SETUP_TOKEN` | generated, kept in the DB | the wizard's token |
+
+Static hosts (GitHub Pages) have no server: the app sees that and stays local-only.
 
 ## Stack
 
 React 19 · TypeScript · Vite · DuckDB-Wasm on IndexedDB snapshots · Gemini Live and Flash ·
-Workbox service worker · web app manifest with shortcuts. No backend.
+Workbox service worker · web app manifest with shortcuts · optional Node server: Express,
+Auth.js, SQLite (`node:sqlite`) or Postgres.
 
 ## Layout
 
@@ -97,6 +145,8 @@ src/domain   types, state machine, readiness, parsers, selectors (pure, unit-tes
 src/live     transport interface, simulated + Gemini transports, session controller
 src/db       Repo interface and implementations, backup
 src/app      router, store, theme, prefs, install / offline / deep links
+src/sync     sync engine (pull / push / merge) and the server API client
+server       the Mock server: Auth.js sign-in, setup, library sync API, SQLite/Postgres
 src/screens  one file per screen; src/components shared pieces
 public       manifest, icons, the distilled Exponent question bank
 design       the Claude Design export (the spec)

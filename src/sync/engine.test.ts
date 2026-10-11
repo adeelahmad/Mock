@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { MemoryRepo, emptyData, sampleData } from '../db/memory.ts';
 import { buildBackup, type MockBackup } from '../db/backup.ts';
-import { SyncEngine, type MemoStore, type RemoteLibrary, type SyncApi, type SyncMemo } from './engine.ts';
+import { SyncEngine, mergeLedgers, type MemoStore, type RemoteLibrary, type SyncApi, type SyncMemo } from './engine.ts';
 
 /** The server in miniature: one library with compare-and-swap revisions. */
 class FakeServer {
@@ -111,5 +111,10 @@ describe('SyncEngine', () => {
     await e.sync();
     expect(e.status.phase).toBe('idle');
     expect(server.lib?.rev).toBe(1);
+  });
+
+  it('merges spend ledgers without double counting', () => {
+    const b = (model: string, calls: number, input: number) => ({ model, lpId: null, calls, input, output: 0, audioInput: 0, audioOutput: 0 });
+    expect(mergeLedgers([b('flash', 3, 30), b('live', 1, 5)], [b('flash', 5, 50), b('pro', 1, 1)])).toEqual([b('flash', 5, 50), b('live', 1, 5), b('pro', 1, 1)]);
   });
 });
