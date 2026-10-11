@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://github.com/adeelahmad/Mock/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/adeelahmad/Mock?sort=semver&color=F9AB00"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-1A73E8"></a>
-  <img alt="Go 1.26+" src="https://img.shields.io/badge/go-1.26%2B-00ADD8?logo=go&logoColor=white">
+  <img alt="One binary" src="https://img.shields.io/badge/install-one%20binary-00ADD8">
   <img alt="Local-first PWA" src="https://img.shields.io/badge/PWA-local--first-5A0FC8">
   <a href="https://adeelahmad.github.io/Mock/"><img alt="Docs" src="https://img.shields.io/badge/docs-site-202124"></a>
 </p>
@@ -105,9 +105,12 @@ mock --meet       # … and the Google Meet bridge
 Or download a binary from [Releases](https://github.com/adeelahmad/Mock/releases/latest).
 `MOCK_VERSION=v0.1.0` pins a release; `MOCK_INSTALL_DIR` picks where it goes.
 
-**No install:** open the [hosted app](https://adeelahmad.github.io/Mock/app/) and add it to your
-home screen. **From source:** `make binary` (Node 22, Go 1.26+). **Proxmox:** a prebuilt
-LXC template or a community-scripts helper, see [Deploy](#deploy).
+Nothing else to install: no Node, no Go. **No install at all:** open the
+[hosted app](https://adeelahmad.github.io/Mock/app/) and add it to your home screen.
+**Proxmox:** a prebuilt LXC template, see [Deploy](#deploy).
+
+**Build from source** (contributors only): needs Node 22 and Go 1.26+, then `make binary`.
+See [Build from source](#build-from-source).
 
 ## How it works
 
@@ -209,26 +212,29 @@ change), and only after the pairing code. The Gemini key never leaves the app.
 
 ## One binary
 
-`make binary` builds `bin/mock`: the whole app in one self-contained file. The built web app is
-embedded with `go:embed`, and the same binary is the sign-in and sync server and the Google Meet
-bridge. It is pure Go (SQLite included), so it needs nothing else to run; only the Meet bot
-needs a Chrome or Chromium beside it.
+`mock` is the whole app in one self-contained file: the built web app is embedded, and the same
+binary is the sign-in and sync server and the Google Meet bridge. It is pure Go (SQLite
+included), so it needs nothing else to run; only the Meet bot needs a Chrome or Chromium beside
+it. Get it with the [install script](#install) or from
+[Releases](https://github.com/adeelahmad/Mock/releases/latest).
 
 ```
-make binary            # bin/mock for this machine (needs Node 22 and Go 1.26+ to build)
-make binaries          # bin/mock-{linux,darwin}-{amd64,arm64}
-./bin/mock             # the app + sign-in + sync on http://localhost:8787
-./bin/mock --meet      # … and the Meet bridge (ws://127.0.0.1:8788 and the main port)
-./bin/mock token       # the setup token the sign-in wizard asks for
-./bin/mock bridge      # only the Meet bridge, for the app hosted elsewhere (GitHub Pages)
-./bin/mock help
+mock                   # the app + sign-in + sync on http://localhost:8787
+mock --meet            # … and the Meet bridge (ws://127.0.0.1:8788 and the main port)
+mock token             # the setup token the sign-in wizard asks for
+mock bridge            # only the Meet bridge, for the app hosted elsewhere (GitHub Pages)
+mock help
 ```
 
 Copy it anywhere and run it; data goes to `data/mock.db` next to where it runs (`MOCK_DB` to
 move it). Put HTTPS in front of it for anything but localhost: the microphone and service
 worker need a secure origin.
 
-## Develop
+## Build from source
+
+For contributors; running Mock needs none of this. Building needs Node 22.18+ and Go 1.26+.
+`make binary` builds `bin/mock` for this machine, `make binaries` cross-compiles
+`bin/mock-{linux,darwin}-{amd64,arm64}`.
 
 With `make` (run `make help` for the list):
 
@@ -289,11 +295,11 @@ server). Serve it over HTTPS: the microphone, service worker and install prompt 
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/adeelahmad/Mock/main/proxmox/ct/mock.sh)"
 ```
 
-It asks **Prebuilt** or **From source**. Prebuilt (the fast path) downloads the release's LXC
+It asks **Prebuilt** or **Wizard**; neither builds anything. Prebuilt (the fast path) downloads the release's LXC
 template, `mock-lxc-debian13-<amd64|arm64>.tar.zst` (Debian 13 with the Mock binary, Caddy
 `tls internal` and the services), checks it against `checksums.txt`, and runs `pct create`; on
 first boot the container sets itself up and the script prints the URL. `MOCK_MODE=template` or
-`MOCK_MODE=source` skips the question; the script's header lists the template options (`CTID`,
+`MOCK_MODE=source` (the wizard) skips the question; the script's header lists the template options (`CTID`,
 `MOCK_STORAGE`, `MOCK_BRIDGE`, …). By hand:
 
 ```
@@ -306,7 +312,7 @@ pct exec 120 -- mock-token
 
 Inside a template container, `update` installs the latest release's binary. `make lxc` builds
 the templates locally (mmdebstrap, as root or with subuids); tagged releases build and attach
-them. From source uses the [community-scripts](https://community-scripts.github.io/ProxmoxVE/)
+them. The wizard uses the [community-scripts](https://community-scripts.github.io/ProxmoxVE/)
 engine:
 
 From a private fork, either clone it on the host and run `bash proxmox/ct/mock.sh`, or
@@ -315,11 +321,12 @@ From a private fork, either clone it on the host and run `bash proxmox/ct/mock.s
 container's git remote so `update` can pull).
 
 You get the usual helper-script wizard (Default / Advanced, `var_*` overrides). It creates an
-unprivileged Debian 13 container (2 vCPU, 2 GiB, 8 GB), installs Caddy, builds the Mock binary
-(Node 22 and Go for the build) into `/usr/local/bin/mock`, runs it as the `mock` service (SQLite
+unprivileged Debian 13 container (2 vCPU, 2 GiB, 8 GB), installs Caddy, downloads the release's
+Mock binary into `/usr/local/bin/mock` (until v0.1.0 is tagged there is no release, so it builds
+from source with Node 22 and Go instead), runs it as the `mock` service (SQLite
 in `/var/lib/mock`; Postgres or `AUTH_URL` via `/etc/mock/server.env`) and serves it through Caddy on `https://<ip>/` (Caddy's internal CA: trust its root, printed at the end,
 since the microphone needs trusted HTTPS) and `http://<ip>/`. Run `update` inside the container
-to pull and rebuild the binary when `main` moves.
+to install the latest release.
 
 ## Sync with a passphrase (no server)
 
@@ -335,7 +342,7 @@ Details and limits: [docs](https://adeelahmad.github.io/Mock/guide/passphrase-sy
 
 The Mock binary (`cmd/mock`, `internal/`) is a small Go server: OAuth 2 / OpenID Connect sign-in
 (`golang.org/x/oauth2`, `go-oidc`, PKCE, signed session cookies), a database for the synced
-libraries, and the embedded app. Run it with `make serve` (or `./bin/mock`), behind HTTPS in
+libraries, and the embedded app. Run it with `mock` (from a checkout, `make serve`), behind HTTPS in
 production.
 
 1. **First run.** Open the app; it finds an unconfigured server and opens the setup wizard.

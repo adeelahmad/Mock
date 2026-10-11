@@ -2,10 +2,12 @@
 # Mock: Proxmox VE LXC. On the Proxmox host shell:
 #   bash -c "$(curl -fsSL https://raw.githubusercontent.com/adeelahmad/Mock/main/proxmox/ct/mock.sh)"
 #
-# It offers two ways in:
+# It offers two ways in; neither needs Node or Go once a release (v0.1.0+) is published:
 #   Prebuilt template (fast)  downloads the release's Debian 13 template with Mock, Caddy and the
 #                             services inside, and runs `pct create`. Ready in under a minute.
-#   Build from source         the community-scripts helper wizard; builds Mock in the container.
+#   Helper wizard             the community-scripts helper wizard; a fresh Debian 13 container
+#                             that downloads the release's binary (builds it from source only
+#                             while no release exists).
 # Skip the question with MOCK_MODE=template or MOCK_MODE=source. Template options (env):
 #   CTID (next free)  MOCK_HOSTNAME (mock)  MOCK_STORAGE (local-lvm)  MOCK_TEMPLATE_STORAGE (local)
 #   MOCK_DISK (8)  MOCK_CORES (2)  MOCK_RAM (2048)  MOCK_BRIDGE (vmbr0)  MOCK_TAG (latest)
@@ -26,6 +28,10 @@ mock_from_template() {
   if [[ "$tag" == latest ]]; then
     tag="$(curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/${MOCK_REPO}/releases/latest")"
     tag="${tag##*/}"
+  fi
+  if [[ "$tag" != v* ]]; then
+    echo "No Mock release is published yet, so there is no prebuilt template; using the helper wizard." >&2
+    return 2
   fi
   base="https://github.com/${MOCK_REPO}/releases/download/${tag}"
   tstore="${MOCK_TEMPLATE_STORAGE:-local}"
@@ -79,8 +85,8 @@ mock_from_template() {
 
 if [[ -z "${MOCK_MODE:-}" && ! -d /opt/mock ]] && command -v pct >/dev/null; then
   if command -v whiptail >/dev/null && [[ -t 0 ]]; then
-    if whiptail --title "Mock" --yes-button "Prebuilt" --no-button "From source" --yesno \
-      "Use the prebuilt template (fast: download and pct create), or build Mock from source with the helper-script wizard?" 10 70; then
+    if whiptail --title "Mock" --yes-button "Prebuilt" --no-button "Wizard" --yesno \
+      "Use the prebuilt template (fast: download and pct create), or the community-scripts helper wizard (a fresh container that downloads the binary)?" 10 70; then
       MOCK_MODE=template
     else
       MOCK_MODE=source
@@ -91,10 +97,12 @@ if [[ -z "${MOCK_MODE:-}" && ! -d /opt/mock ]] && command -v pct >/dev/null; the
 fi
 if [[ "${MOCK_MODE:-}" == template ]]; then
   (mock_from_template)
-  exit $?
+  rc=$?
+  # 2: no release yet, so fall through to the wizard (which builds from source until there is one).
+  [[ $rc -eq 2 ]] || exit $rc
 fi
 
-# Build from source: the community-scripts engine and install/mock-install.sh.
+# Helper wizard: the community-scripts engine and install/mock-install.sh.
 export MOCK_REPO MOCK_BRANCH MOCK_GITHUB_TOKEN
 # This repo is the "scripts root" for the community-scripts engine: it fetches
 # install/mock-install.sh from here instead of community-scripts/ProxmoxVE.
@@ -159,27 +167,53 @@ function update_script() {
   fi
 
   cd /opt/mock || exit
-  $STD git fetch --depth 1 origin "${MOCK_BRANCH}"
-  RELEASE=$(git rev-parse FETCH_HEAD)
-  if [[ "${RELEASE}" == "$(cat /opt/mock_version.txt 2>/dev/null)" ]]; then
-    msg_ok "No update required. ${APP} is already at ${RELEASE:0:7}"
-    exit
+  # The latest release's prebuilt binary; main built from source only while there is no release.
+  local tag="${MOCK_TAG:-}"
+  [[ -z "$tag" ]] && tag="$(curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/${MOCK_REPO}/releases/latest" 2>/dev/null)" && tag="${tag##*/}"
+  if [[ "$tag" == v* ]]; then
+    RELEASE="$tag"
+    if [[ "${RELEASE}" == "$(cat /opt/mock_version.txt 2>/dev/null)" ]]; then
+      msg_ok "No update required. ${APP} is already at ${RELEASE}"
+      exit
+    fi
+    msg_info "Updating ${APP} to ${RELEASE}"
+    $STD git fetch --depth 1 origin tag "${RELEASE}"
+    $STD git reset --hard "${RELEASE}"
+    local arch tmp base
+    arch="$(dpkg --print-architecture)"
+    tmp="$(mktemp -d)"
+    base="https://github.com/${MOCK_REPO}/releases/download/${RELEASE}"
+    curl -fsSL "${base}/mock-linux-${arch}" -o "${tmp}/mock-linux-${arch}"
+    curl -fsSL "${base}/checksums.txt" -o "${tmp}/checksums.txt"
+    (cd "$tmp" && grep " mock-linux-${arch}\$" checksums.txt | sha256sum -c --quiet)
+    install -m 0755 "${tmp}/mock-linux-${arch}" /usr/local/bin/mock.new && mv /usr/local/bin/mock.new /usr/local/bin/mock
+    rm -rf "$tmp"
+    echo "${RELEASE}" >/opt/mock_version.txt
+    msg_ok "Updated ${APP}"
+  else
+    $STD git fetch --depth 1 origin "${MOCK_BRANCH}"
+    RELEASE=$(git rev-parse FETCH_HEAD)
+    if [[ "${RELEASE}" == "$(cat /opt/mock_version.txt 2>/dev/null)" ]]; then
+      msg_ok "No update required. ${APP} is already at ${RELEASE:0:7}"
+      exit
+    fi
+
+    # No release published yet: build from source (Node and Go only for the build).
+    NODE_VERSION="22" setup_nodejs
+    setup_go
+
+    msg_info "Updating ${APP} to ${RELEASE:0:7}"
+    $STD git reset --hard FETCH_HEAD
+    export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 GOTOOLCHAIN=auto
+    $STD npm ci --include=dev --no-audit --no-fund
+    $STD make binary
+    install -m 0755 bin/mock /usr/local/bin/mock.new && mv /usr/local/bin/mock.new /usr/local/bin/mock
+    echo "${RELEASE}" >/opt/mock_version.txt
+    $STD npm cache clean --force
+    $STD go clean -cache -modcache
+    $STD make clean && rm -rf node_modules
+    msg_ok "Updated ${APP}"
   fi
-
-  NODE_VERSION="22" setup_nodejs
-  setup_go
-
-  msg_info "Updating ${APP} to ${RELEASE:0:7}"
-  $STD git reset --hard FETCH_HEAD
-  export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 GOTOOLCHAIN=auto
-  $STD npm ci --include=dev --no-audit --no-fund
-  $STD make binary
-  install -m 0755 bin/mock /usr/local/bin/mock.new && mv /usr/local/bin/mock.new /usr/local/bin/mock
-  echo "${RELEASE}" >/opt/mock_version.txt
-  $STD npm cache clean --force
-  $STD go clean -cache -modcache
-  $STD make clean && rm -rf node_modules
-  msg_ok "Updated ${APP}"
 
   msg_info "Restarting Mock and Caddy"
   $STD bash /opt/mock/proxmox/install/mock-server.sh

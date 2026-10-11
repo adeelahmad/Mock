@@ -1,5 +1,6 @@
 #!/bin/sh
 # Install the Mock binary (the app, sign-in/sync server and Meet bridge in one file).
+# Downloads a prebuilt release; nothing else (no Node, no Go) is needed to run it.
 #
 #   curl -fsSL https://raw.githubusercontent.com/adeelahmad/Mock/main/install.sh | sh
 #
@@ -31,7 +32,11 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 asset="mock-$os-$arch"
 echo "Downloading $asset ($VERSION)…"
-curl -fsSL "$base/$asset" -o "$tmp/$asset"
+curl -fsSL "$base/$asset" -o "$tmp/$asset" || {
+  echo "mock: couldn't download $asset ($VERSION). If no release is published yet, use the hosted" >&2
+  echo "app (https://adeelahmad.github.io/Mock/app/) or build from source: make binary" >&2
+  exit 1
+}
 curl -fsSL "$base/checksums.txt" -o "$tmp/checksums.txt"
 
 want=$(grep " $asset\$" "$tmp/checksums.txt" | cut -d' ' -f1)
