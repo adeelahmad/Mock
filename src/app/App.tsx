@@ -7,6 +7,7 @@ import { useApp } from './store.tsx';
 import { paths } from './router.ts';
 import { useDeepLinks } from './deeplinks.ts';
 import { Icon } from '../components/ui.tsx';
+import { Wordmark } from '../components/Wordmark.tsx';
 import { SpendBar } from '../components/Budget.tsx';
 import { daysUntil } from '../domain/selectors.ts';
 import Home from '../screens/Home.tsx';
@@ -33,7 +34,7 @@ function Sidebar() {
   );
   return (
     <nav className="sidebar" aria-label="Sections">
-      <span className="wordmark">Mock</span>
+      <Wordmark />
       {item('practice', 'Practice', <Icon.Mic />, paths.practice)}
       {item('library', 'Library', <Icon.Library />, paths.library('lps'))}
       {route.tab === 'library' && (
@@ -124,7 +125,7 @@ export default function App() {
       )}
       {!ready && (
         <div className="splash">
-          <span className="wordmark big">Mock</span>
+          <Wordmark big />
           <span className="spinner" style={{ width: 18, height: 18 }} />
           <span className="sub">{status}</span>
         </div>

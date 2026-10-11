@@ -10,11 +10,21 @@ import { CSV_TEMPLATES } from '../../src/domain/csv-templates.ts';
 const base = process.env.DOCS_BASE ?? '/Mock/';
 
 // The sample CSVs come from the same source the app's import flows offer, so they never drift.
-// site/public is generated (gitignored): the samples and the app icon.
+// site/public is generated (gitignored): the samples and the brand assets, copied from the app's
+// public/ so the docs and the app never drift (brand kit v1.0, robot identity).
 const pub = fileURLToPath(new URL('../public/', import.meta.url));
+const app = (f: string) => fileURLToPath(new URL('../../public/' + f, import.meta.url));
 mkdirSync(pub + 'samples', { recursive: true });
 for (const t of Object.values(CSV_TEMPLATES)) writeFileSync(pub + 'samples/' + t.file, t.text);
-copyFileSync(fileURLToPath(new URL('../../public/icons/icon.svg', import.meta.url)), pub + 'logo.svg');
+for (const [from, to] of [
+  ['icons/icon.svg', 'favicon.svg'], ['favicon.ico', 'favicon.ico'], ['icons/apple-touch-icon.png', 'apple-touch-icon.png'],
+  ['icons/app-icon.svg', 'app-icon.svg'], ['brand/mock-logo.svg', 'mock-logo.svg'], ['brand/mock-logo-dark.svg', 'mock-logo-dark.svg'],
+  ['brand/og.png', 'og.png'], ['brand/og-dark.png', 'og-dark.png'],
+]) copyFileSync(app(from), pub + to);
+
+// Pages serves the site at an absolute origin; social cards need an absolute image URL.
+const origin = process.env.DOCS_ORIGIN ?? 'https://adeelahmad.github.io';
+const card = 'Rehearse your interview loop. Practise. Get coached. Try again.';
 
 export default defineConfig({
   base,
@@ -24,13 +34,27 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: base + 'logo.svg' }],
-    ['meta', { name: 'theme-color', content: '#ffffff' }],
+    ['link', { rel: 'icon', href: base + 'favicon.ico', sizes: '16x16 32x32 48x48' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: base + 'favicon.svg' }],
+    ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: base + 'apple-touch-icon.png' }],
+    ['meta', { name: 'theme-color', content: '#FFFFFF', media: '(prefers-color-scheme: light)' }],
+    ['meta', { name: 'theme-color', content: '#18191B', media: '(prefers-color-scheme: dark)' }],
+    ['meta', { property: 'og:title', content: 'Mock - Voice interview practice' }],
+    ['meta', { property: 'og:description', content: card }],
+    ['meta', { property: 'og:type', content: 'website' }],
+    ['meta', { property: 'og:image', content: origin + base + 'og.png' }],
+    ['meta', { property: 'og:image:width', content: '1200' }],
+    ['meta', { property: 'og:image:height', content: '630' }],
+    ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
+    ['meta', { name: 'twitter:title', content: 'Mock - Voice interview practice' }],
+    ['meta', { name: 'twitter:description', content: card }],
+    ['meta', { name: 'twitter:image', content: origin + base + 'og.png' }],
   ],
   // The app is a separate build copied into /app/ at deploy time, so VitePress can't see it.
   ignoreDeadLinks: [/^\/app\/?/, /^\/samples\//],
   themeConfig: {
-    logo: '/logo.svg',
+    logo: { light: '/mock-logo.svg', dark: '/mock-logo-dark.svg', alt: 'Mock' },
+    siteTitle: false,
     nav: [
       { text: 'Guide', link: '/guide/getting-started', activeMatch: '/guide/' },
       { text: 'Run it', link: '/run/develop', activeMatch: '/run/' },

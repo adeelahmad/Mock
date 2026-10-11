@@ -1,8 +1,7 @@
-<p align="center">
-  <img src="public/icons/icon.svg" width="96" height="96" alt="Mock">
-</p>
-
-<h1 align="center">Mock</h1>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/assets/mock-banner-dark.png">
+  <img alt="Mock - voice interview practice. Practise. Get coached. Try again." src=".github/assets/mock-banner-light.png" width="100%">
+</picture>
 
 <p align="center">
   <b>Rehearse the interview out loud.</b><br>
@@ -365,10 +364,11 @@ cmd/mock     the binary: serve, token, bridge
 internal     Go: server (API + static), auth (OAuth/OIDC), store (SQLite/Postgres),
              meet (bridge, Chromium bot, in-page audio for Meet), web (the embedded app)
 src/screens  one file per screen; src/components shared pieces
-public       manifest, icons, the distilled Exponent question bank
+public       manifest, icons, brand/ (logo, OG cards), the distilled Exponent question bank
 design       the Claude Design export (the spec)
 scripts      design refs, app screenshots, icon renderer
 site         the docs and landing site (VitePress), published to GitHub Pages
+.github      assets/: README banners and the repository social preview (brand kit v1.0)
 ```
 
 

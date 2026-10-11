@@ -34,7 +34,7 @@ Tick **Releases** and untick **Packages** and **Deployments** if they're empty.
 
 ## 3. Social preview
 
-Settings → General → **Social preview → Edit → Upload an image**: `docs/media/social-preview.png`
+Settings → General → **Social preview → Edit → Upload an image**: `.github/assets/social-preview.png`
 (1280×640 PNG). This is what X, Slack, LinkedIn and Discord show when the repo link is shared.
 
 ## 4. Pages

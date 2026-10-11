@@ -23,7 +23,7 @@ export default defineConfig({
       manifest: false,
       workbox: {
         globPatterns: ['**/*.{js,css,html,woff2,json,svg,png,webmanifest}', '**/duckdb-eh-*.wasm', '**/duckdb-browser-eh.worker-*.js'],
-        globIgnores: ['**/duckdb-mvp-*.wasm', '**/duckdb-browser-mvp.worker-*.js', '**/duckdb-coi*'],
+        globIgnores: ['brand/**', '**/duckdb-mvp-*.wasm', '**/duckdb-browser-mvp.worker-*.js', '**/duckdb-coi*'],
         maximumFileSizeToCacheInBytes: 48 * 1024 * 1024,
         navigateFallback: 'index.html',
         // Sign-in redirects and the API belong to the Mock server, never to the cached shell.
