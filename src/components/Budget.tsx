@@ -23,12 +23,12 @@ export function SpendBar({ variant = 'float' }: { variant?: 'float' | 'side' | '
   const max = s.rows[0]?.usd || 1;
   return (
     <div className={'spendbar ' + variant} ref={ref}>
-      <button className="spend-pill" aria-expanded={open} aria-label={'Gemini spend ' + fmtUsd(s.total) + ', show per Leadership Principle'} onClick={() => setOpen((o) => !o)}>
+      <button className="spend-pill" aria-expanded={open} aria-label={'Gemini spend ' + fmtUsd(s.total) + ', show per area'} onClick={() => setOpen((o) => !o)}>
         <span className="spend-label">Spent</span><span className="spend-total">{fmtUsd(s.total)}</span>
       </button>
       {open && (
-        <div className="spend-pop" role="dialog" aria-label="Spend per Leadership Principle">
-          <div className="spend-head"><span className="label">Spend per LP</span><span className="mono sub">{fmtTokens(s.tokens)} tokens</span></div>
+        <div className="spend-pop" role="dialog" aria-label="Spend per area">
+          <div className="spend-head"><span className="label">Spend per area</span><span className="mono sub">{fmtTokens(s.tokens)} tokens</span></div>
           {s.rows.length === 0 && <span className="sub">Nothing spent yet. Sessions with a Gemini key count here.</span>}
           {s.rows.map((r) => (
             <div key={r.lpId ?? '-'} className="spend-row">

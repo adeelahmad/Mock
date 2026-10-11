@@ -109,7 +109,7 @@ export function QuestionList({ questions, lps, more, onMore, onAsk, onAnswer, on
             <button type="button" className="q-text" title="Ask me this now" onClick={() => onAsk(q)}>{q.text}</button>
             <div className="q-line">
               {retag === q.id
-                ? <select className="input lp-select" autoFocus aria-label="Leadership Principle" value={lpId} onBlur={() => setRetag(null)} onChange={(e) => { onRetag(q.id, e.target.value); setRetag(null); }}>
+                ? <select className="input lp-select" autoFocus aria-label="Area" value={lpId} onBlur={() => setRetag(null)} onChange={(e) => { onRetag(q.id, e.target.value); setRetag(null); }}>
                     <option value="">Untagged</option>{lps.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
                   </select>
                 : <button type="button" className={'lp-tag' + (lpId ? '' : ' gold')} title="Change the area" onClick={() => setRetag(q.id)}>{q.lpName}</button>}
@@ -357,7 +357,7 @@ export default function Library({ seg }: { seg: LibrarySeg }) {
             </div>
           </div>
           <div className="lib-detail" aria-hidden="true">
-            <span style={{ font: '700 15px/1.2 var(--font-sans)', color: 'var(--m-fg2)' }}>Pick a Leadership Principle</span>
+            <span style={{ font: '700 15px/1.2 var(--font-sans)', color: 'var(--m-fg2)' }}>Pick an area</span>
             <span className="sub">Its stories, question bank, verdict history and best attempt open here.</span>
           </div>
         </div>

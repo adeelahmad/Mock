@@ -76,7 +76,7 @@ export default function LpDetail({ id }: { id: string }) {
     return (
       <div className="screen">
         <BackHead onBack={() => go(paths.library('lps'))} label="Areas" />
-        <div className="screen-body"><div className="card pad sub">That Leadership Principle is not in your library any more.</div></div>
+        <div className="screen-body"><div className="card pad sub">That area is not in your library any more.</div></div>
       </div>
     );
   }

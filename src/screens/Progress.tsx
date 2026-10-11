@@ -119,7 +119,7 @@ export default function Progress() {
   );
 
   const heatmap = (
-    <div className="pg-heat" style={gridStyle} role="group" aria-label="Leadership Principle by session heatmap">
+    <div className="pg-heat" style={gridStyle} role="group" aria-label="Area by session heatmap">
       <div className="pg-heat-row head">
         <span className="label pg-corner">Area × session</span>
         {cols.map((n) => <span key={n} className="pg-col">S{n}</span>)}

@@ -123,7 +123,7 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
   };
   const start = () => {
     const o = startOptions();
-    if (!o) { toast(pick === 'replay' ? 'Drop your past-loop notes in Library · Files first.' : pick === 'set' ? 'That set is empty — add questions in Library · Questions first.' : 'Add a Leadership Principle in the Library first.'); return; }
+    if (!o) { toast(pick === 'replay' ? 'Drop your past-loop notes in Library · Files first.' : pick === 'set' ? 'That set is empty — add questions in Library · Questions first.' : 'Add an area in the Library first.'); return; }
     void live.start(o);
   };
 
