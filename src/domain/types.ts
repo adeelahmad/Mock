@@ -1,6 +1,8 @@
 // Mock — domain types. One source of truth for the data the screens show and the
 // storage layer persists (schema v1, see docs/plan.md §3).
 
+import type { GamePlay } from './game.ts';
+
 export type Verdict = 'strong_hire' | 'inclined' | 'not_inclined' | 'strong_no_hire';
 /** Verdict as the design codes it: 0 = not yet, 1 = strong hire … 4 = strong no hire. */
 export type VerdictCode = 0 | 1 | 2 | 3 | 4;
@@ -176,6 +178,8 @@ export interface Settings {
   pricing: ModelPrice[];
   /** Tokens spent so far, per model and Leadership Principle. */
   usage: UsageBucket[];
+  /** Finished rounds of the Areas game, oldest first (domain/game.ts). */
+  gamePlays: GamePlay[];
 }
 
 /** Billable tokens of one or more Gemini calls. */
@@ -187,7 +191,7 @@ export interface UiPrefs {
   theme: 'light' | 'dark' | 'system';
   voiceVisual: 'orb' | 'wave' | 'ring';
   liveLayout: 'stage' | 'transcript' | 'split';
-  lastTab: 'practice' | 'library' | 'history' | 'progress';
+  lastTab: 'practice' | 'library' | 'history' | 'progress' | 'game';
 }
 
 export const VERDICT_CODE: Record<Verdict, VerdictCode> = { strong_hire: 1, inclined: 2, not_inclined: 3, strong_no_hire: 4 };

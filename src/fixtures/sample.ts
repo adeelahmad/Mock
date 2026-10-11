@@ -204,7 +204,7 @@ export const isAwsAreas = (areas: { id: string }[]): boolean => areas.length > 0
 
 export const SETTINGS: Settings = {
   interviewDate: '2026-10-30', liveModel: 'gemini-3.8-live', textModel: 'gemini-3.8-flash', voice: 'Aoede', pauseMs: 2500,
-  systemInstruction: DEFAULT_SYSTEM_INSTRUCTION, loopSize: 5, coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 12345, lastBackupAt: null, onboarded: true,
+  systemInstruction: DEFAULT_SYSTEM_INSTRUCTION, loopSize: 5, coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 12345, lastBackupAt: null, onboarded: true, gamePlays: [],
   pricing: DEFAULT_PRICING,
   usage: [
     { model: 'gemini-3.8-live', lpId: 'own', calls: 14, input: 182_000, output: 2_100, audioInput: 61_000, audioOutput: 48_000 },

@@ -148,7 +148,7 @@ input[type="number"].seed { width: 84px; background: var(--m-card); font-family:
 
 /* ---------- Tab bar (phone) + sidebar (desktop) ---------- */
 .tabbar { display: flex; justify-content: space-around; align-items: flex-start; padding: 10px 8px calc(env(safe-area-inset-bottom) + 10px); border-top: 1px solid var(--m-line); background: var(--m-card); }
-.tabbar > button { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 72px; border: none; background: transparent; cursor: pointer; color: var(--m-fg3); font: 600 11px/1 var(--font-sans); padding: 0; }
+.tabbar > button { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 64px; border: none; background: transparent; cursor: pointer; color: var(--m-fg3); font: 600 11px/1 var(--font-sans); padding: 0; }
 .tabbar > button.on { color: var(--m-fg); }
 .tabbar > button > svg { width: 24px; height: 24px; }
 .sidebar { display: none; }
