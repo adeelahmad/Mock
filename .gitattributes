@@ -1,0 +1,5 @@
+# Keep GitHub's language bar (and Trending's language pages) about the code: the Claude
+# Design export and the docs site are documentation, not source.
+design/** linguist-documentation
+site/** linguist-documentation
+docs/** linguist-documentation

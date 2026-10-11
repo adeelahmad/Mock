@@ -2,17 +2,15 @@
 
 These live in GitHub's settings, not in the code, so a PR can't set them.
 
-## 1. Make the repo public (required to trend)
+## 1. Visibility and default branch
 
-Settings → General → Danger Zone → **Change visibility → Public**. A private repo can't appear on
-Trending, can't be starred by others, and `install.sh`, the release downloads and the README
-badges all 404 for everyone else until it is public.
+The repo is public and its default branch is `main` (checked 2026-10-11), so nothing to do here.
+A quick scan of the history for API keys and private keys found none. The old
+`feat/sharp-feynman-ra7w22` branch can be deleted.
 
-Before flipping it: check the history has no secrets (`git log -p | grep -iE 'AIza|secret|token'`
-is a quick first pass; GitHub's secret scanning runs on public repos automatically).
-
-Also check the **default branch** is `main` (Settings → General → Default branch); the old
-`feat/sharp-feynman-ra7w22` branch can then be deleted.
+GitHub listed the repo's language as **HTML** because of the Claude Design export in `design/`.
+`.gitattributes` now marks `design/`, `site/` and `docs/` as documentation, so the language bar
+(and the Trending language pages) should show Go and TypeScript after the next push to `main`.
 
 ## 2. About (the gear next to "About" on the repo page)
 
@@ -45,9 +43,9 @@ Settings → Pages → **Source: GitHub Actions**. The `Pages` workflow then pub
 `https://adeelahmad.github.io/Mock/` and the app at `…/app/` on every push to `main`. The README's
 "Try the demo" and "Docs" links point there.
 
-Earlier Pages runs failed in seconds without starting a job, which points at Actions minutes or
-billing on the private repo. Public repos get Actions and Pages free, so making it public should
-fix this; otherwise check Settings → Billing → Actions.
+Earlier Pages runs failed in seconds without starting a job, which points at Actions settings or
+billing. Public repos get Actions and Pages free; if runs still fail to start, check Settings →
+Actions → General (Actions allowed) and Settings → Billing.
 
 ## 5. Features
 
@@ -76,7 +74,7 @@ Pin the repo on your GitHub profile (Profile → Customize your pins).
 
 ## Trending checklist
 
-- [ ] Public, default branch `main`
+- [x] Public, default branch `main`
 - [ ] About description, website, topics
 - [ ] Social preview uploaded
 - [ ] Pages on and the demo link works

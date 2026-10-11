@@ -289,7 +289,7 @@ script, using their engine): on the Proxmox host shell run
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/adeelahmad/Mock/main/proxmox/ct/mock.sh)"
 ```
 
-While the repo is private, either clone it on the host and run `bash proxmox/ct/mock.sh`, or
+From a private fork, either clone it on the host and run `bash proxmox/ct/mock.sh`, or
 `export MOCK_GITHUB_TOKEN=<read-only token>` and add
 `-H "Authorization: Bearer $MOCK_GITHUB_TOKEN"` to the curl (the token is kept in the
 container's git remote so `update` can pull).
