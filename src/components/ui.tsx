@@ -149,3 +149,6 @@ export function BackHead({ onBack, label, right }: { onBack: () => void; label: 
 export const fmt = (s: number): string => { s = Math.max(0, s | 0); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
 export const fmtClock = (sec: number): string => { const s = Math.max(0, Math.round(sec)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 export const download = (name: string, blob: Blob): void => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); };
+/** Labels that wrap a hidden file input are not focusable; this makes Enter/Space open the picker. */
+export const keyClick = (e: React.KeyboardEvent<HTMLElement>): void => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } };
+

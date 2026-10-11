@@ -261,7 +261,7 @@ export default function LpDetail({ id }: { id: string }) {
             <button type="button" className="btn sm" style={{ color: 'var(--m-fg2)' }} onClick={async () => { await repo.resetLps(); await refresh(); toast('The 16 LPs are back to their defaults'); }}>Reset to defaults</button>
           </div>
           <div className="lpd-master-list"><LpList lps={lpRows} selected={id} onOpen={(x) => go(paths.lp(x))} /></div>
-          <span className="lpd-master-foot">{dbMode === 'duckdb' ? 'DuckDB-WASM ✓' : dbMode === 'memory' ? 'in-memory · sample library' : 'starting'}</span>
+          <span className="lpd-master-foot">{dbMode === 'duckdb' ? 'DuckDB-WASM ✓' : dbMode === 'memory' ? 'in-memory library' : 'starting'}</span>
         </aside>
         {detail}
       </div>
