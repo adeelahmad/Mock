@@ -86,6 +86,40 @@ export const NEW_QUESTION_TOOL: ToolDeclaration = {
   },
 };
 
+/** Retrieval over the candidate's prep files (resume, notes, past loops). Blocking: the model waits for the chunks. */
+export const SEARCH_PREP_TOOL: ToolDeclaration = {
+  name: 'search_prep',
+  description: "Search the candidate's uploaded prep files (resume, notes, past interview write-ups) for facts relevant to a query. Call it when the candidate is stuck, has no story, or asks for help, then use what comes back to build a STAR story with them. Returns the best passages with their file names.",
+  parameters: {
+    type: 'OBJECT',
+    properties: {
+      query: { type: 'STRING', description: 'What to look for: the question, the LP, or a project, team or skill the candidate mentioned' },
+      limit: { type: 'INTEGER', description: 'How many passages to return (default 4, max 8)' },
+    },
+    required: ['query'],
+  },
+};
+
+/** Saves a story the candidate built with the coach. */
+export const SAVE_STORY_TOOL: ToolDeclaration = {
+  name: 'save_story',
+  description: "Save a STAR story you built together with the candidate to their story library. Call it only after you read the story back and the candidate agreed to keep it.",
+  parameters: {
+    type: 'OBJECT',
+    properties: {
+      title: { type: 'STRING', description: 'A short title, e.g. "Payments outage rollback"' },
+      situation: { type: 'STRING', description: 'Situation, one or two sentences' },
+      task: { type: 'STRING', description: 'Task: what the candidate owned' },
+      action: { type: 'STRING', description: 'Actions the candidate took, first person' },
+      result: { type: 'STRING', description: 'Result, with numbers' },
+      learning: { type: 'STRING', description: 'What they learned or would do differently' },
+      lp: { type: 'STRING', description: 'The Leadership Principle it best answers, by its full name' },
+      numbers: { type: 'ARRAY', items: { type: 'STRING' }, description: 'Key numbers as "label: value", e.g. "latency: -40%"' },
+    },
+    required: ['title', 'situation', 'task', 'action', 'result'],
+  },
+};
+
 /** Tiny typed emitter shared by both transports. */
 export class Emitter {
   private listeners = new Set<TransportListener>();

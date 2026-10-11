@@ -69,6 +69,8 @@ export interface LiveScreenProps {
   turns: LiveTurn[];
   hint: boolean;
   hintText: string;
+  /** The prep-file passage closest to the current question, shown with the hint and the notes. */
+  source?: LiveSource | null;
   notes: LiveNote[];
   /** The session's story-notes setting. */
   notesAllowed: boolean;
@@ -112,13 +114,28 @@ function Turns({ turns, className = '' }: { turns: LiveTurn[]; className?: strin
   );
 }
 
-function NoteRows({ notes }: { notes: LiveNote[] }) {
-  if (notes.length === 0) return <div className="live-note-empty sub">No stories mapped to this LP yet.</div>;
+export interface LiveSource { file: string; heading: string; text: string }
+
+const clip = (t: string, n: number): string => { const s = t.replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s; };
+
+/** "From resume.md › Payments" and the passage itself. */
+function SourceBlock({ source, max = 280 }: { source: LiveSource; max?: number }) {
+  return (
+    <div className="live-source">
+      <span className="live-source-from">From {source.file}{source.heading ? ' › ' + source.heading : ''}</span>
+      <span className="live-source-text">{clip(source.text, max)}</span>
+    </div>
+  );
+}
+
+function NoteRows({ notes, source }: { notes: LiveNote[]; source?: LiveSource | null }) {
+  if (notes.length === 0) return source ? <SourceBlock source={source} /> : <div className="live-note-empty sub">No stories mapped to this LP yet.</div>;
   return (
     <>
       {notes.map((n, i) => (
         <div key={i} className="live-note-row"><span className="live-note-t">{n.t}</span><span className="live-note-n">{n.n}</span></div>
       ))}
+      {source && <SourceBlock source={source} />}
     </>
   );
 }
@@ -358,7 +375,7 @@ export default function LiveScreen(p: LiveScreenProps) {
         {p.hint && showHandles && (
           <div className="live-hint" role="status">
             <span className="ic-warm"><Icon.Bulb size={18} /></span>
-            <span className="live-hint-text">{p.hintText}</span>
+            <span className="live-hint-text">{p.hintText}{p.source && <SourceBlock source={p.source} max={220} />}</span>
             <button type="button" className="icon-btn xs" aria-label="Dismiss hint" onClick={() => p.onAction('dismissHint')}><Icon.Close size={16} /></button>
           </div>
         )}
@@ -366,7 +383,7 @@ export default function LiveScreen(p: LiveScreenProps) {
         {!desktop && notesVisible && (
           <div className="live-notes">
             <button type="button" className="live-notes-head" onClick={() => setNOpen(false)} aria-expanded="true"><span>Story notes{p.lpName ? ' · ' + p.lpName : ''}</span><Icon.Up size={16} /></button>
-            <NoteRows notes={p.notes} />
+            <NoteRows notes={p.notes} source={p.source} />
           </div>
         )}
 
@@ -419,7 +436,7 @@ export default function LiveScreen(p: LiveScreenProps) {
               {p.notesAllowed && (
                 <div className="live-side-notes">
                   <div className="live-notes-head"><span>Story notes{p.lpName ? ' · ' + p.lpName : ''}</span><span className="live-hidden">hidden from the interviewer</span></div>
-                  <NoteRows notes={p.notes} />
+                  <NoteRows notes={p.notes} source={p.source} />
                 </div>
               )}
             </>
@@ -427,7 +444,7 @@ export default function LiveScreen(p: LiveScreenProps) {
           {sideNotes && (
             <div className="live-side-notes full">
               <div className="live-notes-head"><span>Story notes{p.lpName ? ' · ' + p.lpName : ''}</span><span className="live-hidden">hidden from the interviewer</span></div>
-              <NoteRows notes={p.notes} />
+              <NoteRows notes={p.notes} source={p.source} />
             </div>
           )}
         </aside>
