@@ -1,6 +1,6 @@
-// Mock — the live connection interface. Two transports implement it: the real Gemini Live
-// WebSocket (`gemini.ts`) and a simulated one that replays scripted events for development, demos
-// and tests. The session controller never knows which one it has.
+// Mock — the live connection interface. Three transports implement it: the real Gemini Live
+// WebSocket (`gemini.ts`), the speech → model → voice pipeline (`pipeline.ts`), and a simulated
+// one that replays scripted events for development, demos and tests. The session controller never knows which one it has.
 
 export interface ToolDeclaration {
   name: string;
@@ -43,14 +43,14 @@ export type TransportEvent =
   /** The next chunk of the mixed recording (real transport), in order from 0. */
   | { type: 'recordingChunk'; blob: Blob; index: number }
   /** Token counts for the budget (Gemini sends `usageMetadata` periodically, per response). */
-  | { type: 'usage'; usageMetadata: unknown }
+  | { type: 'usage'; usageMetadata: unknown; model?: string }
   | { type: 'closed'; code?: number; reason?: string }
   | { type: 'error'; message: string };
 
 export type TransportListener = (e: TransportEvent) => void;
 
 export interface LiveTransport {
-  readonly kind: 'gemini' | 'simulated';
+  readonly kind: 'gemini' | 'pipeline' | 'simulated';
   connect(config: LiveConfig): Promise<void>;
   /** Text into the conversation: control tags ([START], [REDO] …) or a typed message. */
   sendText(text: string): void;

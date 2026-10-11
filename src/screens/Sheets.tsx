@@ -10,6 +10,8 @@ import { newId } from '../db/repo.ts';
 import { latestSessionNumber, type LpRow, type QuestionRow, type StoryRow } from '../domain/selectors.ts';
 import type { Coaching, Lp, PrepFile, Question, QuestionSource, QuestionSourceSetting, Story } from '../domain/types.ts';
 import { INTERVIEWERS } from '../fixtures/sample.ts';
+import { isLiveStack, stackLabel, stackOf, type VoiceStack } from '../domain/providers.ts';
+import { StackPicker } from './Providers.tsx';
 import { writeModelAnswer } from '../gemini/model-answer.ts';
 import { todayQueue, focusWhy } from './Home.tsx';
 import '../styles/screens/home.css';
@@ -58,8 +60,9 @@ function Tile({ lp, children, plain }: { lp?: LpRow | null; children?: React.Rea
 }
 
 export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const { data, repo, refresh, go, gemini, live, toast } = useApp();
+  const { data, repo, refresh, go, gemini, live, toast, providers } = useApp();
   const { lpRows, storyRows, questions, files, sessions, settings } = data;
+  const [stack, setStack] = useState<VoiceStack>(() => stackOf(providers.settings));
   const [page, setPage] = useState<1 | 2>(1);
   const [pick, setPick] = useState<Pick>('focus');
   const [picker, setPicker] = useState<Picker>(null);
@@ -71,7 +74,7 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
   const [coaching, setCoaching] = useState<Coaching>(settings.coaching);
   const [seedText, setSeedText] = useState(String(settings.seed));
 
-  useEffect(() => { if (open) { setPage(1); setPick('focus'); setPicker(null); setMore(false); } }, [open]);
+  useEffect(() => { if (open) { setPage(1); setPick('focus'); setPicker(null); setMore(false); setStack(stackOf(providers.settings)); } }, [open]);
   useEffect(() => { setCoaching(settings.coaching); }, [settings.coaching]);
   useEffect(() => { setSeedText(String(settings.seed)); }, [settings.seed]);
 
@@ -124,7 +127,7 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
   const start = () => {
     const o = startOptions();
     if (!o) { toast(pick === 'replay' ? 'Drop your past-loop notes in Library · Files first.' : pick === 'set' ? 'That set is empty — add questions in Library · Questions first.' : 'Add an area in the Library first.'); return; }
-    void live.start(o);
+    void live.start({ ...o, stack });
   };
 
   const elseLabel = (): string | null => {
@@ -171,7 +174,7 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
 
       <div className="stack g8">
         <button type="button" className="more-row" onClick={() => setMore((m) => !m)} aria-expanded={more}>
-          <div className="stack g2"><span className="more-title">More · remembered</span><span className="more-sub">{SOURCE_SETTING_LABEL[settings.questionSource]} · story notes {settings.storyNotes ? 'on' : 'off'} · {gemini.voice}</span></div>
+          <div className="stack g2"><span className="more-title">More · remembered</span><span className="more-sub">{SOURCE_SETTING_LABEL[settings.questionSource]} · story notes {settings.storyNotes ? 'on' : 'off'} · {isLiveStack(stack) ? gemini.voice : stackLabel(stack, providers.settings.openai.model)}</span></div>
           {more ? <Icon.Up size={16} style={{ color: 'var(--m-fg3)' }} /> : <Icon.Down size={16} style={{ color: 'var(--m-fg3)' }} />}
         </button>
         {more && (
@@ -187,6 +190,10 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
                 <input type="number" className="seed" value={seedText} onChange={(e) => setSeedText(e.target.value)} onBlur={commitSeed} onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }} aria-label="Session seed" />
                 <button type="button" className="seed-btn" aria-label="New seed" onClick={() => void setSetting('seed', newSeed())}>↻</button>
               </div>
+            </div>
+            <div className="stack g8">
+              <div className="stack g2"><span className="more-title">Voice &amp; model · this session</span><span className="more-sub">{stackLabel(stack, providers.settings.openai.model)} · Chrome and local models are free · defaults in Settings</span></div>
+              <StackPicker value={stack} onChange={setStack} />
             </div>
             <div className="more-line">
               <div className="stack g2"><span className="more-title">Remembered</span><span className="more-sub">Voice {gemini.voice} · {gemini.model}</span></div>

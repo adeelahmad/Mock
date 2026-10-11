@@ -148,3 +148,7 @@ input[type="range"].pause:focus-visible::-moz-range-thumb { box-shadow: var(--ri
 .vault-qr { width: 196px; max-width: 70vw; padding: 10px; border-radius: 12px; background: #fff; }
 .vault-qr svg { display: block; width: 100%; height: auto; }
 .vault-code { font: 700 26px/1.2 var(--font-mono); letter-spacing: .02em; }
+
+/* Voice & model: provider sections fold away when not in use */
+details.card > summary { cursor: pointer; list-style-position: inside; }
+details.card:not([open]) { gap: 0; }

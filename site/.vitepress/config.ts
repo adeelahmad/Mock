@@ -67,6 +67,7 @@ export default defineConfig({
           { text: 'Getting started', link: '/guide/getting-started' },
           { text: 'Features', link: '/guide/features' },
           { text: 'Areas and CSV import', link: '/guide/areas-and-import' },
+          { text: 'Voice and model', link: '/guide/providers' },
           { text: 'Spend tracker', link: '/guide/spend' },
           { text: 'Game', link: '/guide/game' },
           { text: 'Hints from your files', link: '/guide/hints' },

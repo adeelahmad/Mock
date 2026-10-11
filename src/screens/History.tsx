@@ -14,6 +14,7 @@ import { fmtDuration, fmtSessionDate, sessionModeLabel } from '../domain/selecto
 import { buildBackup, backupFileName } from '../db/backup.ts';
 import { reportInput } from '../live/reporter.ts';
 import { analysisPipeline } from '../gemini/setup.ts';
+import { textLlm } from '../live/make-pipeline.ts';
 import { MODE_LABEL, type Exchange, type Lp, type Mode, type Session, type Story, type TranscriptEvent } from '../domain/types.ts';
 import { VERDICT_LABEL } from '../domain/verdict.ts';
 import '../styles/screens/history.css';
@@ -177,7 +178,7 @@ function ListPanel({ selected, master }: { selected: string | null; master: bool
 
 // ---------- the detail ----------
 function Detail({ id, desktop }: { id: string; desktop: boolean }) {
-  const { data, repo, refresh, back, go, toast, live, route, gemini } = useApp();
+  const { data, repo, refresh, back, go, toast, live, route, gemini, providers } = useApp();
   const [writing, setWriting] = useState(false);
   const session = data.sessions.find((s) => s.id === id) ?? null;
   const xs = useMemo(() => exchangesOf(data.exchanges, id), [data.exchanges, id]);
@@ -295,7 +296,8 @@ function Detail({ id, desktop }: { id: string; desktop: boolean }) {
     try {
       const input = await reportInput(repo, id);
       if (!input) return;
-      const { reporter } = analysisPipeline({ key: gemini.key || null, textModel: data.settings.textModel, lps: data.lps, stories: data.stories, script: null, onFallback: (_w, err) => toast('Flash report failed — wrote it offline (' + err.message + ')') });
+      const llm = textLlm(providers.settings, providers.settings, providers.keys);
+      const { reporter } = analysisPipeline({ key: gemini.key || null, llm, textModel: data.settings.textModel, lps: data.lps, stories: data.stories, script: null, onFallback: (_w, err) => toast((llm ? 'Report' : 'Flash report') + ' failed — wrote it offline (' + err.message + ')') });
       await repo.updateSession(id, { report: await reporter.report(input) });
       await refresh();
     } finally { setWriting(false); }
