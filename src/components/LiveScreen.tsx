@@ -46,6 +46,8 @@ export interface LiveCoaching {
 }
 
 export interface LiveScreenProps {
+  /** The Gemini spend pill, shown in the header next to End. */
+  spend?: React.ReactNode;
   phase: LivePhase;
   paused: boolean;
   reconnecting: boolean;
@@ -237,6 +239,7 @@ export default function LiveScreen(p: LiveScreenProps) {
             {!desktop && isCoaching && <Viz kind="wave" who={who} accent="cool" size={56} w={56} h={22} />}
             {showLp && <span className="chip lg">{p.lpName}</span>}
             {!isEnd && !isConnecting && <span className="live-elapsed">Session {p.sessionNumber} · <span className="mono">{fmt(p.elapsedSec)}</span> elapsed</span>}
+            {p.spend}
             {!isEnd && <button type="button" className="live-end" onClick={() => p.onAction('end')}>End</button>}
           </div>
         </header>
