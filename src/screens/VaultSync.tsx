@@ -176,7 +176,8 @@ function PairSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
     const { signal } = defaultSignal(saved.config, account.hint);
     const h = host(signal, packPairing(saved));
     setP(h);
-    h.done.then(() => { toast('Paired · the new device is syncing'); onClose(); }, (e: Error) => { if (e.message !== 'cancelled') setErr(e.message); }).finally(() => signal.close());
+    // After success the host lingers a few seconds in case its last message was lost.
+    h.done.then(() => { toast('Paired · the new device is syncing'); onClose(); setTimeout(() => signal.close(), 25_000); }, (e: Error) => { signal.close(); if (e.message !== 'cancelled') setErr(e.message); });
     return () => h.cancel();
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
   const code = p ? formatCode(p.code) : '';

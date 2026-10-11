@@ -69,7 +69,7 @@ export interface Pairing<T> { code: PairCode; done: Promise<T>; cancel(): void }
  * Host: wait for one device to present the code, then send it `payload`. Single use: after one
  * attempt (right or wrong) the code is spent. Resolves true when the other device took the key.
  */
-export function host(signal: Signal, payload: Uint8Array, o: { code?: PairCode; timeoutMs?: number } = {}): Pairing<boolean> {
+export function host(signal: Signal, payload: Uint8Array, o: { code?: PairCode; timeoutMs?: number; lingerMs?: number } = {}): Pairing<boolean> {
   const code = o.code ?? newCode();
   const topic = pairTopic(code.nameplate);
   const me = session();
@@ -83,6 +83,7 @@ export function host(signal: Signal, payload: Uint8Array, o: { code?: PairCode; 
   let shared: { k: Uint8Array; aes: CryptoKey } | null = null;
   const send = (m: Omit<Msg, 's'> & Record<string, string>) => signal.publish(topic, JSON.stringify({ ...m, s: me }));
   const end = (e?: Error) => { clearTimeout(timer); leave(); if (e) fail(e); };
+  let sent: string | null = null;
   leave = signal.join(topic, (raw) => void (async () => {
     let m: Msg;
     try { m = JSON.parse(raw); } catch { return; }
@@ -94,15 +95,24 @@ export function host(signal: Signal, payload: Uint8Array, o: { code?: PairCode; 
         shared = await s.shared(joinerPub, joinerPub, s.pub);
         send({ t: 'pake', p: bytesToHex(s.pub) });
       } catch { end(new Error('Pairing failed')); }
+    } else if (m.t === 'pake' && m.s === peer && shared) {
+      // The joiner did not hear us (relays drop messages): say it again.
+      send({ t: 'pake', p: bytesToHex(s.pub) });
     } else if (m.t === 'confirm' && m.s === peer && shared) {
+      if (sent) { send({ t: 'key', c: sent }); return; }
       const want = hmac(sha256, shared.k, utf8ToBytes('joiner'));
       if (!equalBytes(want, hexToBytes(m.m))) { send({ t: 'fail' }); end(new Error('Wrong code: the other device typed a different one')); return; }
-      send({ t: 'key', c: toB64(await seal(shared.aes, payload, 'pair')) });
-      end(); finish(true);
+      sent = toB64(await seal(shared.aes, payload, 'pair'));
+      send({ t: 'key', c: sent });
+      finish(true);
+      // Linger briefly in case the key message is lost and the joiner asks again.
+      clearTimeout(timer);
+      timer = setTimeout(() => end(), o.lingerMs ?? 20_000);
     }
   })());
   timer = setTimeout(() => end(new Error('The code expired')), o.timeoutMs ?? 10 * 60_000);
-  return { code, done, cancel: () => end(new Error('cancelled')) };
+  // After a successful hand-off, keep lingering (the timer ends it).
+  return { code, done, cancel: () => { if (!sent) end(new Error('cancelled')); } };
 }
 
 /** Joiner: present the code; resolves with the host's payload. */
@@ -112,12 +122,13 @@ export function join(signal: Signal, code: PairCode, o: { timeoutMs?: number; re
   const s = side(code);
   let host: string | null = null;
   let shared: { aes: CryptoKey } | null = null;
+  let confirm: string | null = null;
   let finish!: (v: Uint8Array) => void, fail!: (e: Error) => void;
   const done = new Promise<Uint8Array>((res, rej) => { finish = res; fail = rej; });
   const send = (m: Record<string, string>) => signal.publish(topic, JSON.stringify({ ...m, s: me }));
   const hello = () => send({ t: 'pake', p: bytesToHex(s.pub) });
   // The host may not be listening yet (or the relay dropped it): say it again until answered.
-  const again = setInterval(() => { if (!host) hello(); }, o.retryMs ?? 3000);
+  const again = setInterval(() => { if (!host) hello(); else if (confirm) send({ t: 'confirm', m: confirm }); }, o.retryMs ?? 3000);
   const end = (e?: Error) => { clearInterval(again); clearTimeout(timer); leave(); if (e) fail(e); };
   const leave = signal.join(topic, (raw) => void (async () => {
     let m: Msg;
@@ -129,7 +140,8 @@ export function join(signal: Signal, code: PairCode, o: { timeoutMs?: number; re
         const hostPub = hexToBytes(m.p);
         const sh = await s.shared(hostPub, s.pub, hostPub);
         shared = sh;
-        send({ t: 'confirm', m: bytesToHex(hmac(sha256, sh.k, utf8ToBytes('joiner'))) });
+        confirm = bytesToHex(hmac(sha256, sh.k, utf8ToBytes('joiner')));
+        send({ t: 'confirm', m: confirm });
       } catch { end(new Error('Pairing failed')); }
     } else if (m.t === 'fail' && m.s === host) {
       end(new Error('Wrong code'));

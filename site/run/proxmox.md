@@ -56,6 +56,33 @@ arm64 on an amd64 host needs qemu-user-static). `sudo proxmox/lxc/smoke.sh <temp
 under systemd-nspawn and checks the app answers over HTTPS. Tagged releases build both,
 smoke-test them and attach them.
 
+## Cloudflare Tunnel
+
+Keep the container private and still reach it from anywhere: a
+[Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
+connects out to Cloudflare, so nothing listens on your public IP, and Cloudflare serves HTTPS
+with a real certificate, so phones don't need Caddy's root certificate either.
+
+1. In Cloudflare Zero Trust, go to **Networks → Tunnels → Create a tunnel → Cloudflared**, then
+   copy the token.
+2. Add a **public hostname** such as `mock.example.com`, with service `http://localhost:8787`.
+3. Run it in the container:
+
+   ```sh
+   pct exec 120 -- mock-tunnel <tunnel-token> mock.example.com
+   ```
+
+   It installs `cloudflared` as a service and sets `AUTH_URL=https://mock.example.com` in
+   `/etc/mock/server.env`, so sign-in callbacks use the public address. The prebuilt-template
+   installer also asks for the token (`MOCK_CF_TOKEN` and `MOCK_CF_HOSTNAME` skip the question).
+4. Register your OAuth apps with `https://mock.example.com/auth/callback/<provider>`.
+
+Then use `https://mock.example.com` from any device. Sign in, and
+[passphrase sync](/guide/passphrase-sync) uses this server as its relay (signed-in users only).
+The GitHub Pages app can use it too: **Settings → Sync → Where devices meet → My Mock server**.
+A tunnel carries HTTP and WebSockets but not TURN (UDP). Most devices connect directly anyway;
+for the networks that don't, run a TURN server with its own UDP port.
+
 ## From source
 
 ### What you get
@@ -74,4 +101,5 @@ smoke-test them and attach them.
 |---|---|
 | `update` | pull `main` and rebuild the binary |
 | `mock-token` | print the sign-in setup token |
+| `mock-tunnel <token> [hostname]` | publish through a [Cloudflare Tunnel](#cloudflare-tunnel) |
 | `systemctl status mock` | server status |

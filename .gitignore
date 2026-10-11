@@ -12,3 +12,4 @@ data
 site/public
 site/.vitepress/cache
 site/.vitepress/dist
+/mock

@@ -70,6 +70,7 @@ export default defineConfig({
           { text: 'Spend tracker', link: '/guide/spend' },
           { text: 'Game', link: '/guide/game' },
           { text: 'Hints from your files', link: '/guide/hints' },
+          { text: 'Sync with a passphrase', link: '/guide/passphrase-sync' },
           { text: 'Sign-in and sync', link: '/guide/sync' },
           { text: 'Google Meet interviewer', link: '/guide/meet' },
         ],

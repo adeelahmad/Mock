@@ -83,6 +83,17 @@ describe('pairing', () => {
     await expect(j.done).rejects.toThrow(/Wrong code/);
     await expect(h.done).rejects.toThrow(/Wrong code/);
   });
+  it('survives a relay that drops the host\'s reply and the key once', async () => {
+    const hub = new MemoryHub();
+    const hs = hub.signal();
+    const dropped = new Set<string>();
+    const pub = hs.publish.bind(hs);
+    hs.publish = (topic, data) => { const t = JSON.parse(data).t as string; if ((t === 'pake' || t === 'key') && !dropped.has(t)) { dropped.add(t); return; } pub(topic, data); };
+    const h = host(hs, new Uint8Array([7, 7]), { lingerMs: 500 });
+    const j = join(hub.signal(), h.code, { retryMs: 20 });
+    expect(await j.done).toEqual(new Uint8Array([7, 7]));
+    expect(dropped).toEqual(new Set(['pake', 'key']));
+  });
   it('makes codes from the word list', () => {
     const c = newCode();
     expect(formatCode(c)).toMatch(/^\d{1,3}-[a-z]+-[a-z]+$/);
