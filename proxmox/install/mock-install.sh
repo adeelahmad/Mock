@@ -1,54 +1,59 @@
 #!/usr/bin/env bash
-# Mock — in-container install and update (Debian 12). Called by proxmox/ct/mock.sh.
-#   mock-install.sh install   # packages, Node 22, Caddy, clone, build, serve
-#   mock-install.sh update    # pull, rebuild and swap the site if the branch moved
-set -Eeuo pipefail
 
-REPO_URL="${MOCK_REPO:-https://github.com/adeelahmad/Mock.git}"
-BRANCH="${MOCK_BRANCH:-main}"
-SRC=/opt/mock
-WWW=/var/www/mock
-VERSION_FILE=/opt/mock_version.txt
-export DEBIAN_FRONTEND=noninteractive PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+# Author: Adeel Ahmad (adeelahmad)
+# License: MIT
+# Source: https://github.com/adeelahmad/Mock
 
-YW=$'\033[33m'; GN=$'\033[1;92m'; RD=$'\033[01;31m'; CL=$'\033[m'
-msg_info() { printf ' %s⏳ %s...%s\n' "$YW" "$1" "$CL"; }
-msg_ok()   { printf ' %s✔ %s%s\n' "$GN" "$1" "$CL"; }
-msg_error(){ printf ' %s✖ %s%s\n' "$RD" "$1" "$CL" >&2; }
-trap 'msg_error "Failed at line $LINENO: $BASH_COMMAND"' ERR
+source /dev/stdin <<<"$FUNCTIONS_FILE_PATH"
+color
+verb_ip6
+catch_errors
+setting_up_container
+network_check
+update_os
 
-build_and_publish() {
-  cd "$SRC"
-  msg_info "Installing npm dependencies"
-  npm ci --include=dev --no-audit --no-fund --loglevel=error
-  msg_ok "Dependencies installed"
-  msg_info "Building"
-  npm run build --silent >/dev/null
-  msg_ok "Built"
-  # Swap the new build in whole so the server never serves a half-copied site.
-  rm -rf "${WWW}.new" && cp -a dist "${WWW}.new"
-  [[ -d "$WWW" ]] && mv "$WWW" "${WWW}.old"
-  mv "${WWW}.new" "$WWW" && rm -rf "${WWW}.old"
-  git rev-parse HEAD >"$VERSION_FILE"
-}
+msg_info "Installing Dependencies"
+$STD apt install -y git caddy
+msg_ok "Installed Dependencies"
 
-write_caddyfile() {
-  local out=${1:-/etc/caddy/Caddyfile}
-  # Internal-CA certificates for the container's hostname and current IPs.
-  local hosts ip
-  hosts="localhost $(hostname)"
-  for ip in $(hostname -I); do hosts+=" $ip"; done
-  local sites; sites=$(printf 'https://%s, ' $hosts); sites=${sites%, }
-  cat >"$out" <<CADDY
+NODE_VERSION="22" setup_nodejs
+
+msg_info "Cloning ${APP}"
+MOCK_REPO="${MOCK_REPO:-adeelahmad/Mock}"
+MOCK_BRANCH="${MOCK_BRANCH:-main}"
+if [[ -n "${MOCK_GITHUB_TOKEN:-}" ]]; then
+  MOCK_URL="https://x-access-token:${MOCK_GITHUB_TOKEN}@github.com/${MOCK_REPO}.git"
+else
+  MOCK_URL="https://github.com/${MOCK_REPO}.git"
+fi
+$STD git clone --depth 1 --branch "${MOCK_BRANCH}" "${MOCK_URL}" /opt/mock
+RELEASE=$(git -C /opt/mock rev-parse HEAD)
+msg_ok "Cloned ${APP} ${RELEASE:0:7}"
+
+msg_info "Building ${APP}"
+cd /opt/mock || exit
+export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+$STD npm ci --include=dev --no-audit --no-fund
+$STD npm run build
+mkdir -p /var/www
+cp -a dist /var/www/mock
+msg_ok "Built ${APP}"
+
+msg_info "Configuring Caddy"
+# Caddy's internal CA issues certificates for the hostname and current IPs;
+# the app needs a secure origin for the microphone and service worker.
+MOCK_SITES="https://localhost, https://$(hostname)"
+for ip in $(hostname -I); do MOCK_SITES+=", https://${ip}"; done
+cat <<CADDY >/etc/caddy/Caddyfile
 {
 	auto_https disable_redirects
 }
 
 (mock) {
-	root * ${WWW}
+	root * /var/www/mock
 	encode zstd gzip
 	file_server
-	@nocache path /sw.js /index.html / /manifest.webmanifest /registerSW.js
+	@nocache path / /index.html /sw.js /registerSW.js /manifest.webmanifest
 	header @nocache Cache-Control "no-cache"
 	header /assets/* Cache-Control "public, max-age=31536000, immutable"
 }
@@ -57,88 +62,35 @@ http:// {
 	import mock
 }
 
-${sites} {
+${MOCK_SITES} {
 	tls internal
 	import mock
 }
 CADDY
-  [[ "$out" == /etc/caddy/Caddyfile ]] || return 0
-  systemctl reload caddy 2>/dev/null || systemctl restart caddy
-}
+systemctl enable -q caddy
+systemctl restart caddy
+if ! systemctl is-active --quiet caddy; then
+  msg_error "Caddy failed to start"
+  journalctl -u caddy -n 20 --no-pager
+  exit 1
+fi
+msg_ok "Configured Caddy"
 
-install() {
-  msg_info "Installing dependencies"
-  apt-get update -qq
-  apt-get install -y -qq curl ca-certificates git gnupg debian-keyring debian-archive-keyring apt-transport-https >/dev/null
-  msg_ok "Dependencies installed"
+echo "${RELEASE}" >/opt/mock_version.txt
 
-  msg_info "Installing Node.js 22"
-  install -d -m 0755 /etc/apt/keyrings
-  curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor --yes -o /etc/apt/keyrings/nodesource.gpg
-  echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" >/etc/apt/sources.list.d/nodesource.list
-  msg_ok "Node.js repo added"
-
-  msg_info "Installing Caddy"
-  curl -fsSL https://dl.cloudsmith.io/public/caddy/stable/gpg.key | gpg --dearmor --yes -o /etc/apt/keyrings/caddy-stable.gpg
-  echo "deb [signed-by=/etc/apt/keyrings/caddy-stable.gpg] https://dl.cloudsmith.io/public/caddy/stable/deb/debian any-version main" >/etc/apt/sources.list.d/caddy-stable.list
-  apt-get update -qq
-  apt-get install -y -qq nodejs caddy >/dev/null
-  msg_ok "Node.js $(node -v) and Caddy installed"
-
-  msg_info "Cloning ${REPO_URL} (${BRANCH})"
-  rm -rf "$SRC"
-  git clone -q --depth 1 --branch "$BRANCH" "$REPO_URL" "$SRC"
-  msg_ok "Cloned"
-
-  build_and_publish
-  write_caddyfile
-  systemctl enable -q caddy
-
-  cat >/usr/bin/update <<UPD
+# The engine's /usr/bin/update fetches ct/mock.sh over plain curl, which fails
+# while the repo is private; run the checkout's copy instead (git pull first).
+cat <<UPD >/usr/bin/update
 #!/usr/bin/env bash
-exec env MOCK_BRANCH="${BRANCH}" bash ${SRC}/proxmox/install/mock-install.sh update
+git -C /opt/mock pull -q --ff-only origin "${MOCK_BRANCH}" 2>/dev/null || true
+MOCK_BRANCH="${MOCK_BRANCH}" exec bash /opt/mock/proxmox/ct/mock.sh
 UPD
-  chmod +x /usr/bin/update
+chmod +x /usr/bin/update
 
-  msg_info "Cleaning up"
-  apt-get -y -qq autoremove >/dev/null && apt-get -y -qq autoclean >/dev/null
-  npm cache clean --force >/dev/null 2>&1 || true
-  msg_ok "Mock $(cut -c1-7 "$VERSION_FILE") installed"
-}
+motd_ssh
+customize
 
-update() {
-  [[ -d "$SRC/.git" ]] || { msg_error "No Mock installation found in $SRC"; exit 1; }
-  cd "$SRC"
-  msg_info "Checking for updates"
-  git fetch -q --depth 1 origin "$BRANCH"
-  local remote; remote=$(git rev-parse FETCH_HEAD)
-  if [[ -f "$VERSION_FILE" && "$(cat "$VERSION_FILE")" == "$remote" && -z "${MOCK_FORCE:-}" ]]; then
-    msg_ok "Already up to date ($(cut -c1-7 <<<"$remote")). MOCK_FORCE=1 update to rebuild anyway."
-    exit 0
-  fi
-  git reset -q --hard FETCH_HEAD
-  msg_ok "Updated source to $(cut -c1-7 <<<"$remote")"
-  # This file may just have changed under us; finish with the new version.
-  exec bash "$SRC/proxmox/install/mock-install.sh" publish
-}
-
-publish() {
-  build_and_publish
-  write_caddyfile
-  npm cache clean --force >/dev/null 2>&1 || true
-  msg_ok "Mock $(cut -c1-7 "$VERSION_FILE") is live"
-}
-
-case "${1:-install}" in
-  install) install ;;
-  update)
-    # Run update from a copy: `git reset` rewrites the checkout this file lives in.
-    if [[ -z "${MOCK_COPY:-}" ]]; then
-      tmp=$(mktemp); cp "${BASH_SOURCE[0]}" "$tmp"
-      MOCK_COPY=1 exec bash "$tmp" update
-    fi
-    update ;;
-  publish) publish ;;
-  caddyfile) write_caddyfile "${2:-/dev/stdout}" ;;
-  *) echo "usage: $0 install|update|publish|caddyfile [path]" >&2; exit 2 ;;
-esac
+msg_info "Cleaning up"
+$STD npm cache clean --force
+msg_ok "Cleaned up"
+cleanup_lxc
