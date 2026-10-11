@@ -5,6 +5,8 @@
 // `inlineData` (≤ 20 MB per request). The docs also present the newer Interactions API
 // (`response_format`); if generateContent is retired, only this module changes.
 
+import { reportUsage } from './usage.ts';
+
 export const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 /** Inline request ceiling; clips above it are sent as transcript only. */
 export const INLINE_LIMIT_BYTES = 20 * 1024 * 1024;
@@ -23,6 +25,8 @@ export interface FlashRequest {
   timeoutMs?: number;
   signal?: AbortSignal;
   fetch?: typeof fetch;
+  /** The Leadership Principle the tokens are spent on, for the budget breakdown. */
+  lpId?: string | null;
 }
 
 export class FlashError extends Error {
@@ -62,7 +66,8 @@ export async function generateText(r: FlashRequest): Promise<string> {
     clearTimeout(timer);
     r.signal?.removeEventListener('abort', onAbort);
   }
-  const json = (await res.json().catch(() => null)) as { error?: { message?: string }; candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[]; promptFeedback?: { blockReason?: string } } | null;
+  const json = (await res.json().catch(() => null)) as { error?: { message?: string }; candidates?: { content?: { parts?: { text?: string }[] }; finishReason?: string }[]; promptFeedback?: { blockReason?: string }; usageMetadata?: unknown } | null;
+  if (json?.usageMetadata) reportUsage(r.model, r.lpId ?? null, json.usageMetadata);
   if (!res.ok) throw new FlashError(json?.error?.message || 'Flash returned ' + res.status, res.status);
   if (json?.promptFeedback?.blockReason) throw new FlashError('Blocked: ' + json.promptFeedback.blockReason, res.status);
   const text = (json?.candidates?.[0]?.content?.parts ?? []).map((p) => p.text ?? '').join('');
