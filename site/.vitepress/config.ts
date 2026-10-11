@@ -78,10 +78,10 @@ export default defineConfig({
       {
         text: 'Run it',
         items: [
-          { text: 'Develop (Makefile)', link: '/run/develop' },
-          { text: 'Deploy', link: '/run/deploy' },
+          { text: 'Install (one binary)', link: '/run/install' },
           { text: 'Proxmox VE', link: '/run/proxmox' },
-          { text: 'Go binary', link: '/run/go-binary' },
+          { text: 'Deploy', link: '/run/deploy' },
+          { text: 'Build from source', link: '/run/develop' },
         ],
       },
     ],

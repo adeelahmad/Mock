@@ -10,15 +10,22 @@ It asks how to make the container:
 
 - **Prebuilt** (fast): downloads the release's LXC template and runs `pct create`. Nothing is
   built on the host or in the container.
-- **From source**: the [community-scripts](https://community-scripts.github.io/ProxmoxVE/)
-  helper wizard, which builds Mock in the container.
+- **Wizard**: the [community-scripts](https://community-scripts.github.io/ProxmoxVE/)
+  helper wizard, which makes a fresh container and downloads the release's binary into it.
 
-`MOCK_MODE=template` or `MOCK_MODE=source` skips the question.
+Neither needs Node or Go. `MOCK_MODE=template` or `MOCK_MODE=source` (the wizard) skips the
+question.
+
+::: warning Until the first release
+Both paths download from a GitHub Release. Until v0.1.0 is tagged there is none: the script
+then uses the wizard, which builds Mock from source in the container (Node 22 and Go, removed
+again afterwards).
+:::
 
 ## Prebuilt template
 
 Each release carries `mock-lxc-debian13-amd64.tar.zst` and `mock-lxc-debian13-arm64.tar.zst`:
-a Debian 13 rootfs (built with mmdebstrap) holding the [Mock binary](/run/go-binary), Caddy,
+a Debian 13 rootfs (built with mmdebstrap) holding the [Mock binary](/run/install), Caddy,
 OpenSSH and a `mock-firstboot` unit. On every boot it writes the Caddyfile for the container's
 hostname and IPs; the first boot also creates the `mock` user, service and `/var/lib/mock`, and
 fresh SSH host keys. The script verifies the download against the release's `checksums.txt`.
@@ -83,14 +90,14 @@ The GitHub Pages app can use it too: **Settings → Sync → Where devices meet 
 A tunnel carries HTTP and WebSockets but not TURN (UDP). Most devices connect directly anyway;
 for the networks that don't, run a TURN server with its own UDP port.
 
-## From source
+## Helper wizard
 
 ### What you get
 
 - The usual helper-script wizard (Default / Advanced, `var_*` overrides).
 - An unprivileged Debian 13 container: 2 vCPU, 2 GiB RAM, 8 GB disk.
-- Caddy, and the [Mock binary](/run/go-binary) built in the container (Node 22 and Go for the
-  build) into `/usr/local/bin/mock`, running as the `mock` service behind Caddy.
+- Caddy, and the release's [Mock binary](/run/install) in `/usr/local/bin/mock` (built from
+  source only while no release exists), running as the `mock` service behind Caddy.
 - SQLite in `/var/lib/mock`. For Postgres or a public `AUTH_URL`, edit `/etc/mock/server.env`.
 - Served on `https://<ip>/` with Caddy's internal CA, and on `http://<ip>/`. Trust the root
   certificate printed at the end, since the microphone needs trusted HTTPS.
@@ -99,7 +106,7 @@ for the networks that don't, run a TURN server with its own UDP port.
 
 | Command | Does |
 |---|---|
-| `update` | pull `main` and rebuild the binary |
+| `update` | install the latest release's binary |
 | `mock-token` | print the sign-in setup token |
 | `mock-tunnel <token> [hostname]` | publish through a [Cloudflare Tunnel](#cloudflare-tunnel) |
 | `systemctl status mock` | server status |

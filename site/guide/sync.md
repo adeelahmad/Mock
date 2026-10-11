@@ -7,7 +7,7 @@ spend follow you to every browser you sign in on.
 ::: info Static hosting has no server
 The hosted app on GitHub Pages has no server. To sync it anyway, use
 [Sync with a passphrase](/guide/passphrase-sync): your devices sync directly, with no account.
-Server sync needs the [Go binary](/run/go-binary) (`make serve`) or [Proxmox](/run/proxmox).
+Server sync needs the [Mock binary](/run/install) or [Proxmox](/run/proxmox).
 :::
 
 ## Set it up

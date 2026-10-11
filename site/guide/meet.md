@@ -29,7 +29,7 @@ app ends the session and keeps what was said.
 ## How it works
 
 The Gemini connection, session logic, tools, cards, report and recording all stay in the app
-tab. The bridge (part of the [Go binary](/run/go-binary)) drives a Chromium that joins the call, sends
+tab. The bridge (part of the [Mock binary](/run/install)) drives a Chromium that joins the call, sends
 the call's audio to the app at 16 kHz and plays Mock's voice into the call as its microphone.
 Its camera tile shows Mock's name, the phase, the area and the current question.
 

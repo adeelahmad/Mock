@@ -52,7 +52,7 @@ Pick the relay in **Settings → Sync → Where devices meet**:
 
 - **Public relays** (the default on GitHub Pages): free public [Nostr](https://nostr.com)
   relays. Nothing to host or sign up for.
-- **This server**: when Mock is served by your own [Mock server](/run/go-binary) and you are
+- **This server**: when Mock is served by your own [Mock server](/run/install) and you are
   signed in to it. Only signed-in users can use it, and each account only sees its own devices.
 - **My Mock server / Another server**: use your self-hosted Mock from somewhere else, for example
   the GitHub Pages app talking to the Mock in your home lab. Press **Sign in**, sign in once in

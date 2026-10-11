@@ -26,6 +26,8 @@ Pages has no server, so the hosted app stays local-only; see [sign-in and sync](
 
 ## Anywhere else
 
+From a checkout (needs Node, see [Build from source](/run/develop)):
+
 ```sh
 make build      # or npm run build
 ```
@@ -34,6 +36,6 @@ Upload `dist/` to Netlify, Cloudflare Pages, S3 or any web server.
 
 ## With the server
 
-`make serve` builds the [Go binary](/run/go-binary) and serves the app with the sign-in and sync
-API from that one file on :8787. Put it behind a reverse proxy with HTTPS. See
+[Install the binary](/run/install) and run `mock`: it serves the app with the sign-in and sync
+API from that one file on :8787 (from a checkout, `make serve` builds and runs it). Put it behind a reverse proxy with HTTPS. See
 [Proxmox](/run/proxmox) for a ready container.

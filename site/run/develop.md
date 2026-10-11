@@ -1,6 +1,9 @@
-# Develop
+# Build from source
 
-Needs Node 22.18 or newer, and Go 1.26 or newer for the server and the [binary](/run/go-binary). Clone the repo, then use `make` (or the npm scripts underneath).
+For contributors. To run Mock you need none of this: [install the binary](/run/install).
+
+Building needs Node 22.18 or newer, and Go 1.26 or newer for the server and the
+[binary](/run/install). Clone the repo, then use `make` (or the npm scripts underneath).
 
 ```sh
 git clone https://github.com/adeelahmad/Mock && cd Mock
@@ -25,7 +28,7 @@ make dev            # http://localhost:5173
 | `make serve` | build `bin/mock`, then serve the app and API from it |
 | `make bridge` | only the [Meet bridge](/guide/meet) on 127.0.0.1:8788 |
 | `make token` | print the sign-in setup token |
-| `make binary` / `make binaries` | the [Go binary](/run/go-binary), for this machine / cross-compiled |
+| `make binary` / `make binaries` | the [Go binary](/run/install), for this machine / cross-compiled |
 | `make docs` | this site, live on :5174 |
 | `make docs-build` | build this site, with the app at `/app/`, into `site/.vitepress/dist` |
 | `make clean` | remove build output, `bin/` and test results |

@@ -9,7 +9,7 @@ sessions and recordings stay on the device, and it works offline once loaded.
 
 ## 1. Open it
 
-Open <a :href="withBase('/app/')" target="_self">the hosted app</a>, or [run it yourself](/run/develop).
+Open <a :href="withBase('/app/')" target="_self">the hosted app</a>, or [install the one-file binary](/run/install) and run it yourself.
 
 ## 2. First run
 
