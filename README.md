@@ -33,8 +33,8 @@ for the architecture and milestones, `docs/design-inventory.md` for the feature 
 
 Every Gemini call reports how many tokens it used, and Mock adds them up. The **Spent** pill
 always shows the total: top-right on phone, in the sidebar on desktop, and in the header during
-a live session. Tap it for the split per Leadership Principle. Live tokens count toward the LP
-of the question being asked, analysis cards toward the answer's LP, and session reports and
+a live session. Tap it for the split per area. Live tokens count toward the area
+of the question being asked, analysis cards toward the answer's area, and session reports and
 question tagging go under "Reports & other".
 
 The price is set in **Settings → Budget**: one row per model, in USD per 1M tokens, with text
