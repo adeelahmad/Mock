@@ -37,7 +37,7 @@ function Sidebar() {
       {item('library', 'Library', <Icon.Library />, paths.library('lps'))}
       {route.tab === 'library' && (
         <div className="nav-sub">
-          {(['lps', 'stories', 'questions', 'files'] as const).map((s) => <button key={s} className={lib === s ? 'on' : ''} onClick={() => go(paths.library(s))}>{{ lps: 'LPs', stories: 'Stories', questions: 'Questions', files: 'Files' }[s]}</button>)}
+          {(['lps', 'stories', 'questions', 'files'] as const).map((s) => <button key={s} className={lib === s ? 'on' : ''} onClick={() => go(paths.library(s))}>{{ lps: 'Areas', stories: 'Stories', questions: 'Questions', files: 'Files' }[s]}</button>)}
         </div>
       )}
       {item('history', 'History', <Icon.Clock />, paths.history)}

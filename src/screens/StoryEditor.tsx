@@ -129,9 +129,9 @@ export default function StoryEditor({ id }: { id: string }) {
           <span className="se-hint">Say the number before the narrative — the coach checks every one of these against what you said.</span>
         </div>
 
-        {/* ---- LP mapping */}
+        {/* ---- area mapping */}
         <div className="stack g8">
-          <span className="se-h">LP mapping <span className="se-hint">· <button type="button" className="text-btn" style={{ color: 'var(--m-cool)', fontWeight: 700 }} onClick={() => go(paths.grid)}>tap the grid to change</button></span></span>
+          <span className="se-h">Area mapping <span className="se-hint">· <button type="button" className="text-btn" style={{ color: 'var(--m-cool)', fontWeight: 700 }} onClick={() => go(paths.grid)}>tap the grid to change</button></span></span>
           <div className="list r12">
             {mapped.map(({ lp, role }) => (
               <div key={lp.id} className="se-map-row">
@@ -143,12 +143,12 @@ export default function StoryEditor({ id }: { id: string }) {
                 </div>
               </div>
             ))}
-            {mapped.length === 0 && <div className="lpd-empty">Not mapped to any LP yet — the interviewer will not reach for this story.</div>}
-            <button type="button" className={'se-map-add' + (picking ? ' open' : '')} aria-expanded={picking} onClick={() => setPicking((p) => !p)}>{picking ? 'Pick an LP' : '+ Map another LP'}</button>
+            {mapped.length === 0 && <div className="lpd-empty">Not mapped to any area yet — the interviewer will not reach for this story.</div>}
+            <button type="button" className={'se-map-add' + (picking ? ' open' : '')} aria-expanded={picking} onClick={() => setPicking((p) => !p)}>{picking ? 'Pick an area' : '+ Map another area'}</button>
             {picking && (
-              <div className="se-pick" role="group" aria-label="Unmapped LPs">
+              <div className="se-pick" role="group" aria-label="Unmapped areas">
                 {unmapped.map((l) => <button key={l.id} type="button" title={l.name} onClick={() => void mapAnother(l.id)}>{l.short} · {l.name}</button>)}
-                {unmapped.length === 0 && <span className="se-hint">Every LP is mapped to this story.</span>}
+                {unmapped.length === 0 && <span className="se-hint">Every area is mapped to this story.</span>}
               </div>
             )}
           </div>

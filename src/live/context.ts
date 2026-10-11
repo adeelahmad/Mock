@@ -97,7 +97,7 @@ export function prioritiseQuestions(questions: Question[], opts: { mode: Mode; f
 function render(input: ContextInput): string {
   const fill: Record<string, string> = {
     SESSION_NUMBER: String(input.sessionNumber), DATE: input.date, MODE: input.mode, FOCUS: input.focus || 'none', COACHING: input.coaching, QUESTION_SOURCE: input.questionSource,
-    PREVIOUS_SESSIONS: renderPrevious(input.previous), LPS: renderLps(input.lps), STORIES: renderStories(input.stories, input.lps), QUESTIONS: renderQuestions(input.questions, input.lps), FILES: renderFiles(input.files),
+    PREVIOUS_SESSIONS: renderPrevious(input.previous), AREAS: renderLps(input.lps), STORIES: renderStories(input.stories, input.lps), QUESTIONS: renderQuestions(input.questions, input.lps), FILES: renderFiles(input.files),
   };
   let text = coachTemplate.replace(/\{\{(\w+)\}\}/g, (_m, k: string) => fill[k] ?? '');
   if (input.userInstruction?.trim()) text += '\n\n## Candidate’s own instruction\n' + input.userInstruction.trim() + '\n';

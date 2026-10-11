@@ -75,8 +75,8 @@ export default function LpDetail({ id }: { id: string }) {
   if (!lp) {
     return (
       <div className="screen">
-        <BackHead onBack={() => go(paths.library('lps'))} label="LPs" />
-        <div className="screen-body"><div className="card pad sub">That Leadership Principle is not in your library any more.</div></div>
+        <BackHead onBack={() => go(paths.library('lps'))} label="Areas" />
+        <div className="screen-body"><div className="card pad sub">That area is not in your library any more.</div></div>
       </div>
     );
   }
@@ -85,7 +85,7 @@ export default function LpDetail({ id }: { id: string }) {
   const startEdit = () => { setName(lp.name); setDesc(lp.description); setEditing(true); };
   const saveEdit = async () => {
     const n = name.trim(), d = desc.trim();
-    if (!n) { toast('Give the LP a name'); return; }
+    if (!n) { toast('Give the area a name'); return; }
     if (n !== lp.name || d !== lp.description) { await repo.updateLp(id, { name: n, description: d }); await refresh(); toast('Saved ' + n); }
     setEditing(false);
   };
@@ -145,7 +145,7 @@ export default function LpDetail({ id }: { id: string }) {
 
   const detail = (
     <div className="lpd-detail">
-      <div className="lpd-back"><BackHead onBack={() => go(paths.library('lps'))} label="LPs" right={editButton} /></div>
+      <div className="lpd-back"><BackHead onBack={() => go(paths.library('lps'))} label="Areas" right={editButton} /></div>
       <div className="screen-body lpd-body">
         <div className="lpd-top">
           {editing ? (
@@ -166,7 +166,7 @@ export default function LpDetail({ id }: { id: string }) {
           )}
           <div className="lpd-actions">
             <button type="button" className="btn md" style={{ height: 40, fontSize: 14 }} onClick={() => (editing ? void saveEdit() : startEdit())}>{editing ? 'Save' : 'Edit'}</button>
-            <button type="button" className="btn md primary" style={{ height: 40, fontSize: 14, padding: '0 18px' }} onClick={practise}>Practise this LP</button>
+            <button type="button" className="btn md primary" style={{ height: 40, fontSize: 14, padding: '0 18px' }} onClick={practise}>Practise this area</button>
           </div>
         </div>
 
@@ -185,7 +185,7 @@ export default function LpDetail({ id }: { id: string }) {
                   <button type="button" className="lpd-x" aria-label={'Remove ' + story.title + ' from ' + lp.name} title="Remove" onClick={() => void setRole(story, null)}><Icon.Close size={14} /></button>
                 </div>
               ))}
-              {mapped.length === 0 && <div className="lpd-empty">No story answers this LP yet. Map one below, or add a story.</div>}
+              {mapped.length === 0 && <div className="lpd-empty">No story answers this area yet. Map one below, or add a story.</div>}
               <button type="button" className="lpd-grid-link" onClick={() => go(paths.grid)}>Map a story in the grid →</button>
             </div>
           </section>
@@ -241,14 +241,14 @@ export default function LpDetail({ id }: { id: string }) {
                     </span>
                   </div>
                 ) : (
-                  <div className="lpd-best-text"><span className="lpd-best-1">No best attempt yet</span><span className="lpd-best-2">Practise this LP — the strongest answer is kept here.</span></div>
+                  <div className="lpd-best-text"><span className="lpd-best-1">No best attempt yet</span><span className="lpd-best-2">Practise this area — the strongest answer is kept here.</span></div>
                 )}
               </div>
             </div>
           </section>
         </div>
       </div>
-      <div className="screen-foot lpd-foot"><button type="button" className="btn lg primary block" onClick={practise}>Practise this LP</button></div>
+      <div className="screen-foot lpd-foot"><button type="button" className="btn lg primary block" onClick={practise}>Practise this area</button></div>
     </div>
   );
 
@@ -257,8 +257,8 @@ export default function LpDetail({ id }: { id: string }) {
       <div className="lpd-md">
         <aside className="lpd-master" aria-label="Leadership Principles">
           <div className="lpd-master-head">
-            <span className="lpd-master-title">LPs</span>
-            <button type="button" className="btn sm" style={{ color: 'var(--m-fg2)' }} onClick={async () => { await repo.resetLps(); await refresh(); toast('The 16 LPs are back to their defaults'); }}>Reset to defaults</button>
+            <span className="lpd-master-title">Areas</span>
+            <button type="button" className="btn sm" style={{ color: 'var(--m-fg2)' }} onClick={async () => { if (!confirm('Replace the areas with the 16 AWS Leadership Principles?')) return; await repo.resetLps(); await refresh(); toast('Areas set to the AWS Leadership Principles'); }}>AWS defaults</button>
           </div>
           <div className="lpd-master-list"><LpList lps={lpRows} selected={id} onOpen={(x) => go(paths.lp(x))} /></div>
           <span className="lpd-master-foot">{dbMode === 'duckdb' ? 'DuckDB-WASM ✓' : dbMode === 'memory' ? 'in-memory library' : 'starting'}</span>

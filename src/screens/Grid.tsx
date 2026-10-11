@@ -10,7 +10,8 @@ import { paths } from '../app/router.ts';
 import { BackHead, Icon } from '../components/ui.tsx';
 import type { Lp, LpRole } from '../domain/types.ts';
 import type { StoryRow } from '../domain/selectors.ts';
-import { guessLp, parseStoriesFromMarkdown, type ParsedStory } from '../domain/parsers.ts';
+import { guessLp, parseStoriesFile, type ParsedStory } from '../domain/parsers.ts';
+import CsvSamples from '../components/CsvSamples.tsx';
 import ImportStories from './ImportStories.tsx';
 import '../styles/screens/library-detail.css';
 
@@ -50,8 +51,8 @@ export default function Grid() {
   };
   const onFiles = async (list: File[]) => {
     const all: ParsedStory[] = [];
-    for (const f of list) all.push(...parseStoriesFromMarkdown(await f.text(), lps));
-    if (!all.length) { toast('No ## headings found in ' + list.map((f) => f.name).join(', ')); return; }
+    for (const f of list) all.push(...parseStoriesFile(f.name, await f.text(), lps));
+    if (!all.length) { toast('No stories found in ' + list.map((f) => f.name).join(', ') + ' — start from the sample CSV'); return; }
     setImporting({ fileName: list.length === 1 ? list[0].name : list[0].name + ' + ' + (list.length - 1) + ' more', stories: all });
   };
   const askCoach = () => {
@@ -64,10 +65,10 @@ export default function Grid() {
   const coverage = (
     <div className="gd-cov-block">
       <div className="gd-cov">
-        <span><span className="n">{coveredCount}</span> of {total} LPs covered</span>
-        {gapLps.length ? <span className="gd-gaps">{plural(gapLps.length, 'gap')}</span> : <span className="gd-gaps ok">every LP covered</span>}
+        <span><span className="n">{coveredCount}</span> of {total} areas covered</span>
+        {gapLps.length ? <span className="gd-gaps">{plural(gapLps.length, 'gap')}</span> : <span className="gd-gaps ok">every area covered</span>}
       </div>
-      <div className="progress-bar" role="progressbar" aria-valuenow={coveredCount} aria-valuemin={0} aria-valuemax={total} aria-label="LPs covered"><span style={{ width: pct + '%' }} /></div>
+      <div className="progress-bar" role="progressbar" aria-valuenow={coveredCount} aria-valuemin={0} aria-valuemax={total} aria-label="Areas covered"><span style={{ width: pct + '%' }} /></div>
     </div>
   );
 
@@ -79,9 +80,9 @@ export default function Grid() {
           <div className="gd-head-left">
             <div className="gd-tabs" role="tablist" aria-label="Stories view">
               <button type="button" role="tab" aria-selected={false} onClick={() => go(paths.library('stories'))}>Cards</button>
-              <button type="button" role="tab" aria-selected className="on">Story × LP grid</button>
+              <button type="button" role="tab" aria-selected className="on">Story × area grid</button>
             </div>
-            <span className="gd-title">Story × LP</span>
+            <span className="gd-title">Story × area</span>
           </div>
           <div className="gd-right">
             {coverage}
@@ -92,7 +93,7 @@ export default function Grid() {
           </div>
         </div>
 
-        <div className="gd-card" role="grid" aria-label="Story × LP grid" aria-rowcount={storyRows.length + 2} aria-colcount={total + 2}>
+        <div className="gd-card" role="grid" aria-label="Story × area grid" aria-rowcount={storyRows.length + 2} aria-colcount={total + 2}>
           <div className="gd-row hdr" role="row">
             <span role="columnheader" aria-label="Story" />
             {lps.map((l) => <span key={l.id} role="columnheader" className={'gd-short' + (covered.has(l.id) ? '' : ' gap')} title={l.name + (covered.has(l.id) ? '' : ' · no story yet')}>{l.short}</span>)}
@@ -131,7 +132,7 @@ export default function Grid() {
           {over && (
             <div className="gd-panel over">
               <span className="label gold">Over-used</span>
-              <span><strong>{over.title}</strong> covers {plural(over.links.length, 'LP')} and was used {over.uses} times. <span className="gd-phone">A loop will notice — map</span><span className="gd-desk">Map</span> a second story to {overSecondaries.length ? joinNames(overSecondaries) : 'its LPs'}.</span>
+              <span><strong>{over.title}</strong> covers {plural(over.links.length, 'area')} and was used {over.uses} times. <span className="gd-phone">A loop will notice — map</span><span className="gd-desk">Map</span> a second story to {overSecondaries.length ? joinNames(overSecondaries) : 'its areas'}.</span>
             </div>
           )}
           {gapLps.length > 0 && (
@@ -145,12 +146,12 @@ export default function Grid() {
             </div>
           )}
           {!over && gapLps.length === 0 && storyRows.length > 0 && (
-            <div className="gd-panel"><span className="label green">Covered</span><span>Every LP has a story and none is over-used. Keep the secondary mappings honest — the coach will push you to vary them.</span></div>
+            <div className="gd-panel"><span className="label green">Covered</span><span>Every area has a story and none is over-used. Keep the secondary mappings honest — the coach will push you to vary them.</span></div>
           )}
         </div>
       </div>
-      <div className="screen-foot gd-foot"><button type="button" className="btn block" onClick={() => picker.current?.click()}><Icon.Upload size={18} />Import stories from markdown</button></div>
-      <input ref={picker} type="file" multiple accept=".md,.txt" style={{ display: 'none' }} aria-hidden="true" onChange={(e) => { const l = Array.from(e.target.files ?? []); e.target.value = ''; if (l.length) void onFiles(l); }} />
+      <div className="screen-foot gd-foot"><button type="button" className="btn block" onClick={() => picker.current?.click()}><Icon.Upload size={18} />Import stories from CSV</button><CsvSamples only={['stories']} /></div>
+      <input ref={picker} type="file" multiple accept=".csv" style={{ display: 'none' }} aria-hidden="true" onChange={(e) => { const l = Array.from(e.target.files ?? []); e.target.value = ''; if (l.length) void onFiles(l); }} />
       {importing && <ImportStories open fileName={importing.fileName} stories={importing.stories} onClose={() => setImporting(null)} onDone={(n) => { setImporting(null); if (n) toast('Imported ' + plural(n, 'story', 'stories')); }} />}
     </div>
   );

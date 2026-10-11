@@ -8,12 +8,12 @@ const pct = (description: string) => ({ type: 'integer', minimum: 0, maximum: 10
 export const ANALYSIS_SCHEMA: Record<string, unknown> = {
   type: 'object',
   properties: {
-    lp: { type: 'string', description: 'The Leadership Principle the question tested, by its full name' },
+    lp: { type: 'string', description: 'The area the question tested, by its full name' },
     storyUsed: { type: ['string', 'null'], description: 'Title of the candidate story they told, exactly as in the story list; null if none matches' },
     betterStory: {
       type: ['object', 'null'],
       description: 'A story from the list that would have answered better, or null if theirs was the best fit',
-      properties: { title: { type: 'string' }, reason: { type: 'string', description: 'One sentence: why it fits this LP better' } },
+      properties: { title: { type: 'string' }, reason: { type: 'string', description: 'One sentence: why it fits this area better' } },
       required: ['title', 'reason'],
     },
     numbersMissed: {
@@ -53,7 +53,7 @@ export const REPORT_SCHEMA: Record<string, unknown> = {
       type: 'array', description: 'Answers where another of their stories would land better',
       items: { type: 'object', properties: { lpName: { type: 'string' }, useStory: { type: 'string' }, insteadOf: { type: ['string', 'null'] } }, required: ['lpName', 'useStory', 'insteadOf'] },
     },
-    nextFocus: { type: 'string', description: 'What to practise next: "{LP name} — {one imperative sentence}"' },
+    nextFocus: { type: 'string', description: 'What to practise next: "{area name} — {one imperative sentence}"' },
   },
   required: ['summary', 'votes', 'improvement', 'fixes', 'storySwaps', 'nextFocus'],
 };

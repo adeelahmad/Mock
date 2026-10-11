@@ -49,7 +49,10 @@ export interface Repo {
   setSettings(patch: Partial<Settings>): Promise<void>;
   /** Adds Gemini token counts to the budget ledger (read-modify-write in one step). */
   addUsage(entries: UsageEntry[]): Promise<void>;
+  /** Areas back to the AWS Leadership Principles preset. */
   resetLps(): Promise<void>;
+  /** Replace the areas (a custom interview's own list); links to removed ids stay but show nowhere. */
+  setLps(lps: Lp[]): Promise<void>;
   updateLp(id: string, patch: Partial<Pick<Lp, 'name' | 'description'>>): Promise<void>;
   upsertStory(story: Story): Promise<void>;
   deleteStory(id: string): Promise<void>;
