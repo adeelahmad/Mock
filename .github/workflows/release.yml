@@ -5,6 +5,9 @@
 #
 #   git tag v0.1.0 && git push origin v0.1.0
 #
+# Or Actions → Release → Run workflow with a tag: an existing tag is rebuilt; a new one is
+# created on the chosen branch's head first.
+#
 # Pull requests that touch the LXC build run everything except the publish step.
 name: Release
 
@@ -19,7 +22,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Existing tag to (re)build, e.g. v0.1.0
+        description: Tag to (re)build, e.g. v0.1.0; created on this branch's head if it doesn't exist
         required: true
 
 permissions:
@@ -29,7 +32,24 @@ env:
   TAG: ${{ inputs.tag || (github.event_name == 'pull_request' && format('pr{0}', github.event.number)) || github.ref_name }}
 
 jobs:
+  # Run workflow with a new tag: create it on the selected branch's head.
+  tag:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            echo "$TAG exists; rebuilding it"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" -m "Mock $TAG" && git push origin "refs/tags/$TAG"
+          fi
+
   binaries:
+    needs: tag
+    if: ${{ !failure() && !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -58,6 +78,7 @@ jobs:
   # Each architecture builds on its own runner, then boots under systemd-nspawn as a smoke test.
   lxc:
     needs: binaries
+    if: ${{ !failure() && !cancelled() }}
     strategy:
       fail-fast: false
       matrix:
@@ -87,7 +108,7 @@ jobs:
 
   publish:
     needs: [binaries, lxc]
-    if: github.event_name != 'pull_request'
+    if: ${{ !failure() && !cancelled() && github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
