@@ -19,10 +19,10 @@ export interface GeminiAnalyzerOptions {
 }
 
 export const ANALYSIS_SYSTEM = [
-  'You are a bar-raising Amazon interviewer writing the written feedback card for ONE behavioural answer.',
-  'Judge against the Leadership Principle being tested and against the candidate\'s own prep notes (their stories and numbers).',
+  'You are a bar-raising interviewer writing the written feedback card for ONE behavioural answer.',
+  'Judge against the area being tested (the competency or principle named below) and against the candidate\'s own prep notes (their stories and numbers).',
   'Be specific and terse. Quote numbers exactly as written in the notes. Never invent a story that is not in the list.',
-  'Verdict scale: strong_hire (clear, owned, quantified, the LP shows), inclined (good with gaps), not_inclined (vague, "we", no result), strong_no_hire (wrong LP, no story, or a red flag).',
+  'Verdict scale: strong_hire (clear, owned, quantified, the area shows), inclined (good with gaps), not_inclined (vague, "we", no result), strong_no_hire (wrong area, no story, or a red flag).',
 ].join('\n');
 
 export function storyNotes(stories: Story[]): string {
@@ -38,7 +38,7 @@ export function analysisPrompt(input: AnalysisInput, lps: Lp[], stories: Story[]
   const lines = input.transcript.map((t) => (t.speaker === 'me' ? 'CANDIDATE' : t.speaker === 'coach' ? 'COACH' : 'INTERVIEWER') + ': ' + t.text.trim()).filter((l) => !/:\s*$/.test(l));
   return [
     'Question (' + ex.interviewer.name + ', ' + ex.interviewer.role + '): ' + ex.questionText,
-    'Leadership Principle: ' + (lp ? lp.name + ' — ' + lp.description : 'not given; infer it'),
+    'Area: ' + (lp ? lp.name + ' — ' + lp.description : 'not given; infer it'),
     'Answer length: ' + Math.round(input.durationSec) + ' s.' + (withAudio ? ' The attached audio is the exchange; use it for delivery and confidence.' : ''),
     '',
     'Transcript of the exchange (the candidate\'s answer with any follow-ups, then the coach):',

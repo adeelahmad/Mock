@@ -13,7 +13,8 @@ import { newId, type Repo } from '../db/repo.ts';
 import type { Exchange, FileType, Lp, PrepFile, Question, QuestionSource, Session, Settings as SettingsRow, Story, TranscriptEvent, UiPrefs } from '../domain/types.ts';
 import { daysUntil } from '../domain/selectors.ts';
 import { detectFileType, parseExponentRows, parseQuestionsFromCsv, parseStoriesFromMarkdown, parsedQuestionsFromText, type ParsedQuestion } from '../domain/parsers.ts';
-import { DEFAULT_SYSTEM_INSTRUCTION } from '../fixtures/sample.ts';
+import CsvSamples from '../components/CsvSamples.tsx';
+import { DEFAULT_SYSTEM_INSTRUCTION, GENERIC_SYSTEM_INSTRUCTION, isAwsAreas } from '../fixtures/sample.ts';
 import '../styles/screens/settings.css';
 import { BackupSheet, RestoreSheet } from './BackupSheets.tsx';
 
@@ -110,7 +111,7 @@ export default function Settings() {
   const [sys, setSys] = useState(settings.systemInstruction);
   useEffect(() => { setSys(settings.systemInstruction); }, [settings.systemInstruction]);
   const saveSys = async () => { if (sys === settings.systemInstruction) return; await repo.setSettings({ systemInstruction: sys }); await refresh(); toast('System instruction saved'); };
-  const resetSys = async () => { setSys(DEFAULT_SYSTEM_INSTRUCTION); await repo.setSettings({ systemInstruction: DEFAULT_SYSTEM_INSTRUCTION }); await refresh(); toast('System instruction reset to the default'); };
+  const resetSys = async () => { const def = isAwsAreas(data.lps) ? DEFAULT_SYSTEM_INSTRUCTION : GENERIC_SYSTEM_INSTRUCTION; setSys(def); await repo.setSettings({ systemInstruction: def }); await refresh(); toast('System instruction reset to the default'); };
 
   // Recordings + storage.
   const [recKeys, setRecKeys] = useState<string[]>([]);
@@ -159,7 +160,7 @@ export default function Settings() {
     for (const k of recKeys) { const b = await repo.getBlob(k); if (b) download('mock-' + k.replace(/[^a-z0-9_-]+/gi, '-') + ext(b.type), b); }
   };
   const setupAgain = async () => { await repo.setSettings({ onboarded: false }); await refresh(); go(paths.onboarding); };
-  const loadSample = async () => { if (!confirm('Load the sample library? It replaces everything on this device.')) return; await repo.loadSample(); await refresh(); toast('Sample library loaded'); };
+  const loadSample = async () => { if (!confirm('Load the AWS interview defaults? The 16 Leadership Principles and all sample data replace everything on this device.')) return; await repo.loadSample(); await refresh(); toast('AWS interview defaults loaded'); };
   const deleteAll = async () => {
     if (!confirm('Delete all data? Stories, questions, files, sessions and recordings on this device will be removed.')) return;
     if (!confirm('Really delete everything? This cannot be undone — export first if in doubt.')) return;
@@ -270,10 +271,11 @@ export default function Settings() {
                   <Icon.Download size={18} />
                 </button>
                 <label className="data-row" htmlFor="settings-import" role="button" tabIndex={0} onKeyDown={keyClick}>
-                  <span className="data-text"><span className="srow-title">Import library</span><span className="srow-sub">A Mock export, or markdown files</span></span>
+                  <span className="data-text"><span className="srow-title">Import library</span><span className="srow-sub">A Mock export, or CSV files of areas, stories or questions</span></span>
                   <Icon.Upload size={18} />
-                  <input id="settings-import" type="file" multiple accept=".zip,.mockbackup,.json,.zst,.md,.markdown,.txt,.csv" hidden onChange={(e) => pick(e, (l) => void importLibrary(l))} />
+                  <input id="settings-import" type="file" multiple accept=".zip,.mockbackup,.json,.zst,.csv,.md,.markdown,.txt" hidden onChange={(e) => pick(e, (l) => void importLibrary(l))} />
                 </label>
+                <div className="data-row"><CsvSamples /></div>
                 <button className="data-row" onClick={() => setBackupSheet('backup')}>
                   <span className="data-text"><span className="srow-title">Back up everything</span><span className="srow-sub">A zip of every table + settings · {storeNote}{lastBackup}</span></span>
                   <span className="link">Download</span>
@@ -291,12 +293,10 @@ export default function Settings() {
                   <span className="srow-title">Run first-run setup again</span>
                   <span className="link">Open</span>
                 </button>
-                {import.meta.env.DEV && (
-                  <button className="data-row" onClick={() => void loadSample()}>
-                    <span className="data-text"><span className="srow-title">Load sample data</span><span className="srow-sub">Dev builds only · the invented library, 8 sessions</span></span>
-                    <span className="link">Load</span>
-                  </button>
-                )}
+                <button className="data-row" onClick={() => void loadSample()}>
+                  <span className="data-text"><span className="srow-title">Load AWS interview defaults</span><span className="srow-sub">The 16 Leadership Principles as areas, plus all the sample stories, questions, files and sessions</span></span>
+                  <span className="link">Load</span>
+                </button>
                 <button className="data-row danger" onClick={() => void deleteAll()}>
                   <span className="srow-title">Delete all data</span>
                   <span className="note">asks twice</span>

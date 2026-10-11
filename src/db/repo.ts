@@ -45,7 +45,10 @@ export interface Repo {
 
   // ---- writes
   setSettings(patch: Partial<Settings>): Promise<void>;
+  /** Areas back to the AWS Leadership Principles preset. */
   resetLps(): Promise<void>;
+  /** Replace the areas (a custom interview's own list); links to removed ids stay but show nowhere. */
+  setLps(lps: Lp[]): Promise<void>;
   updateLp(id: string, patch: Partial<Pick<Lp, 'name' | 'description'>>): Promise<void>;
   upsertStory(story: Story): Promise<void>;
   deleteStory(id: string): Promise<void>;

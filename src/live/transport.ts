@@ -79,7 +79,7 @@ export const NEW_QUESTION_TOOL: ToolDeclaration = {
     properties: {
       interviewer: { type: 'STRING', description: 'The interviewer asking, by name (e.g. "Dana Whitfield")' },
       question: { type: 'STRING', description: 'The exact question you will ask' },
-      lp: { type: 'STRING', description: 'The Leadership Principle being tested, by its full name' },
+      lp: { type: 'STRING', description: 'The area being tested, by its full name' },
       question_id: { type: 'STRING', description: 'The id of the question from the list, if it came from there' },
     },
     required: ['interviewer', 'question', 'lp'],

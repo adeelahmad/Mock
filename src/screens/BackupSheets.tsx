@@ -44,7 +44,7 @@ export function BackupSheet({ open, onClose, recordingsDefault = false, recordin
         <div className="stack g6">
           <span className="label">What goes in</span>
           <Seg<BackupScope> className="h34" value={scope} onChange={setScope} options={[['all', 'Everything'], ['library', 'Library only'], ['sessions', 'Sessions only']]} />
-          <span className="sub" style={{ fontSize: 12 }}>{scope === 'all' ? 'Every table and setting, as JSON and Parquet, plus uploaded files.' : scope === 'library' ? 'LPs, stories, questions and files — no sessions.' : 'Sessions, answers, analysis and transcripts — no stories or files.'}</span>
+          <span className="sub" style={{ fontSize: 12 }}>{scope === 'all' ? 'Every table and setting, as JSON and Parquet, plus uploaded files.' : scope === 'library' ? 'Areas, stories, questions and files — no sessions.' : 'Sessions, answers, analysis and transcripts — no stories or files.'}</span>
         </div>
         {scope !== 'library' && (
           <div className="hstack" style={{ justifyContent: 'space-between', gap: 12 }}>

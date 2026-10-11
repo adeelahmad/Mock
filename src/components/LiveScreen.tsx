@@ -113,7 +113,7 @@ function Turns({ turns, className = '' }: { turns: LiveTurn[]; className?: strin
 }
 
 function NoteRows({ notes }: { notes: LiveNote[] }) {
-  if (notes.length === 0) return <div className="live-note-empty sub">No stories mapped to this LP yet.</div>;
+  if (notes.length === 0) return <div className="live-note-empty sub">No stories mapped to this area yet.</div>;
   return (
     <>
       {notes.map((n, i) => (

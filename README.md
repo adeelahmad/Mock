@@ -1,10 +1,15 @@
 # Mock
 
-A personal voice app for rehearsing an AWS interview loop. A live interviewer (Gemini Live)
-asks Leadership Principle questions and probes with follow-ups; between answers a coach says,
-out loud, what to fix — judged against your own stories, numbers and notes. Every session is
-recorded, every answer gets an analysis card, every session a report, and progress builds
-across sessions.
+A personal voice app for rehearsing an interview loop. A live interviewer (Gemini Live)
+asks questions on the **areas** the interview assesses (competencies, values, a company's
+principles) and probes with follow-ups; between answers a coach says, out loud, what to fix —
+judged against your own stories, numbers and notes. Every session is recorded, every answer
+gets an analysis card, every session a report, and progress builds across sessions.
+
+Areas are yours to define: import an areas CSV, or load the **AWS interview defaults** (the 16
+Leadership Principles as areas plus all the sample stories, questions, files and sessions) from
+first-run setup or Settings → Library & data. Areas, stories and questions import from CSV;
+each import offers a sample CSV to download and fill in (`src/domain/csv-templates.ts`).
 
 Local-first: no backend, no account. Everything lives in your browser; backups move data
 between phone and laptop. Your Gemini API key is stored on the device and sent only to Google.

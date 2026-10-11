@@ -278,6 +278,7 @@ export class DuckRepo implements Repo {
     return this.serial(async () => { await this.writeSettings({ ...(await this.readSettings()), ...patch }); this.changed('setting'); });
   }
   resetLps(): Promise<void> { return this.serial(async () => { await this.writeLps(LPS); this.changed('lp'); }); }
+  setLps(lps: Lp[]): Promise<void> { return this.serial(async () => { await this.writeLps(lps); this.changed('lp'); }); }
   updateLp(id: string, patch: Partial<Pick<Lp, 'name' | 'description'>>): Promise<void> {
     return this.serial(async () => {
       if (patch.name !== undefined) await this.run('UPDATE lp SET name = ?, is_default = false WHERE id = ?', [patch.name, id]);

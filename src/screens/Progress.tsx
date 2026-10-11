@@ -111,7 +111,7 @@ export default function Progress() {
 
   const tiles = (
     <div className="pg-tiles desk-only" role="group" aria-label="Summary">
-      <div className="pg-tile"><span className="pg-tile-n">{covered.size}<span className="of">/{lpCount}</span></span><span className="pg-tile-l">LPs covered</span></div>
+      <div className="pg-tile"><span className="pg-tile-n">{covered.size}<span className="of">/{lpCount}</span></span><span className="pg-tile-l">Areas covered</span></div>
       <div className="pg-tile"><span className="pg-tile-n" style={{ color: 'var(--m-green)' }}>{cnt.strong}</span><span className="pg-tile-l">✓ strong hire</span></div>
       <div className="pg-tile"><span className="pg-tile-n" style={{ color: 'var(--m-gold)' }}>{cnt.notInclined}</span><span className="pg-tile-l">● not inclined</span></div>
       <div className="pg-tile"><span className="pg-tile-n">{hours}</span><span className="pg-tile-l">hours practised</span></div>
@@ -121,7 +121,7 @@ export default function Progress() {
   const heatmap = (
     <div className="pg-heat" style={gridStyle} role="group" aria-label="Leadership Principle by session heatmap">
       <div className="pg-heat-row head">
-        <span className="label pg-corner">LP × session</span>
+        <span className="label pg-corner">Area × session</span>
         {cols.map((n) => <span key={n} className="pg-col">S{n}</span>)}
         <span className="pg-now-col">NOW</span>
       </div>
@@ -137,7 +137,7 @@ export default function Progress() {
                 ? <button key={c.sessionNumber} className="pg-cell" title={title} aria-label={title + ' · open the answer'} style={{ background: d.vFill, color: d.vOnFill }} onClick={() => openCell(r.lp.id, c.sessionNumber)}><span aria-hidden="true">{d.vGlyph}</span></button>
                 : <span key={c.sessionNumber} role="img" className="pg-cell" title={title} aria-label={title} style={{ background: d.vFill, color: d.vOnFill }}><span aria-hidden="true">{d.vGlyph}</span></span>;
             })}
-            <button className="pg-cell now" title={r.lp.name + ' · now · ' + now.vLabel} aria-label={r.lp.name + ' · now · ' + now.vLabel + ' · open the LP'} style={{ background: now.vFill, color: now.vOnFill, border: r.now ? '1px solid transparent' : '1px dashed var(--m-line2)' }} onClick={() => go(paths.lp(r.lp.id))}><span aria-hidden="true">{now.vGlyph}</span></button>
+            <button className="pg-cell now" title={r.lp.name + ' · now · ' + now.vLabel} aria-label={r.lp.name + ' · now · ' + now.vLabel + ' · open the area'} style={{ background: now.vFill, color: now.vOnFill, border: r.now ? '1px solid transparent' : '1px dashed var(--m-line2)' }} onClick={() => go(paths.lp(r.lp.id))}><span aria-hidden="true">{now.vGlyph}</span></button>
           </div>
         );
       })}
@@ -157,7 +157,7 @@ export default function Progress() {
 
   const weakestPanel = weakest.length > 0 && (
     <div className="pg-weak">
-      <span className="label gold">Weakest LPs</span>
+      <span className="label gold">Weakest areas</span>
       {weakest.map((lp) => (
         <div key={lp.id} className="pg-weak-row">
           <div className="pg-weak-text">

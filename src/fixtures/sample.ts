@@ -192,7 +192,14 @@ export const SESSIONS: Session[] = built.sessions;
 export const EXCHANGES: Exchange[] = built.exchanges;
 export const TRANSCRIPT: TranscriptEvent[] = built.transcript;
 
+/** The AWS preset's instruction (the default while the areas are the 16 Leadership Principles). */
 export const DEFAULT_SYSTEM_INSTRUCTION = 'You are interviewing me for a Senior SDM role at AWS. Ask one Leadership Principle question at a time, then probe with at most two follow-ups that push for specifics: numbers, my personal actions, what I would do differently.\n\nAs coach, judge me only against my own files and story notes. Name the better story if there is one. Quote the number I missed. Give one strength, up to three fixes, and a verdict on the four-step scale. Be direct; no praise padding.';
+
+/** For a custom set of areas: the same coaching, no company named. */
+export const GENERIC_SYSTEM_INSTRUCTION = 'You are interviewing me for the role in my job description. Ask one question at a time on the areas in scope, then probe with at most two follow-ups that push for specifics: numbers, my personal actions, what I would do differently.\n\nAs coach, judge me only against my own files and story notes. Name the better story if there is one. Quote the number I missed. Give one strength, up to three fixes, and a verdict on the four-step scale. Be direct; no praise padding.';
+
+/** True while the areas are (a subset of) the AWS Leadership Principles preset. */
+export const isAwsAreas = (areas: { id: string }[]): boolean => areas.length > 0 && areas.every((a) => LPS.some((l) => l.id === a.id));
 
 export const SETTINGS: Settings = {
   interviewDate: '2026-10-30', liveModel: 'gemini-3.8-live', textModel: 'gemini-3.8-flash', voice: 'Aoede', pauseMs: 2500,

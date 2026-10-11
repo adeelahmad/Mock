@@ -1,5 +1,5 @@
-// Import stories (board 3): the markdown review sheet. "stories.md · 4 found", each ## heading
-// becomes a story with its STAR sections and numbers detected and LPs suggested from the text;
+// Import stories (board 3): the review sheet. "stories.csv · 4 found", each row (or ## heading in
+// an older markdown file) becomes a story with its STAR sections, numbers and areas;
 // status per story; "Import 3 stories · skip 1 duplicate" → repo.upsertStory for each new one.
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -81,7 +81,7 @@ export default function ImportStories({ open, fileName, stories, onClose, onDone
   return (
     <Sheet open={open} onClose={onClose} tall head={head} foot={foot} zIndex={12}>
       <div className="stack g10">
-        <span className="is-intro">Each <code>## heading</code> becomes a story. STAR sections and numbers were detected; LPs are suggested from the text.</span>
+        <span className="is-intro">Each row becomes a story with its STAR columns and numbers; areas come from the areas column, or are suggested from the text.</span>
         {drafts.length === 0 && <span className="sub">No <code className="mono">##</code> headings in {fileName}. One heading per story, then Situation / Task / Action / Result underneath.</span>}
         {drafts.map((d) => {
           const st = status(d);
@@ -92,13 +92,13 @@ export default function ImportStories({ open, fileName, stories, onClose, onDone
               <div className="hstack wrap" style={{ gap: 6 }}>
                 <span className="is-label">Suggested</span>
                 {ids.map((id) => <button key={id} type="button" className="is-chip" disabled={d.duplicate} aria-label={lpName(id) + ' · change'} onClick={() => setChanging(d.key)}>{lpName(id)}</button>)}
-                {ids.length === 0 && <span className="is-none">no LP yet</span>}
+                {ids.length === 0 && <span className="is-none">no area yet</span>}
                 {!d.duplicate && <button type="button" className="is-change" onClick={() => setChanging((c) => (c === d.key ? null : d.key))} aria-expanded={changing === d.key}>{changing === d.key ? 'Done' : 'Change'}</button>}
               </div>
               {changing === d.key && (
-                <div className="hstack wrap" style={{ gap: 6 }} role="group" aria-label={'LPs for ' + d.title}>
+                <div className="hstack wrap" style={{ gap: 6 }} role="group" aria-label={'Areas for ' + d.title}>
                   {lps.map((l) => <button key={l.id} type="button" className={'is-chip' + (ids.includes(l.id) ? '' : ' off')} aria-pressed={ids.includes(l.id)} onClick={() => toggle(d, l.id)}>{l.name}</button>)}
-                  <span className="is-none">first chip is the primary LP</span>
+                  <span className="is-none">first chip is the primary area</span>
                 </div>
               )}
             </div>

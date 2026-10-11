@@ -184,4 +184,4 @@ export interface UiPrefs {
 export const VERDICT_CODE: Record<Verdict, VerdictCode> = { strong_hire: 1, inclined: 2, not_inclined: 3, strong_no_hire: 4 };
 export const CODE_VERDICT: Record<Exclude<VerdictCode, 0>, Verdict> = { 1: 'strong_hire', 2: 'inclined', 3: 'not_inclined', 4: 'strong_no_hire' };
 export const verdictCode = (v: Verdict | null | undefined): VerdictCode => (v ? VERDICT_CODE[v] : 0);
-export const MODE_LABEL: Record<Mode, string> = { loop: 'Full loop', lp: 'One LP', story: 'One story', question_set: 'Question set', replay: 'Replay', deep_dive: 'Deep dive', bar_raiser: 'Bar raiser' };
+export const MODE_LABEL: Record<Mode, string> = { loop: 'Full loop', lp: 'One area', story: 'One story', question_set: 'Question set', replay: 'Replay', deep_dive: 'Deep dive', bar_raiser: 'Bar raiser' };

@@ -9,7 +9,7 @@ import type { Reporter } from '../live/reporter.ts';
 import { REPORT_SCHEMA } from './schemas.ts';
 import { generateJson } from './flash.ts';
 
-export const REPORT_SYSTEM = 'You are the debrief lead of an Amazon interview loop writing the session report for the candidate. Be specific to their answers and their own stories; terse, imperative fixes; no generic advice.';
+export const REPORT_SYSTEM = 'You are the debrief lead of an interview loop writing the session report for the candidate. Be specific to their answers and their own stories; terse, imperative fixes; no generic advice.';
 
 export function reportPrompt(input: ReportInput): string {
   const base = localReport(input);
