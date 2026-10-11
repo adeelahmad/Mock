@@ -19,12 +19,10 @@ export default defineConfig({
       registerType: 'prompt',
       injectRegister: false,
       includeAssets: ['exponent-bank.json'],
-      manifest: {
-        name: 'Mock', short_name: 'Mock', description: 'Rehearse an AWS interview loop with a live interviewer and a coach.',
-        start_url: './', scope: './', display: 'standalone', background_color: '#FFFFFF', theme_color: '#FFFFFF', icons: [],
-      },
+      // The manifest is the static public/manifest.webmanifest (icons, shortcuts), linked from index.html.
+      manifest: false,
       workbox: {
-        globPatterns: ['**/*.{js,css,html,woff2,json,svg,png}', '**/duckdb-eh-*.wasm', '**/duckdb-browser-eh.worker-*.js'],
+        globPatterns: ['**/*.{js,css,html,woff2,json,svg,png,webmanifest}', '**/duckdb-eh-*.wasm', '**/duckdb-browser-eh.worker-*.js'],
         globIgnores: ['**/duckdb-mvp-*.wasm', '**/duckdb-browser-mvp.worker-*.js', '**/duckdb-coi*'],
         maximumFileSizeToCacheInBytes: 48 * 1024 * 1024,
         navigateFallback: 'index.html',

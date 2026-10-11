@@ -17,6 +17,10 @@ export function applyTheme(theme: UiPrefs['theme']): void {
   }
   const mode = resolve(theme);
   document.documentElement.setAttribute('data-theme', mode);
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', mode === 'dark' ? '#18191B' : '#FFFFFF');
+  // index.html carries a light and a dark theme-color for the first paint; once the app has
+  // chosen, both follow it so the status bar matches an explicit Light/Dark pick.
+  document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+    meta.removeAttribute('media');
+    meta.setAttribute('content', mode === 'dark' ? '#18191B' : '#FFFFFF');
+  });
 }
