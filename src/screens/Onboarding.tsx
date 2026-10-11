@@ -8,6 +8,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../app/store.tsx';
 import { paths } from '../app/router.ts';
 import { Icon } from '../components/ui.tsx';
+import { Wordmark } from '../components/Wordmark.tsx';
 import Viz from '../components/Viz.tsx';
 import CsvSamples from '../components/CsvSamples.tsx';
 import { latestSessionNumber, type LpRow } from '../domain/selectors.ts';
@@ -140,7 +141,7 @@ export default function Onboarding() {
     <div className="screen onboarding">
       {step === 3 && <div className="ob-edge" aria-hidden="true" />}
       <div className="screen-head ob-head">
-        <span className="wordmark">Mock</span>
+        <Wordmark />
         <div className="ob-dots" aria-label={'Step ' + step + ' of 3'} role="img">
           <span className="ob-dot on" /><span className={'ob-dot' + (step >= 2 ? ' on' : '')} /><span className={'ob-dot' + (step >= 3 ? ' warm' : '')} />
         </div>

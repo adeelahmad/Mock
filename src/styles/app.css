@@ -29,9 +29,17 @@ a:hover { text-decoration: underline; }
 .muted { color: var(--m-fg3); }
 .label { font: 700 11px/1.2 var(--font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--m-fg3); }
 .label.cool { color: var(--m-cool); } .label.warm { color: var(--m-warm); } .label.gold { color: var(--m-gold); } .label.green { color: var(--m-green); }
-.wordmark { display: inline-flex; align-items: baseline; font: 800 22px/1 var(--font-sans); letter-spacing: -.03em; color: var(--m-fg); }
-.wordmark::after { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--m-warm-fill); margin-left: 3px; }
-.wordmark.big { font-size: 40px; } .wordmark.big::after { width: 10px; height: 10px; margin-left: 4px; }
+/* Wordmark (components/Wordmark.tsx): the brand SVG sized off font-size so the old type scale holds. */
+.wordmark { display: inline-flex; align-items: flex-end; font-size: 22px; line-height: 1; color: var(--m-fg); }
+.wordmark svg { display: block; height: .74em; width: auto; overflow: visible; }
+.wordmark.big { font-size: 40px; }
+.wordmark .wm-m { fill: var(--m-cool); }
+.wordmark .wm-antenna { fill: none; stroke: var(--m-cool); stroke-width: 4; stroke-linecap: round; }
+.wordmark .wm-gold { fill: var(--m-warm-fill); }
+.wordmark .wm-face { fill: #E8F0FE; }
+.wordmark .wm-eye { fill: #202124; }
+.wordmark .wm-smile { fill: none; stroke: #202124; stroke-width: 2.8; stroke-linecap: round; }
+.wordmark .wm-ck { fill: currentColor; }
 
 /* ---------- Surfaces ---------- */
 .card { background: var(--m-card); border: 1px solid var(--m-line); border-radius: 16px; }

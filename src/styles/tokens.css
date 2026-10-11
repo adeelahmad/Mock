@@ -31,6 +31,12 @@
   --font-sans: 'DM Sans Variable', 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
+  /* Brand kit v1.0 (robot identity) — aliases only; the UI tokens above and below already carry
+     these values, so no role changes. Blue = custom M and robot shell, gold = antenna and dot. */
+  --mock-brand-ink: #202124; --mock-brand-paper: #FFFFFF; --mock-brand-blue: #1A73E8; --mock-brand-gold: #F9AB00;
+  --mock-brand-dark-ink: #E8EAED; --mock-brand-dark-blue: #8AB4F8;
+  --mock-brand-sans: var(--font-sans); --mock-brand-mono: var(--font-mono);
+
   /* Mock palette — light */
   --m-canvas: #FFFFFF; --m-bg: #F8F9FA; --m-card: #FFFFFF; --m-elev: #F1F3F4; --m-line: #DADCE0; --m-line2: #BDC1C6;
   --m-fg: #202124; --m-fg2: #5F6368; --m-fg3: #80868B;

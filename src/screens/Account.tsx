@@ -12,6 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { useApp } from '../app/store.tsx';
 import { paths } from '../app/router.ts';
 import { Input } from '../components/ui.tsx';
+import { Wordmark } from '../components/Wordmark.tsx';
 import { ApiError, callbackUrl, getSetup, saveSetup, signIn, signOut, verifySetupToken, type SetupInput, type SetupView } from '../sync/api.ts';
 import type { SyncStatus } from '../sync/engine.ts';
 import '../styles/screens/settings.css';
@@ -40,7 +41,7 @@ function Shell({ step, steps, children, foot }: { step: number; steps: number; c
   return (
     <div className="screen onboarding">
       <div className="screen-head ob-head">
-        <span className="wordmark">Mock</span>
+        <Wordmark />
         <div className="ob-dots" aria-label={'Step ' + step + ' of ' + steps} role="img">
           {Array.from({ length: steps }, (_, i) => <span key={i} className={'ob-dot' + (i < step ? ' on' : '')} />)}
         </div>

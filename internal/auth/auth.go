@@ -656,6 +656,9 @@ var errorText = map[string]string{
 	"Configuration": "Sign-in is not set up correctly. Check the client ID and secret in the setup.",
 }
 
+// robotMark is the brand kit's robot (dark-surface colours), inline so the page needs no assets.
+const robotMark = `<svg width="56" height="56" viewBox="0 25 56 61" aria-hidden="true"><path d="M28.05 37.9V32.3" stroke="#8AB4F8" stroke-width="4" stroke-linecap="round"/><circle cx="28.05" cy="29.7" r="4.1" fill="#F9AB00"/><rect x="1.5" y="51.1" width="5.5" height="15" rx="2.75" fill="#8AB4F8"/><rect x="49.1" y="51.1" width="4.5" height="15" rx="2.25" fill="#8AB4F8"/><rect x="4" y="37.9" width="48.1" height="46.2" rx="13" fill="#8AB4F8"/><rect x="10" y="44.3" width="36.1" height="30.8" rx="8.5" fill="#E8F0FE"/><rect x="16.1" y="51.7" width="5.9" height="7.9" rx="2.95" fill="#202124"/><rect x="34.1" y="51.7" width="5.9" height="7.9" rx="2.95" fill="#202124"/><path d="M23.1 66.5Q28.05 71 33 66.5" fill="none" stroke="#202124" stroke-width="2.8" stroke-linecap="round"/></svg>`
+
 func (a *Auth) errorPage(w http.ResponseWriter, r *http.Request) {
 	msg, ok := errorText[r.URL.Query().Get("error")]
 	if !ok {
@@ -665,6 +668,7 @@ func (a *Auth) errorPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	w.WriteHeader(http.StatusForbidden)
 	fmt.Fprintf(w, `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Sign-in failed · Mock</title>
-<body style="font:16px system-ui;background:#16181d;color:#f4f1ea;display:grid;place-items:center;min-height:90vh"><main style="max-width:28rem"><h1>Sign-in failed.</h1><p>%s</p><p><a style="color:#e8a33d" href="%s">Back to Mock</a></p></main>`,
-		html.EscapeString(msg), html.EscapeString(a.origin(r)+"/"))
+<link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+<body style="font:16px 'DM Sans',system-ui,sans-serif;background:#18191B;color:#E8EAED;display:grid;place-items:center;min-height:90vh"><main style="max-width:28rem">%s<h1 style="letter-spacing:-.025em">Sign-in failed.</h1><p style="color:#9AA0A6">%s</p><p><a style="color:#8AB4F8;font-weight:700" href="%s">Back to Mock</a></p></main>`,
+		robotMark, html.EscapeString(msg), html.EscapeString(a.origin(r)+"/"))
 }

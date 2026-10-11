@@ -63,6 +63,12 @@ UPD
 chmod +x /usr/bin/update
 
 motd_ssh
+# Mock's banner at the top of the login details, and where to open the app at the bottom.
+sed -i '1a [ -n "$BASH_VERSION" ] \&\& [ -r /opt/mock/proxmox/banner.sh ] \&\& . /opt/mock/proxmox/banner.sh \&\& mock_banner' /etc/profile.d/00_lxc-details.sh
+cat <<'MOTD' >>/etc/profile.d/00_lxc-details.sh
+echo -e "    \e[1;38;2;249;171;0m●\e[0m Mock: \e[1mhttps://$(hostname -I | awk '{print $1}')\e[0m   setup token: \e[1mmock-token\e[0m"
+echo ""
+MOTD
 customize
 
 msg_info "Cleaning up"
