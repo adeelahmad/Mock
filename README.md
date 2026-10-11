@@ -73,17 +73,23 @@ host or sub-path with no rewrite rules.
 **Anywhere else:** `npm run build` and upload `dist/` (Netlify, Cloudflare Pages, S3, any web
 server). Serve it over HTTPS: the microphone, service worker and install prompt require it.
 
-**Proxmox VE** (helper-script style LXC): on the Proxmox host shell run
+**Proxmox VE** ([community-scripts](https://community-scripts.github.io/ProxmoxVE/) helper
+script, using their engine): on the Proxmox host shell run
 
 ```
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/adeelahmad/Mock/main/proxmox/ct/mock.sh)"
 ```
 
-It creates an unprivileged Debian 12 container (2 vCPU, 2 GiB, 8 GB; *Advanced* to change),
-installs Node 22 and Caddy, builds the app and serves it on `http://<ip>/` and `https://<ip>/`
-(Caddy's internal CA; trust its root or put your own proxy in front, since the microphone
-needs trusted HTTPS). To update, run `update` inside the container (or the same one-liner
-there). `MOCK_DEFAULTS=1` and `var_*` variables skip the prompts; see `proxmox/ct/mock.sh`.
+While the repo is private, either clone it on the host and run `bash proxmox/ct/mock.sh`, or
+`export MOCK_GITHUB_TOKEN=<read-only token>` and add
+`-H "Authorization: Bearer $MOCK_GITHUB_TOKEN"` to the curl (the token is kept in the
+container's git remote so `update` can pull).
+
+You get the usual helper-script wizard (Default / Advanced, `var_*` overrides). It creates an
+unprivileged Debian 13 container (2 vCPU, 2 GiB, 8 GB), installs Node 22 and Caddy, builds the
+app and serves it on `https://<ip>/` (Caddy's internal CA: trust its root, printed at the end,
+since the microphone needs trusted HTTPS) and `http://<ip>/`. Run `update` inside the container
+to pull and rebuild when `main` moves.
 
 ## Stack
 
