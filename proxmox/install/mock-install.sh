@@ -39,42 +39,16 @@ mkdir -p /var/www
 cp -a dist /var/www/mock
 msg_ok "Built ${APP}"
 
-msg_info "Configuring Caddy"
-# Caddy's internal CA issues certificates for the hostname and current IPs;
-# the app needs a secure origin for the microphone and service worker.
-MOCK_SITES="https://localhost, https://$(hostname)"
-for ip in $(hostname -I); do MOCK_SITES+=", https://${ip}"; done
-cat <<CADDY >/etc/caddy/Caddyfile
-{
-	auto_https disable_redirects
-}
-
-(mock) {
-	root * /var/www/mock
-	encode zstd gzip
-	file_server
-	@nocache path / /index.html /sw.js /registerSW.js /manifest.webmanifest
-	header @nocache Cache-Control "no-cache"
-	header /assets/* Cache-Control "public, max-age=31536000, immutable"
-}
-
-http:// {
-	import mock
-}
-
-${MOCK_SITES} {
-	tls internal
-	import mock
-}
-CADDY
-systemctl enable -q caddy
-systemctl restart caddy
-if ! systemctl is-active --quiet caddy; then
-  msg_error "Caddy failed to start"
-  journalctl -u caddy -n 20 --no-pager
-  exit 1
-fi
-msg_ok "Configured Caddy"
+msg_info "Configuring Caddy and the Mock server"
+bash /opt/mock/proxmox/install/mock-server.sh
+for svc in caddy mock-server; do
+  if ! systemctl is-active --quiet "$svc"; then
+    msg_error "$svc failed to start"
+    journalctl -u "$svc" -n 20 --no-pager
+    exit 1
+  fi
+done
+msg_ok "Configured Caddy and the Mock server"
 
 echo "${RELEASE}" >/opt/mock_version.txt
 
