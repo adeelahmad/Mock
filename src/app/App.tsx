@@ -16,6 +16,7 @@ import FilePreview from '../screens/FilePreview.tsx';
 import History, { SessionDetail } from '../screens/History.tsx';
 import Progress from '../screens/Progress.tsx';
 import Settings from '../screens/Settings.tsx';
+import { usePwa } from './pwa.ts';
 import Onboarding from '../screens/Onboarding.tsx';
 import Live from '../screens/Live.tsx';
 import { SetupSheet, AnswerSheet, AddQuestionSheet, AddStorySheet } from '../screens/Sheets.tsx';
@@ -78,6 +79,7 @@ function Screen() {
 
 export default function App() {
   const { ready, status, toastText, live, route, sheet, closeSheets, data } = useApp();
+  const pwa = usePwa();
   const inLive = route.path === paths.live && live.state;
   const firstRun = !data.settings.onboarded || route.path === paths.onboarding;
   const showTabs = !inLive && ['practice', 'library', 'history', 'progress'].includes(route.tab) && route.parts.length <= 2 && route.path !== paths.settings && route.path !== paths.onboarding;
@@ -93,6 +95,12 @@ export default function App() {
       <AddQuestionSheet open={sheet.addQuestion} onClose={closeSheets} />
       <AddStorySheet open={sheet.addStory} onClose={closeSheets} />
       {toastText && <div className="toast" role="status">{toastText}</div>}
+      {pwa.needRefresh && !inLive && (
+        <div className="toast update" role="status">
+          <span>Update available</span>
+          <span className="hstack" style={{ gap: 6 }}><button className="toast-btn" onClick={pwa.reload}>Reload</button><button className="toast-btn ghost" onClick={pwa.dismiss}>Later</button></span>
+        </div>
+      )}
       {!ready && (
         <div className="splash">
           <span className="wordmark big">Mock</span>

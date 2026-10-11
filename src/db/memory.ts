@@ -6,6 +6,7 @@ import type { Analysis, Exchange, Lp, LpRole, PrepFile, Question, Report, Sessio
 import * as SAMPLE from '../fixtures/sample.ts';
 import type { QuestionFilter, Repo, RepoMode } from './repo.ts';
 import type { MockBackup } from './backup.ts';
+import { MemoryKv, type Kv } from './kv.ts';
 
 export interface MemoryData {
   lps: Lp[]; stories: Story[]; questions: Question[]; files: PrepFile[]; sessions: Session[]; exchanges: Exchange[]; transcript: TranscriptEvent[]; settings: Settings;
@@ -23,16 +24,16 @@ export function emptyData(): MemoryData {
 
 export class MemoryRepo implements Repo {
   private d: MemoryData;
-  private blobs = new Map<string, Blob>();
-  private secrets = new Map<string, string>();
   private ready = false;
-  /** Called after every write so the app can refresh. */
   public onChange: (() => void) | null = null;
 
-  constructor(data: MemoryData = sampleData()) { this.d = data; }
+  /** Blobs and secrets default to memory; the browser fallback passes the IndexedDB stores.
+   *  `bank` is what a reset starts with besides the LPs (the common question bank). */
+  constructor(data: MemoryData = sampleData(), private blobs: Kv<Blob> = new MemoryKv<Blob>(), private secrets: Kv<string> = new MemoryKv<string>(), private bank: Question[] = []) { this.d = data; }
 
   async init(onStatus?: (s: string) => void): Promise<RepoMode> { onStatus?.('Loading the sample library…'); this.ready = true; return 'memory'; }
   mode(): RepoMode { return this.ready ? 'memory' : 'none'; }
+  async flush(): Promise<void> { /* nothing to persist */ }
   private changed(): void { this.onChange?.(); }
   private clone<T>(v: T): T { return JSON.parse(JSON.stringify(v)); }
 
@@ -102,7 +103,7 @@ export class MemoryRepo implements Repo {
   }
   async appendTranscript(events: TranscriptEvent[]): Promise<void> { this.d.transcript.push(...this.clone(events)); this.changed(); }
   async nextSessionNumber(): Promise<number> { return this.d.sessions.reduce((m, s) => Math.max(m, s.number), 0) + 1; }
-  async reset(): Promise<void> { this.d = emptyData(); this.blobs.clear(); this.changed(); }
+  async reset(): Promise<void> { this.d = emptyData(); this.d.questions = this.clone(this.bank); await this.blobs.clear(); this.changed(); }
   async loadSample(): Promise<void> { this.d = sampleData(); this.changed(); }
   async importBackup(b: MockBackup): Promise<void> {
     const t = b.tables;
@@ -110,10 +111,10 @@ export class MemoryRepo implements Repo {
     this.changed();
   }
 
-  async putBlob(key: string, blob: Blob): Promise<boolean> { this.blobs.set(key, blob); return true; }
-  async getBlob(key: string): Promise<Blob | null> { return this.blobs.get(key) ?? null; }
-  async listBlobs(prefix = ''): Promise<string[]> { return Array.from(this.blobs.keys()).filter((k) => k.startsWith(prefix)); }
-  async deleteBlob(key: string): Promise<void> { this.blobs.delete(key); }
-  async getSecret(key: string): Promise<string | null> { return this.secrets.get(key) ?? null; }
-  async setSecret(key: string, value: string | null): Promise<void> { if (value == null) this.secrets.delete(key); else this.secrets.set(key, value); }
+  async putBlob(key: string, blob: Blob): Promise<boolean> { try { await this.blobs.put(key, blob); return true; } catch { return false; } }
+  async getBlob(key: string): Promise<Blob | null> { return this.blobs.get(key); }
+  async listBlobs(prefix = ''): Promise<string[]> { return this.blobs.keys(prefix); }
+  async deleteBlob(key: string): Promise<void> { await this.blobs.delete(key); }
+  async getSecret(key: string): Promise<string | null> { return this.secrets.get(key); }
+  async setSecret(key: string, value: string | null): Promise<void> { if (value == null || value === '') await this.secrets.delete(key); else await this.secrets.put(key, value); }
 }

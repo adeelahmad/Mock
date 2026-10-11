@@ -44,7 +44,7 @@ for (const theme of ['light', 'dark']) {
     const ctx = await browser.newContext({ ...(device === 'phone' ? devices['iPhone 14'] : {}), viewport, deviceScaleFactor: 1, colorScheme: theme });
     const page = await ctx.newPage();
     page.on('pageerror', (e) => report.push(`ERROR ${theme}-${device}: ${e.message}`));
-    await page.goto(BASE + '/#/practice');
+    await page.goto(BASE + '/?repo=sample#/practice');
     await settle(page);
     // theme pref + onboarded flag through the app's own storage
     await page.evaluate((t) => { try { localStorage.setItem('mock.prefs.v1', JSON.stringify({ theme: t, voiceVisual: 'orb', liveLayout: 'stage', lastTab: 'practice' })); } catch {} }, theme);
@@ -52,21 +52,21 @@ for (const theme of ['light', 'dark']) {
 
     for (const [name, hash] of ROUTES) {
       if (ONLY && !ONLY.test(name)) continue;
-      try { await page.goto(BASE + '/' + hash); await settle(page); await shoot(page, dir, name); } catch (e) { report.push(`FAIL ${theme}-${device}/${name}: ${String(e).slice(0, 120)}`); }
+      try { await page.goto(BASE + '/?repo=sample' + hash); await settle(page); await shoot(page, dir, name); } catch (e) { report.push(`FAIL ${theme}-${device}/${name}: ${String(e).slice(0, 120)}`); }
     }
     // Sheets on the home screen
     const trySheet = async (name, open) => {
       if (ONLY && !ONLY.test(name)) return;
-      try { await page.goto(BASE + '/#/practice'); await page.reload(); await settle(page); await open(); await page.waitForTimeout(600); await shoot(page, dir, name); await page.keyboard.press('Escape').catch(() => {}); } catch (e) { report.push(`FAIL ${theme}-${device}/${name}: ${String(e).slice(0, 120)}`); }
+      try { await page.goto(BASE + '/?repo=sample#/practice'); await page.reload(); await settle(page); await open(); await page.waitForTimeout(600); await shoot(page, dir, name); await page.keyboard.press('Escape').catch(() => {}); } catch (e) { report.push(`FAIL ${theme}-${device}/${name}: ${String(e).slice(0, 120)}`); }
     };
     await trySheet('sheet-setup', () => page.getByRole('button', { name: /^Change$/ }).first().click());
-    await trySheet('sheet-answer', async () => { await page.goto(BASE + '/#/library/questions'); await settle(page); await page.getByRole('button', { name: /Model answer/ }).first().click(); });
-    await trySheet('sheet-add-question', async () => { await page.goto(BASE + '/#/library/questions'); await settle(page); await page.getByRole('button', { name: /^\+ (Add|Question)$/ }).first().click(); });
+    await trySheet('sheet-answer', async () => { await page.goto(BASE + '/?repo=sample#/library/questions'); await settle(page); await page.getByRole('button', { name: /Model answer/ }).first().click(); });
+    await trySheet('sheet-add-question', async () => { await page.goto(BASE + '/?repo=sample#/library/questions'); await settle(page); await page.getByRole('button', { name: /^\+ (Add|Question)$/ }).first().click(); });
 
     // First-run steps 2 and 3
     if (!ONLY || ONLY.test('onboarding')) {
       try {
-        await page.goto(BASE + '/#/practice/setup'); await settle(page);
+        await page.goto(BASE + '/?repo=sample#/practice/setup'); await settle(page);
         await page.getByRole('button', { name: /Skip — start with the LPs/ }).click(); await page.waitForTimeout(400); await shoot(page, dir, 'onboarding-2');
         await page.getByRole('button', { name: /^Next$/ }).click(); await page.waitForTimeout(400); await shoot(page, dir, 'onboarding-3');
       } catch (e) { report.push(`FAIL ${theme}-${device}/onboarding: ${String(e).slice(0, 120)}`); }
@@ -75,7 +75,7 @@ for (const theme of ['light', 'dark']) {
     // The live session: start the suggested drill and capture states as the demo plays.
     if (!ONLY || ONLY.test('live')) {
       try {
-        await page.goto(BASE + '/#/practice'); await page.reload(); await settle(page);
+        await page.goto(BASE + '/?repo=sample#/practice'); await page.reload(); await settle(page);
         await page.getByRole('button', { name: /^Start$/ }).first().click();
         const t0 = Date.now();
         const want = ['connecting', 'interviewer', 'answering', 'thinking', 'coaching', 'end'];

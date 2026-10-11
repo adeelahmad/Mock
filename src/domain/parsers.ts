@@ -351,7 +351,7 @@ export const fileKind = (name: string): FileKind => {
   return n.endsWith('.zst') ? 'zst' : n.endsWith('.json') ? 'json' : n.endsWith('.csv') ? 'csv' : 'text';
 };
 
-// ---------- Exponent export (.json; the .zst stream needs the fzstd decoder — M2) ----------
+// ---------- Exponent export (.json, or the zstd-compressed .zst — decoded by prep-import's fileText) ----------
 
 interface RawRow { id?: string | number; category?: string[]; data?: { title?: string }; companies?: { name?: string }[]; votes?: number; difficulty?: string; topComment?: { comment?: string } }
 interface DistilledRow { id?: string; text?: string; lp_id?: string; difficulty?: number; tags?: string; votes?: number; amazon?: boolean; sample?: string }

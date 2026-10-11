@@ -1,8 +1,9 @@
 import { expect, type Page } from '@playwright/test';
 
-/** Waits for the splash to go and the first screen to render. */
-export async function open(page: Page, hash = '#/practice'): Promise<void> {
-  await page.goto('/' + hash);
+/** Waits for the splash to go and the first screen to render. Flows run on the in-memory
+ *  sample library unless `repo` says otherwise ('duckdb' = the real storage, empty install). */
+export async function open(page: Page, hash = '#/practice', repo: 'sample' | 'memory' | 'duckdb' = 'sample'): Promise<void> {
+  await page.goto('/' + (repo === 'duckdb' ? '' : '?repo=' + repo) + hash);
   await page.waitForSelector('.splash', { state: 'detached', timeout: 30_000 }).catch(() => {});
   await expect(page.locator('.app')).toBeVisible();
 }

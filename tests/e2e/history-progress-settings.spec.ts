@@ -36,9 +36,10 @@ test.describe('settings', () => {
     const slider = page.locator('input[type="range"]').first();
     await slider.fill('3000');
     await expect(page.getByText(/^3 s$/)).toBeVisible();
+    await page.getByRole('button', { name: /Back up everything/ }).first().click();
     const dl = page.waitForEvent('download');
-    await page.getByRole('button', { name: /Back up everything|Export everything/ }).first().click();
+    await page.getByRole('button', { name: /^Download$/ }).click();
     const d = await dl;
-    expect(d.suggestedFilename()).toMatch(/mock.*\.json$/);
+    expect(d.suggestedFilename()).toMatch(/^mock-backup-\d{4}-\d{2}-\d{2}\.zip$/);
   });
 });
