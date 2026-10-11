@@ -26,6 +26,8 @@ export default defineConfig({
         globIgnores: ['**/duckdb-mvp-*.wasm', '**/duckdb-browser-mvp.worker-*.js', '**/duckdb-coi*'],
         maximumFileSizeToCacheInBytes: 48 * 1024 * 1024,
         navigateFallback: 'index.html',
+        // Sign-in redirects and the API belong to the Mock server, never to the cached shell.
+        navigateFallbackDenylist: [/\/auth\//, /\/api\//],
         cleanupOutdatedCaches: true,
         runtimeCaching: [{ urlPattern: /duckdb-.*mvp.*\.(wasm|js)$/, handler: 'CacheFirst', options: { cacheName: 'duckdb-mvp', expiration: { maxEntries: 4 } } }],
       },
@@ -33,12 +35,14 @@ export default defineConfig({
     }),
   ],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
+  // `npm run dev` with `npm run server` alongside: the API and sign-in go to the Mock server.
+  server: { proxy: { '/api': 'http://localhost:8787', '/auth': 'http://localhost:8787' } },
   build: { target: 'es2022', chunkSizeWarningLimit: 1200 },
   optimizeDeps: { exclude: ['@duckdb/duckdb-wasm'] },
   test: {
     globals: true,
     environment: 'node',
-    include: ['src/**/*.test.ts', 'tests/unit/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'server/**/*.test.ts', 'tests/unit/**/*.test.ts'],
     testTimeout: 30_000,
   },
 });

@@ -11,8 +11,11 @@ Leadership Principles as areas plus all the sample stories, questions, files and
 first-run setup or Settings → Library & data. Areas, stories and questions import from CSV;
 each import offers a sample CSV to download and fill in (`src/domain/csv-templates.ts`).
 
-Local-first: no backend, no account. Everything lives in your browser; backups move data
-between phone and laptop. Your Gemini API key is stored on the device and sent only to Google.
+Local-first: everything lives in your browser and works offline. Optionally, run the small
+Mock server (below) and sign in with GitHub, Google or any OpenID Connect provider: your
+library, sessions and spend then follow you to every browser you sign in on. Without it,
+backups move data between phone and laptop. Your Gemini API key stays on each device and is
+sent only to Google.
 
 Built to the Claude Design project in `design/` (the design is the spec). See `docs/plan.md`
 for the architecture and milestones, `docs/design-inventory.md` for the feature checklist, and
@@ -90,6 +93,9 @@ make check             # typecheck + unit tests + build
 make e2e               # Playwright (PW_CHROMIUM=/path/to/chromium for a local browser)
 make verify            # check, then e2e
 make preview           # build, then serve dist/
+make server            # the Mock server on :8787 (sign-in + sync)
+make start             # build, then serve app + API from the Mock server
+make token             # print the sign-in setup token
 make clean             # remove dist/ and test results
 ```
 
@@ -106,7 +112,9 @@ npm run e2e            # Playwright; set PW_CHROMIUM=/path/to/chromium to use a 
 npm run refs           # design artboards → tests/design-refs (needs network)
 npm run shots          # app screenshots → tests/screenshots (dev server running)
 npm run icons          # re-render public/icons/*.png from the SVG sources
-npm run meet-bridge    # the local Google Meet bridge (Node 22.18+, runs the TypeScript directly)
+npm run server         # the Mock server on :8787 (sign-in + sync); `npm run dev` proxies to it
+npm start              # build, then serve the app + API from the Mock server
+npm run meet-bridge    # the local Google Meet bridge on :8788 (Node 22.18+, runs the TypeScript directly)
 ```
 
 Dev-only: Settings → Library & data → *Load sample data*.
@@ -140,15 +148,52 @@ container's git remote so `update` can pull).
 
 You get the usual helper-script wizard (Default / Advanced, `var_*` overrides). It creates an
 unprivileged Debian 13 container (2 vCPU, 2 GiB, 8 GB), installs Node 22 and Caddy, builds the
-app and serves it on `https://<ip>/` (Caddy's internal CA: trust its root, printed at the end,
+app, runs the Mock server (`mock-server` service, SQLite in `/var/lib/mock`; Postgres or
+`AUTH_URL` via `/etc/mock/server.env`) and serves it on `https://<ip>/` (Caddy's internal CA: trust its root, printed at the end,
 since the microphone needs trusted HTTPS) and `http://<ip>/`. Run `update` inside the container
 to pull and rebuild when `main` moves.
+
+## Sign-in and sync (Mock server)
+
+`server/` is a small Node 22 server: Auth.js (`@auth/express`) for OAuth sign-in, a database
+for the synced libraries, and the built app. Run it with `npm start` (or `npm run server`
+after `npm run build`), behind HTTPS in production.
+
+1. **First run.** Open the app; it finds an unconfigured server and opens the setup wizard.
+   Paste the **setup token** from the server log (`npm run server -- token` prints it again;
+   on Proxmox `mock-token`).
+2. **Providers.** Add an OAuth client for GitHub, Google and/or an OIDC issuer. The wizard shows
+   the callback URL to register (`https://<host>/auth/callback/<provider>`). Secrets are stored
+   on the server only and never sent back to the browser.
+3. **Who can sign in.** An email allowlist (recommended on the internet). The first account to
+   sign in becomes the admin and can change the setup from Settings → Account & sync.
+4. **Sign in** on each browser. The first upload is this device's library; a fresh browser
+   takes the server copy; a browser with its own library merges into it.
+
+Sync: the library (stories, questions, files' text, sessions, transcripts, reports, settings,
+spend) is one document per user with a revision. Writes push 1.5 s later; the app pulls on
+start, on focus and every minute; when two browsers both changed, the merge keeps new items
+from both and the newer edit of the same item. Recordings, clips, uploaded originals and the
+Gemini key stay on each device. "Use without an account" keeps Mock local-only.
+
+| Variable | Default | |
+|---|---|---|
+| `PORT` / `HOST` | `8787` / `0.0.0.0` | listen address |
+| `MOCK_DB` | `data/mock.db` | SQLite file (`node:sqlite`, no native build) |
+| `DATABASE_URL` | – | `postgres://…` to use Postgres instead |
+| `MOCK_STATIC` | `dist` | the built app to serve; empty for API only |
+| `AUTH_SECRET` | generated, kept in the DB | cookie/JWT secret |
+| `AUTH_URL` | from the request | public URL, if your proxy hides it |
+| `MOCK_SETUP_TOKEN` | generated, kept in the DB | the wizard's token |
+
+Static hosts (GitHub Pages) have no server: the app sees that and stays local-only.
 
 ## Stack
 
 React 19 · TypeScript · Vite · DuckDB-Wasm on IndexedDB snapshots · Gemini Live and Flash ·
-Workbox service worker · web app manifest with shortcuts. No backend; the optional Meet bridge
-runs on your own computer (Node, Playwright, ws).
+Workbox service worker · web app manifest with shortcuts · optional Node server: Express,
+Auth.js, SQLite (`node:sqlite`) or Postgres · optional Meet bridge on your own computer (Node,
+Playwright, ws).
 
 ## Layout
 
@@ -159,6 +204,8 @@ src/meet     Google Meet: bridge client, Meet audio, sign-in and meeting creatio
 meet-bridge  the local bridge: WebSocket server, Playwright bot, in-page audio for Meet
 src/db       Repo interface and implementations, backup
 src/app      router, store, theme, prefs, install / offline / deep links
+src/sync     sync engine (pull / push / merge) and the server API client
+server       the Mock server: Auth.js sign-in, setup, library sync API, SQLite/Postgres
 src/screens  one file per screen; src/components shared pieces
 public       manifest, icons, the distilled Exponent question bank
 design       the Claude Design export (the spec)

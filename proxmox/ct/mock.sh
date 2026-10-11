@@ -79,9 +79,9 @@ function update_script() {
   $STD npm cache clean --force
   msg_ok "Updated ${APP}"
 
-  msg_info "Reloading Caddy"
-  systemctl reload caddy
-  msg_ok "Reloaded Caddy"
+  msg_info "Restarting the Mock server and Caddy"
+  $STD bash /opt/mock/proxmox/install/mock-server.sh
+  msg_ok "Restarted the Mock server and Caddy"
   msg_ok "Updated successfully!"
   exit
 }
@@ -96,3 +96,5 @@ echo -e "${INFO}${YW}Access it using the following URL (HTTPS is needed for the 
 echo -e "${GATEWAY}${BGN}https://${IP}${CL}"
 echo -e "${INFO}${YW}The certificate comes from Caddy's internal CA; trust it on your devices:${CL}"
 echo -e "${TAB}pct pull ${CTID} /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt mock-root.crt"
+echo -e "${INFO}${YW}Sign-in and library sync: the app opens a setup wizard that asks for this token:${CL}"
+echo -e "${TAB}pct exec ${CTID} -- mock-token"
