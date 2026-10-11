@@ -13,7 +13,7 @@ EMBED := internal/web/dist
 
 .DEFAULT_GOAL := help
 
-.PHONY: server serve start token bridge binary binaries embed go-test help install dev typecheck test test-watch build preview e2e check verify refs shots media icons docs docs-build clean
+.PHONY: server serve start token bridge binary binaries lxc embed go-test help install dev typecheck test test-watch build preview e2e check verify refs shots media icons docs docs-build clean
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-11s %s\n", $$1, $$2}'
@@ -55,6 +55,14 @@ binaries: embed ## Cross-compile bin/mock-<os>-<arch> for linux and darwin, amd6
 		os=$${p%/*}; arch=$${p#*/}; \
 		echo "bin/mock-$$os-$$arch"; \
 		CGO_ENABLED=0 GOOS=$$os GOARCH=$$arch $(GO) build -trimpath -ldflags "$(LDFLAGS)" -o bin/mock-$$os-$$arch ./cmd/mock || exit 1; \
+	done
+
+LXC_ARCHES ?= amd64 arm64
+
+lxc: embed ## Prebuilt Proxmox LXC templates bin/mock-lxc-debian13-<arch>.tar.zst (root or subuids, mmdebstrap)
+	@for a in $(LXC_ARCHES); do \
+		CGO_ENABLED=0 GOOS=linux GOARCH=$$a $(GO) build -trimpath -ldflags "$(LDFLAGS)" -o bin/mock-linux-$$a ./cmd/mock || exit 1; \
+		VERSION="$(VERSION)" proxmox/lxc/build.sh $$a || exit 1; \
 	done
 
 go-test: ## Go vet + tests (the Meet bot test runs when Chrome or Chromium is found)

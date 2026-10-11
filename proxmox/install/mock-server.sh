@@ -81,4 +81,10 @@ rm -rf /var/www/mock
 systemctl daemon-reload
 systemctl enable -q mock caddy
 systemctl restart mock
-systemctl reload caddy 2>/dev/null || systemctl restart caddy
+# In the prebuilt template Caddy waits for mock-firstboot (which runs this), so it isn't up yet:
+# queue its start rather than wait for it.
+if systemctl is-active --quiet caddy; then
+  systemctl reload caddy 2>/dev/null || systemctl restart caddy
+else
+  systemctl restart --no-block caddy
+fi
