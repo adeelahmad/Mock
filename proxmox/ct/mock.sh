@@ -40,7 +40,11 @@ mock_from_template() {
   if [[ ! -s "$path" ]]; then
     echo "Downloading the Mock ${tag} template (${arch})"
     mkdir -p "$(dirname "$path")"
-    curl -fL --progress-bar "${base}/mock-lxc-debian13-${arch}.tar.zst" -o "${path}.part"
+    if ! curl -fL --progress-bar "${base}/mock-lxc-debian13-${arch}.tar.zst" -o "${path}.part"; then
+      rm -f "${path}.part"
+      echo "The ${tag} release has no ${arch} template; using the helper wizard (MOCK_MODE=source)." >&2
+      return 2
+    fi
     curl -fsSL "${base}/checksums.txt" | grep " mock-lxc-debian13-${arch}.tar.zst\$" | sed "s#  .*#  ${path}.part#" | sha256sum -c --quiet
     mv "${path}.part" "$path"
   fi
