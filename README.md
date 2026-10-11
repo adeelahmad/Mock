@@ -29,6 +29,21 @@ for the architecture and milestones, `docs/design-inventory.md` for the feature 
 4. Back up after sessions (Settings → Library & data). Practice reminds you when the last
    session isn't in a backup yet.
 
+### What it costs
+
+Every Gemini call reports how many tokens it used, and Mock adds them up. The **Spent** pill
+always shows the total: top-right on phone, in the sidebar on desktop, and in the header during
+a live session. Tap it for the split per Leadership Principle. Live tokens count toward the LP
+of the question being asked, analysis cards toward the answer's LP, and session reports and
+question tagging go under "Reports & other".
+
+The price is set in **Settings → Budget**: one row per model, in USD per 1M tokens, with text
+and audio input/output priced separately. It comes filled with Google's published prices
+(checked 2026-10-11; Gemini 3.8 Flash doubles on 2027-01-01). Mock stores the token counts, not
+dollars, so a new price re-prices everything already spent. Models without a row use the first
+row. *Reset spend* sets the counter back to $0. The counts live in settings, so backups carry
+them.
+
 ### Shortcuts and deep links
 
 The installed app has two shortcuts (long-press the icon on Android, right-click on desktop):
@@ -47,6 +62,20 @@ Once loaded, the app shell, library, History and Progress work offline (service 
 Live sessions need a connection: Practice says so and disables Start. The demo runs offline.
 
 ## Develop
+
+With `make` (run `make help` for the list):
+
+```
+make install           # npm install, devDependencies included
+make dev               # http://localhost:5173 (PORT=… to change)
+make check             # typecheck + unit tests + build
+make e2e               # Playwright (PW_CHROMIUM=/path/to/chromium for a local browser)
+make verify            # check, then e2e
+make preview           # build, then serve dist/
+make clean             # remove dist/ and test results
+```
+
+Or the npm scripts directly:
 
 ```
 npm install            # add --include=dev if NODE_ENV=production
