@@ -2,7 +2,7 @@
   "name": "mock",
   "private": true,
   "version": "0.1.0",
-  "description": "Mock — a voice app for rehearsing an AWS interview loop. A live interviewer asks Leadership Principle questions; between answers a coach tells you what to fix, judged against your own prep.",
+  "description": "Mock \u2014 a voice app for rehearsing an AWS interview loop. A live interviewer asks Leadership Principle questions; between answers a coach tells you what to fix, judged against your own prep.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,7 +18,10 @@
     "refs": "node scripts/design-refs.mjs",
     "shots": "node scripts/app-shots.mjs",
     "icons": "node scripts/icons.mjs",
-    "meet-bridge": "node meet-bridge/main.ts"
+    "meet-bridge": "node meet-bridge/main.ts",
+    "docs": "vitepress dev site --port 5174",
+    "docs:build": "vitepress build site",
+    "pages": "npm run build && vitepress build site && rm -rf site/.vitepress/dist/app && cp -R dist site/.vitepress/dist/app"
   },
   "dependencies": {
     "@auth/express": "^0.12.3",
@@ -44,6 +47,7 @@
     "typescript": "~5.9",
     "vite": "^7.1.0",
     "vite-plugin-pwa": "2.0.0",
+    "vitepress": "^1.6.3",
     "vitest": "^3",
     "workbox-window": "7.4.1",
     "ws": "^8.22.0"

@@ -17,6 +17,7 @@ library, sessions and spend then follow you to every browser you sign in on. Wit
 backups move data between phone and laptop. Your Gemini API key stays on each device and is
 sent only to Google.
 
+User docs: the site in `site/` (`make docs`), published with the app on GitHub Pages.
 Built to the Claude Design project in `design/` (the design is the spec). See `docs/plan.md`
 for the architecture and milestones, `docs/design-inventory.md` for the feature checklist, and
 `docs/STATUS.md` for where the work stands.
@@ -96,6 +97,8 @@ make preview           # build, then serve dist/
 make server            # the Mock server on :8787 (sign-in + sync)
 make start             # build, then serve app + API from the Mock server
 make token             # print the sign-in setup token
+make docs              # the docs site on :5174
+make docs-build        # docs + app at /app/ into site/.vitepress/dist
 make clean             # remove dist/ and test results
 ```
 
@@ -124,12 +127,12 @@ Dev-only: Settings → Library & data → *Load sample data*.
 The build is a static site with relative asset paths and hash routing, so it runs from any
 host or sub-path with no rewrite rules.
 
-**GitHub Pages** (`.github/workflows/deploy.yml`, manual only):
-
-1. Repo Settings → Pages → Source: **GitHub Actions** (once).
-2. Actions → **Deploy to GitHub Pages** → Run workflow (branch or tag, default `main`). It
-   type-checks, runs the unit tests, builds, and publishes `dist/` to
-   `https://<user>.github.io/<repo>/`.
+**GitHub Pages** (`.github/workflows/pages.yml`): the docs site (VitePress, `site/`) at the
+Pages root and the app at `/app/`, deployed on every push to `main` (or Actions → **Pages** →
+Run workflow). It type-checks, runs the unit tests, builds both, and publishes
+`https://<user>.github.io/<repo>/` with the app at `…/app/`. One-time setup: repo Settings →
+Pages → Source: **GitHub Actions** (on a private repo, Pages needs a paid GitHub plan).
+`make docs` serves the site locally; `make docs-build` builds it with the app inside.
 
 **Anywhere else:** `npm run build` and upload `dist/` (Netlify, Cloudflare Pages, S3, any web
 server). Serve it over HTTPS: the microphone, service worker and install prompt require it.
@@ -210,4 +213,5 @@ src/screens  one file per screen; src/components shared pieces
 public       manifest, icons, the distilled Exponent question bank
 design       the Claude Design export (the spec)
 scripts      design refs, app screenshots, icon renderer
+site         the docs and landing site (VitePress), published to GitHub Pages
 ```
