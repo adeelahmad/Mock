@@ -63,23 +63,32 @@ for (const theme of ['light', 'dark']) {
     await trySheet('sheet-answer', async () => { await page.goto(BASE + '/#/library/questions'); await settle(page); await page.getByRole('button', { name: /Model answer/ }).first().click(); });
     await trySheet('sheet-add-question', async () => { await page.goto(BASE + '/#/library/questions'); await settle(page); await page.getByRole('button', { name: /^\+ (Add|Question)$/ }).first().click(); });
 
+    // First-run steps 2 and 3
+    if (!ONLY || ONLY.test('onboarding')) {
+      try {
+        await page.goto(BASE + '/#/practice/setup'); await settle(page);
+        await page.getByRole('button', { name: /Skip — start with the LPs/ }).click(); await page.waitForTimeout(400); await shoot(page, dir, 'onboarding-2');
+        await page.getByRole('button', { name: /^Next$/ }).click(); await page.waitForTimeout(400); await shoot(page, dir, 'onboarding-3');
+      } catch (e) { report.push(`FAIL ${theme}-${device}/onboarding: ${String(e).slice(0, 120)}`); }
+    }
+
     // The live session: start the suggested drill and capture states as the demo plays.
     if (!ONLY || ONLY.test('live')) {
       try {
         await page.goto(BASE + '/#/practice'); await page.reload(); await settle(page);
         await page.getByRole('button', { name: /^Start$/ }).first().click();
         const t0 = Date.now();
-        const want = ['connecting', 'interviewer', 'answering', 'thinking', 'coaching', 'ended'];
+        const want = ['connecting', 'interviewer', 'answering', 'thinking', 'coaching', 'end'];
         const got = new Set();
         while (Date.now() - t0 < 150_000 && got.size < want.length) {
           const st = await page.locator('.live').getAttribute('data-phase').catch(() => null);
           const paused = await page.locator('.live').getAttribute('data-paused').catch(() => null);
-          if (st && !got.has(st) && want.includes(st) && paused !== 'true') { got.add(st); await page.waitForTimeout(st === 'coaching' ? 2500 : 300); await shoot(page, dir, 'live-' + st); }
+          if (st && !got.has(st) && want.includes(st) && paused !== 'true') { got.add(st); await page.waitForTimeout(st === 'coaching' ? 2500 : 300); await shoot(page, dir, 'live-' + (st === 'end' ? 'ended' : st)); }
           if (st === 'coaching' && got.has('coaching') && !got.has('paused')) { got.add('paused'); await page.keyboard.press('Space').catch(() => {}); await page.waitForTimeout(400); await shoot(page, dir, 'live-paused'); await page.keyboard.press('Space').catch(() => {}); }
-          if (st === 'ended') break;
+          if (st === 'end') break;
           await page.waitForTimeout(250);
         }
-        if (!got.has('ended')) { await page.getByRole('button', { name: /^End/ }).first().click().catch(() => {}); await page.waitForTimeout(1500); await shoot(page, dir, 'live-ended'); }
+        if (!got.has('end')) { await page.getByRole('button', { name: /^End/ }).first().click().catch(() => {}); await page.waitForTimeout(1500); await shoot(page, dir, 'live-ended'); }
       } catch (e) { report.push(`FAIL ${theme}-${device}/live: ${String(e).slice(0, 160)}`); }
     }
     await ctx.close();

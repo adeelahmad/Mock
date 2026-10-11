@@ -9,7 +9,7 @@ Settings → General, then delete the old branch).
 | Milestone | State |
 |---|---|
 | Plan (`docs/plan.md`, `docs/design-inventory.md`, `prompts/coach.md`) | done, approved ("ok") |
-| **M1** — shell, tokens, every screen on sample data + simulated transport | **built and integrated; review pass not finished** (see below) |
+| **M1** — shell, tokens, every screen on sample data + simulated transport | **done** (see below) |
 | M2 — DuckDB-Wasm, IndexedDB, library CRUD, imports, backup zip, service worker | not started |
 | M3 — real Gemini Live transport, recording, context budget | not started |
 | M4 — Flash analysis, reports, History playback from recordings, Progress queries | not started |
@@ -49,31 +49,26 @@ Verified at the last commit: `npm run typecheck` 0 errors · `npm test` 66 unit 
   settings). **Written, not yet run** — run `npm run e2e` with `PW_CHROMIUM=/opt/pw-browsers/chromium`
   on this box (the installed Chromium is older than the Playwright package) and fix selectors.
 
-## M1 — what is left before calling it done
+## M1 — closed (session 2, 2026-10-11)
 
-1. **Visual review loop.** Compare `tests/screenshots/*` with `tests/design-refs/*` per
-   screen (phone + desktop, light + dark) and fix deviations. A first look at home, Library,
-   session detail, Progress and Settings showed them close to the boards. Not yet checked:
-   the live states (the screenshot script found only `live-ended`; it reads
-   `.live[data-state]`, so check what attribute `src/screens/Live.tsx` sets), the sheets, the
-   grid, story editor, file preview, onboarding steps 2–3, dark desktop.
-2. **Run the Playwright flows** and fix selectors/timing (the live demo takes ~90 s to reach
-   coaching at real speed; specs allow 240 s).
-3. Agent-reported deviations to decide on (all deliberate, listed in the build report under
-   `/root/.claude/projects/...` is gone with the session — summarised here):
-   - Home weakest card says "Redo · {LP}" (task wording) not "Redo this answer · 4 min".
-   - Session card sub-line uses "{verdict} · {last} · up to 3 questions · coaching after each".
-   - Library DB badge is a footnote under the LP list, not in the header.
-   - Story editor header shows a disabled "Saved" until the draft is dirty.
-   - "Mock found" counts in the file preview come from the real parser (3 · 1 · 1 on the sample
-     file, the board's 5 · 2 · 1 was illustrative).
-   - Progress "Readiness · now" card and legend are phone-only (desktop board omits them).
-   - `.zst` Exponent export shows a toast until fzstd is bundled (M2).
-   - Sample session 14 has 9 exchanges (the HEAT matrix) where the History board shows 5.
-4. Optional refactors flagged by the agents: move `importPrepFiles`/`useHelloTest`/`keyClick`
-   out of `Settings.tsx` into `src/domain/prep-import.ts` (Onboarding imports them from
-   Settings today); teach `Dropzone` to walk dropped folders; `paths.answer()` is available
-   for History/Progress deep links.
+- **Playwright flows green**: 22/22 (phone + desktop). The live screen exposes its phase as
+  `.live[data-phase]` (`connecting · interviewer · answering · thinking · coaching · end`);
+  helpers and `scripts/app-shots.mjs` read that. Desktop has no Hint handle (key `H`) and shows one
+  analysis card until "All N".
+- **Visual review** done for every route, sheet, live state, onboarding 1–3 and dark desktop.
+  Fixed: the voice visual shows "nobody" while connecting and in the thinking pause; "1 turn"
+  pluralised and the phone handle row fits Transcript · Notes · Hint · Feedback at 390 px; grid
+  subtitle and desktop panel order match the board; story-editor fields grow with their text.
+  `npm run shots` now also captures onboarding steps 2–3.
+- **Deviations kept** (deliberate): home weakest card "Redo · {LP}"; session card sub-line;
+  Library DB badge as a footnote; story editor "Saved" until dirty and a one-line summary field;
+  real parser counts in file preview; Progress "Readiness · now" phone-only; `.zst` toast until
+  M2; sample session 14 has 9 exchanges; onboarding step 2 keeps the Gemini key + model fields
+  (the hello test needs them) above the persona picker; step 3 adds a Status box; desktop
+  Library → LPs opens with an empty detail pane until an LP is picked; the coaching eyebrow
+  (Q · LP · interviewer's question) also shows on desktop.
+- Optional refactors still open: move `importPrepFiles`/`useHelloTest`/`keyClick` out of
+  `Settings.tsx`; `Dropzone` folder walking; `paths.answer()` deep links.
 
 ## How to run
 
@@ -99,7 +94,6 @@ interviewers · D10 session seed kept. Open questions in plan §8 still default.
 
 ## Next session, suggested order
 
-1. Finish M1: run `npm run shots` + review loop; run e2e; commit "M1 done".
-2. M2 per plan §4 (DuckDB-Wasm repo behind the same `Repo` interface; pin a tested
+1. M2 per plan §4 (DuckDB-Wasm repo behind the same `Repo` interface; pin a tested
    duckdb-wasm version; Parquet snapshots to IndexedDB; migrations; zip backups; service worker).
-3. M3, M4, M5.
+2. M3, M4, M5.
