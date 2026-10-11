@@ -27,7 +27,9 @@ export default defineConfig({
     { command: 'npm run dev -- --port 5173 --strictPort', url: 'http://localhost:5173', reuseExistingServer: !process.env.CI, timeout: 60_000 },
     {
       command: 'make binary && rm -f bin/e2e.db* && MOCK_DB=bin/e2e.db MOCK_SETUP_TOKEN=e2e-setup-token ./bin/mock --port 4173',
-      url: 'http://localhost:4173', reuseExistingServer: !process.env.CI, timeout: 300_000,
+      // Never reuse: a bin/mock left on :4173 from another checkout or an older build serves a
+      // stale app and database, and the offline test then hangs on navigator.serviceWorker.ready.
+      url: 'http://localhost:4173', reuseExistingServer: false, timeout: 300_000,
     },
   ],
 });
