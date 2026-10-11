@@ -2,6 +2,7 @@
 // storage layer persists (schema v1, see docs/plan.md §3).
 
 import type { GamePlay } from './game.ts';
+import type { ProviderSettings } from './providers.ts';
 
 export type Verdict = 'strong_hire' | 'inclined' | 'not_inclined' | 'strong_no_hire';
 /** Verdict as the design codes it: 0 = not yet, 1 = strong hire … 4 = strong no hire. */
@@ -180,6 +181,8 @@ export interface Settings {
   usage: UsageBucket[];
   /** Finished rounds of the Areas game, oldest first (domain/game.ts). */
   gamePlays: GamePlay[];
+  /** Speech to text, language model and text to speech (domain/providers.ts); all Gemini = Gemini Live. */
+  providers: ProviderSettings;
 }
 
 /** Billable tokens of one or more Gemini calls. */

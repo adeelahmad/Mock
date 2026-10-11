@@ -43,6 +43,10 @@ feedback you need is specific: *you said "significant" when your notes say $1.2M
 - **A live interviewer.** Gemini Live asks questions on the areas the loop assesses
   (competencies, values, a company's principles), probes with follow-ups, and hears you out.
   Hands-free: say "redo", "next" or "hint".
+- **Pick your engines, or pay nothing.** Gemini Live is the default. Swap speech to text,
+  the model and the voice separately, in Settings or per session: Chrome's free speech engines,
+  ElevenLabs, and any OpenAI-compatible endpoint (Ollama, LM Studio, OpenAI) with your own
+  model name and context size.
 - **A coach that knows your prep.** After each answer: a short spoken verdict and up to three
   fixes, checked against your own stories, numbers and notes. The numbers you missed, your STAR
   time split, "I" vs "we", pace and fillers.
@@ -393,7 +397,9 @@ embedded, OAuth/OIDC sign-in, SQLite (modernc.org/sqlite) or Postgres (pgx), and
 
 ```
 src/domain   types, state machine, readiness, parsers, selectors (pure, unit-tested)
-src/live     transport interface, simulated + Gemini transports, session controller, context tools
+src/live     transport interface, simulated + Gemini + pipeline transports, session controller, context tools
+src/llm      the pipeline's language model: Gemini or any OpenAI-compatible endpoint
+src/speech   speech to text and text to speech: Chrome, ElevenLabs, Gemini
 src/meet     Google Meet: bridge client, Meet audio, sign-in and meeting creation
 src/db       Repo interface and implementations, backup
 src/app      router, store, theme, prefs, install / offline / deep links

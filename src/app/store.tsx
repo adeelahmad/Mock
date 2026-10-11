@@ -24,6 +24,9 @@ import { KnowledgeIndex, type Hit, type IndexStatus } from '../rag/knowledge.ts'
 import { geminiEmbedder, type Embedder } from '../rag/embed.ts';
 import { readPrefs, writePrefs, readFlag, writeFlag } from './prefs.ts';
 import { DEFAULT_PRICING } from '../domain/budget.ts';
+import { DEFAULT_PROVIDERS, isLiveStack, missingFor, stackLabel, stackOf, withProviderDefaults, type ProviderSettings, type VoiceStack } from '../domain/providers.ts';
+import { makePipeline, textLlm, type ProviderKeys } from '../live/make-pipeline.ts';
+import { SYSTEM_PROMPT_BUDGET } from '../live/context.ts';
 import { setUsageSink } from '../gemini/usage.ts';
 import type { UsageEntry } from '../db/repo.ts';
 import { applyTheme } from './theme.ts';
@@ -57,6 +60,15 @@ export interface LiveStart {
   focusLabel?: string;
   questionText?: string | null;
   coaching?: Settings['coaching'];
+  /** This session's speech in, model and voice out; omitted → the Settings default. */
+  stack?: VoiceStack;
+}
+
+export interface ProvidersState {
+  settings: ProviderSettings;
+  keys: ProviderKeys;
+  setKey: (name: keyof ProviderKeys, value: string) => Promise<void>;
+  save: (patch: Partial<ProviderSettings>) => Promise<void>;
 }
 
 export interface Account {
@@ -92,6 +104,8 @@ export interface AppStore {
   toastText: string;
   gemini: GeminiConfig;
   setGemini: (patch: Partial<Pick<GeminiConfig, 'key' | 'model' | 'voice'>>) => Promise<void>;
+  /** Speech-to-text, model and text-to-speech choices, and the keys they need. */
+  providers: ProvidersState;
   live: {
     state: SessionState | null; meta: ControllerMeta | null; controller: SessionController | null;
     /** The options of the running (or last) session, for "Start session N+1". */
@@ -110,6 +124,9 @@ export interface AppStore {
   account: Account;
 }
 
+/** Keys kept in this browser and carried by passphrase sync. */
+const SECRETS = ['gemini.key', 'openai.key', 'elevenlabs.key'];
+
 const Ctx = createContext<AppStore | null>(null);
 export const useApp = (): AppStore => { const v = useContext(Ctx); if (!v) throw new Error('useApp outside AppProvider'); return v; };
 
@@ -118,7 +135,7 @@ function derive(d: Omit<AppData, 'lpRows' | 'storyRows' | 'questionRows' | 'cove
   return { ...d, lpRows: rows, storyRows: storyRows(d.stories, d.lps, d.exchanges), questionRows: questionRows(d.questions, d.lps), covered: coveredLpIds(d.stories), heat: heatmap(d.lps, d.sessions, d.exchanges), trend: trend(d.sessions, d.exchanges), weakest: weakestAnswer(d.sessions, d.exchanges) };
 }
 
-const EMPTY: AppData = derive({ lps: [], stories: [], questions: [], files: [], sessions: [], exchanges: [], settings: { interviewDate: '2026-10-30', liveModel: 'gemini-3.8-live', textModel: 'gemini-3.8-flash', voice: 'Aoede', pauseMs: 2500, systemInstruction: '', loopSize: 5, coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 12345, lastBackupAt: null, onboarded: false, pricing: DEFAULT_PRICING, usage: [], gamePlays: [] } });
+const EMPTY: AppData = derive({ lps: [], stories: [], questions: [], files: [], sessions: [], exchanges: [], settings: { interviewDate: '2026-10-30', liveModel: 'gemini-3.8-live', textModel: 'gemini-3.8-flash', voice: 'Aoede', pauseMs: 2500, systemInstruction: '', loopSize: 5, coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 12345, lastBackupAt: null, onboarded: false, pricing: DEFAULT_PRICING, usage: [], gamePlays: [], providers: DEFAULT_PROVIDERS } });
 
 export function AppProvider({ repo: given, children }: { repo?: Repo; children: React.ReactNode }) {
   const repo = useMemo(() => given ?? new MemoryRepo(), [given]);
@@ -130,6 +147,7 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
   const [toastText, setToastText] = useState('');
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [gemini, setGem] = useState<GeminiConfig>({ key: '', hasKey: false, model: 'gemini-3.8-live', voice: 'Aoede' });
+  const [providerKeys, setProviderKeys] = useState<ProviderKeys>({ openai: '', elevenlabs: '' });
   const [liveState, setLiveState] = useState<SessionState | null>(null);
   const [liveMeta, setLiveMeta] = useState<ControllerMeta | null>(null);
   const controller = useRef<SessionController | null>(null);
@@ -148,8 +166,16 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
   const vault = useMemo(() => new Vault({
     local: { build: () => buildBackup(repo), apply: (doc) => repo.importBackup(doc) },
     secrets: {
-      read: async (): Promise<Record<string, string>> => { const k = await repo.getSecret('gemini.key'); return k ? { 'gemini.key': k } : {}; },
-      write: async (s) => { if (s['gemini.key']) { await repo.setSecret('gemini.key', s['gemini.key']); await refreshRef.current?.(); } },
+      read: async (): Promise<Record<string, string>> => {
+        const out: Record<string, string> = {};
+        for (const name of SECRETS) { const k = await repo.getSecret(name); if (k) out[name] = k; }
+        return out;
+      },
+      write: async (s) => {
+        let any = false;
+        for (const name of SECRETS) if (s[name]) { await repo.setSecret(name, s[name]); any = true; }
+        if (any) await refreshRef.current?.();
+      },
     },
     busy: () => !!liveRef.current && liveRef.current.phase !== 'ended',
     persist: idbPersist, saved: localSaved,
@@ -167,8 +193,11 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
 
   const refresh = useCallback(async () => {
     const [lps, stories, questions, files, sessions, exchanges, settings] = await Promise.all([repo.lps(), repo.stories(), repo.questions(), repo.files(), repo.sessions(), repo.exchanges(), repo.settings()]);
+    settings.providers = withProviderDefaults(settings.providers);
     setData(derive({ lps, stories, questions, files, sessions, exchanges, settings }));
     const key = (await repo.getSecret('gemini.key')) ?? '';
+    const [openai, elevenlabs] = await Promise.all([repo.getSecret('openai.key'), repo.getSecret('elevenlabs.key')]);
+    setProviderKeys({ openai: openai ?? '', elevenlabs: elevenlabs ?? '' });
     setGem({ key, hasKey: !!key, model: settings.liveModel, voice: settings.voice });
   }, [repo]);
 
@@ -228,6 +257,16 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     await refresh();
   }, [repo, refresh, vault]);
 
+  const setProviderKey = useCallback(async (name: keyof ProviderKeys, value: string) => {
+    await repo.setSecret(name + '.key', value.trim() || null); vault.changed();
+    await refresh();
+  }, [repo, refresh, vault]);
+  const saveProviders = useCallback(async (patch: Partial<ProviderSettings>) => {
+    await repo.setSettings({ providers: withProviderDefaults({ ...withProviderDefaults(data.settings.providers), ...patch }) });
+    await refresh();
+  }, [repo, refresh, data.settings.providers]);
+  const providers: ProvidersState = useMemo(() => ({ settings: withProviderDefaults(data.settings.providers), keys: providerKeys, setKey: setProviderKey, save: saveProviders }), [data.settings.providers, providerKeys, setProviderKey, saveProviders]);
+
   // ---- knowledge index: follows the included prep files; embeds with the Gemini key when there is one
   const embedder = useMemo<Embedder | null>(() => (gemini.key ? geminiEmbedder({ key: gemini.key }) : null), [gemini.key]);
   const syncing = useRef(false);
@@ -263,19 +302,33 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     exitLive();
     setLastStart(o);
     const s = data.settings;
-    // With a key the session runs on Gemini Live; without one, the scripted demo. The audio
-    // engine is created before the first await so iOS sees the Start tap as its gesture.
-    const demo = !gemini.hasKey;
+    const prov = withProviderDefaults(s.providers);
+    // All Gemini (the default): one Gemini Live connection. Anything else: speech → model → voice,
+    // turn by turn. Without what the choice needs (no key at all, by default), the scripted
+    // demo. The audio engine is created before the first await so iOS sees the Start tap as its gesture.
+    let stack = o.stack ?? stackOf(prov);
     // With Mock in a Google Meet call, the session runs there: meeting audio in, the bot's
-    // microphone out (docs/meet.md). The local engine stays silent and only records.
+    // microphone out (docs/meet.md). Chrome's speech engines cannot reach the call.
+    if (meet.inCall() && (stack.stt === 'browser' || stack.tts === 'browser')) {
+      toast('Chrome speech cannot hear or speak in a Meet call · this session uses Gemini Live');
+      stack = { stt: 'gemini', llm: 'gemini', tts: 'gemini' };
+    }
+    const live = isLiveStack(stack);
+    const missing = missingFor(stack, { gemini: gemini.hasKey, openaiUrl: !!prov.openai.baseUrl.trim(), elevenlabs: !!providerKeys.elevenlabs });
+    const demo = !!missing;
+    if (missing && !(live && !gemini.hasKey)) toast(stackLabel(stack, prov.openai.model) + ' needs ' + missing + ' · Settings · Voice & model · running the demo');
     const inMeet = !demo && meet.inCall();
     inMeetRef.current = inMeet;
-    const transport = demo
+    const audio = demo ? null : inMeet ? new MeetAudio(meet.client, new BrowserAudio({ mic: false, speakers: false })) : new BrowserAudio();
+    const transport = !audio
       ? new SimulatedTransport(DEMO_SCRIPT)
-      : new GeminiLiveTransport({ auth: { kind: 'key', key: gemini.key }, audio: inMeet ? new MeetAudio(meet.client, new BrowserAudio({ mic: false, speakers: false })) : new BrowserAudio() });
-    // With a key the cards and the report come from Flash, falling back to the offline card /
-    // local report; the demo replays the script's cards.
-    const { analyzer, reporter } = analysisPipeline({ key: demo ? null : gemini.key || null, textModel: s.textModel, lps: data.lps, stories: data.stories, script: demo ? DEMO_SCRIPT : null, onFallback: (what, err) => toast((what === 'analysis' ? 'Flash card failed' : 'Flash report failed') + ' — used the offline one (' + err.message + ')') });
+      : live
+        ? new GeminiLiveTransport({ auth: { kind: 'key', key: gemini.key }, audio })
+        : makePipeline({ stack, providers: prov, keys: providerKeys, geminiKey: gemini.key, textModel: s.textModel, voice: s.voice, pauseMs: s.pauseMs, audio });
+    // The cards and the report come from Flash (or the session's OpenAI-compatible model),
+    // falling back to the offline card / local report; the demo replays the script's cards.
+    const llm = demo ? null : textLlm(stack, prov, providerKeys);
+    const { analyzer, reporter } = analysisPipeline({ key: demo ? null : gemini.key || null, llm, textModel: s.textModel, lps: data.lps, stories: data.stories, script: demo ? DEMO_SCRIPT : null, onFallback: (what, err) => toast((what === 'analysis' ? (llm ? 'Coach card failed' : 'Flash card failed') : (llm ? 'Report failed' : 'Flash report failed')) + ' — used the offline one (' + err.message + ')') });
     const c = new SessionController(transport, analyzer, repo, () => Date.now(), demo, { reporter });
     controller.current = c;
     c.subscribe((st, meta) => { setLiveState(st); setLiveMeta(meta); if (inMeet) meet.mirror(st); });
@@ -283,14 +336,16 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     const weak = data.lpRows.slice().sort((a, b) => (a.readiness ?? 0.35) - (b.readiness ?? 0.35)).map((l) => l.id);
     const questions = prioritiseQuestions(data.questions, { mode: o.mode, focusLpId: focusLp?.id ?? null, weakLpIds: weak.slice(0, 5) });
     const previous = await repo.reports(8);
-    const ctx = buildContext({ sessionNumber: await repo.nextSessionNumber(), date: new Date().toISOString().slice(0, 10), mode: o.mode, focus: o.focusLabel ?? focusLp?.name ?? o.questionText ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, previous, lps: data.lps, stories: data.stories, questions, files: data.files, userInstruction: s.systemInstruction });
+    // A small local model gets a system prompt that leaves room for the conversation.
+    const budget = !demo && stack.llm === 'openai' ? Math.max(2000, Math.min(SYSTEM_PROMPT_BUDGET, Math.floor(prov.openai.contextTokens * 0.6))) : undefined;
+    const ctx = buildContext({ sessionNumber: await repo.nextSessionNumber(), date: new Date().toISOString().slice(0, 10), mode: o.mode, focus: o.focusLabel ?? focusLp?.name ?? o.questionText ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, previous, lps: data.lps, stories: data.stories, questions, files: data.files, userInstruction: s.systemInstruction }, { budget });
     c.setContext({ estimated: ctx.estimatedTokens, counted: null, budget: ctx.budget, trimmed: ctx.trimmed });
-    if (!demo) void confirmTokens(ctx, (t) => countTokens(gemini.key, s.textModel, t)).then((counted) => { if (counted != null) c.setContext({ estimated: ctx.estimatedTokens, counted, budget: ctx.budget, trimmed: ctx.trimmed }); });
+    if (!demo && live) void confirmTokens(ctx, (t) => countTokens(gemini.key, s.textModel, t)).then((counted) => { if (counted != null) c.setContext({ estimated: ctx.estimatedTokens, counted, budget: ctx.budget, trimmed: ctx.trimmed }); });
     // Show the connecting screen while the mic is granted and the connection opens.
     setSheet({ setup: false, answer: null, addQuestion: false, addStory: false });
     routerGo('/live');
-    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: s.liveModel, voice: s.voice, questionText: o.questionText ?? null, retriever: index.current ? searchIndex : null, tools: demo ? [] : contextTools(repo) });
-  }, [data, gemini.hasKey, gemini.key, repo, exitLive, toast, searchIndex]);
+    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: live ? s.liveModel : stack.llm === 'openai' ? prov.openai.model : s.textModel, voice: s.voice, questionText: o.questionText ?? null, retriever: index.current ? searchIndex : null, tools: demo ? [] : contextTools(repo) });
+  }, [data, gemini.hasKey, gemini.key, providerKeys, repo, exitLive, toast, searchIndex]);
 
   // Budget: every Gemini call's tokens go to the ledger, batched so a live session writes at
   // most every two seconds.
@@ -330,7 +385,7 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
   }), [server, syncStatus, skipped, reloadAccount, sync, vault, vaultStatus]);
 
   const value: AppStore = useMemo(() => ({
-    ready, status, dbMode, repo, data, refresh, prefs, setPref, route, go: routerGo, back: routerBack, toast, toastText, gemini, setGemini,
+    ready, status, dbMode, repo, data, refresh, prefs, setPref, route, go: routerGo, back: routerBack, toast, toastText, gemini, setGemini, providers,
     live: { state: liveState, meta: liveMeta, controller: controller.current, lastStart, start: startLive, exit: exitLive },
     transcript,
     knowledge,
@@ -338,7 +393,7 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     openSheet: (name, v) => setSheet((x) => ({ ...x, [name]: name === 'answer' ? (v as QuestionRow) : true })),
     closeSheets: () => setSheet({ setup: false, answer: null, addQuestion: false, addStory: false }),
     account,
-  }), [account, ready, status, dbMode, repo, data, refresh, prefs, setPref, route, toast, toastText, gemini, setGemini, liveState, liveMeta, lastStart, startLive, exitLive, sheet, transcript, knowledge]);
+  }), [account, ready, status, dbMode, repo, data, refresh, prefs, setPref, route, toast, toastText, gemini, setGemini, providers, liveState, liveMeta, lastStart, startLive, exitLive, sheet, transcript, knowledge]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

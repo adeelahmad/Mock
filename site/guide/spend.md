@@ -19,8 +19,12 @@ and output priced separately. It comes filled with Google's published prices (ch
 | `gemini-3.8-live` | 0.75 | 4.50 | 3.00 | 12.00 |
 | `gemini-3.8-flash` | 0.75 | 3.75 | 0.75 | 3.75 |
 | `gemini-embedding-001` | 0.15 | – | – | – |
+| `gemini-2.5-flash-preview-tts` | 0.50 | – | – | 10.00 |
 
 Mock stores token counts, not dollars, so a new price re-prices everything already spent.
-A model without a row uses the first row. *Reset spend* sets the counter back to $0.
+A Gemini model without a row uses the first row. Any other model (Ollama or another
+OpenAI-compatible endpoint) without a row counts as free, as do Chrome's speech engines; add a
+row with its id to price a paid endpoint. ElevenLabs bills by character on your ElevenLabs
+account and is not counted here. *Reset spend* sets the counter back to $0.
 
 The counts live in settings, so backups and [sync](/guide/sync) carry them.

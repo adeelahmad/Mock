@@ -19,7 +19,10 @@ describe('budget', () => {
     const live = priceFor('models/gemini-3.8-live', DEFAULT_PRICING)!;
     expect(live.model).toBe('gemini-3.8-live');
     expect(priceFor('gemini-3.8-flash-001', DEFAULT_PRICING)!.model).toBe('gemini-3.8-flash');
-    expect(priceFor('something-else', DEFAULT_PRICING)!.model).toBe(DEFAULT_PRICING[0].model);
+    expect(priceFor('gemini-something-else', DEFAULT_PRICING)!.model).toBe(DEFAULT_PRICING[0].model);
+    // A local or OpenAI-compatible model without a row is free.
+    expect(priceFor('llama3.2', DEFAULT_PRICING)).toBeNull();
+    expect(costOf({ input: 1e6, output: 1e6, audioInput: 0, audioOutput: 0 }, priceFor('llama3.2', DEFAULT_PRICING))).toBe(0);
     expect(costOf({ input: 1e6, output: 1e6, audioInput: 1e6, audioOutput: 1e6 }, live)).toBeCloseTo(0.75 + 4.5 + 3 + 12);
   });
 

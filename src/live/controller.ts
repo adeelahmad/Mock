@@ -155,7 +155,7 @@ export class SessionController {
     await this.repo.updateSession(session.id, { endedAt: new Date(now).toISOString() });
     // The report runs alongside the recap; it waits for every card, not for the audio.
     const report = this.writeReport(session.id);
-    if (this.transport.kind === 'gemini') {
+    if (this.transport.kind !== 'simulated') {
       // The model speaks the recap after [END]: keep the connection (and the recording) open
       // until that turn completes and its audio drains.
       await this.waitForRecap();
@@ -231,7 +231,7 @@ export class SessionController {
       case 'turnComplete': if (this.ended) this.turnsAfterEnd++; break;
       case 'recordingChunk': void this.saveChunk(e.blob, e.index); break;
       case 'toolCallCancellation': break;
-      case 'usage': if (this.opts) reportUsage(this.opts.model, this.exchange?.lpId ?? (this.opts.mode === 'lp' ? this.opts.focus : null) ?? null, e.usageMetadata); break;
+      case 'usage': if (this.opts) reportUsage(e.model ?? this.opts.model, this.exchange?.lpId ?? (this.opts.mode === 'lp' ? this.opts.focus : null) ?? null, e.usageMetadata); break;
     }
   }
 

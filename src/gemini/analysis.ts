@@ -9,6 +9,7 @@ import { measureDelivery, normalizeAnalysis } from '../domain/analysis.ts';
 import type { AnalysisInput, Analyzer } from '../live/analyzer.ts';
 import { ANALYSIS_SCHEMA } from './schemas.ts';
 import { audioPart, generateJson, type Part } from './flash.ts';
+import type { TextLlm } from '../llm/chat.ts';
 
 export interface GeminiAnalyzerOptions {
   key: string;
@@ -16,6 +17,8 @@ export interface GeminiAnalyzerOptions {
   lps: Lp[];
   stories: Story[];
   fetch?: typeof fetch;
+  /** Write the card with another model (OpenAI-compatible) instead of Flash; no audio then. */
+  llm?: TextLlm | null;
 }
 
 export const ANALYSIS_SYSTEM = [
@@ -55,10 +58,10 @@ export function analysisPrompt(input: AnalysisInput, lps: Lp[], stories: Story[]
 export class GeminiAnalyzer implements Analyzer {
   constructor(private o: GeminiAnalyzerOptions) {}
   async analyze(input: AnalysisInput): Promise<Analysis> {
-    const audio = await audioPart(input.clip);
+    const audio = this.o.llm ? null : await audioPart(input.clip);
     const parts: Part[] = [{ text: analysisPrompt(input, this.o.lps, this.o.stories, !!audio) }];
     if (audio) parts.push(audio);
-    const raw = await generateJson({ key: this.o.key, model: this.o.model, system: ANALYSIS_SYSTEM, parts, schema: ANALYSIS_SCHEMA, temperature: 0.2, fetch: this.o.fetch, lpId: input.exchange.lpId });
+    const raw = await generateJson({ key: this.o.key, model: this.o.model, system: ANALYSIS_SYSTEM, parts, schema: ANALYSIS_SCHEMA, temperature: 0.2, fetch: this.o.fetch, lpId: input.exchange.lpId, via: this.o.llm });
     const lpName = this.o.lps.find((l) => l.id === input.exchange.lpId)?.name ?? '';
     return normalizeAnalysis(raw, { measured: measureDelivery(input.transcript, input.durationSec), stories: this.o.stories, lpName, coachText: input.coachText });
   }

@@ -1,7 +1,7 @@
 // Settings (board 5) — one scrolling screen the board shows in two halves: interview date and
 // loop size, Gemini Live (key, model, "Test · say hello"), the interviewer voice list with
 // preview, the pause slider, the system instruction (saved on blur), appearance and the live-
-// screen tweaks, Library & data, and the version line. Everything has a default set during first
+// screen tweaks, voice & model providers (Providers.tsx), budget, Library & data, and the version line. Everything has a default set during first
 // run. Writes go through the repo, then refresh(). The data helpers (voices, models, backup,
 // prep import, the hello test) are exported because Onboarding shares them.
 
@@ -20,6 +20,7 @@ import { BackupSheet, RestoreSheet } from './BackupSheets.tsx';
 import { AccountSection } from './Account.tsx';
 import { VaultSection } from './VaultSync.tsx';
 import { BudgetSettings } from '../components/Budget.tsx';
+import { ProvidersSection } from './Providers.tsx';
 
 export { VOICES, personaFor, previewToast, MODELS, type VoicePersona } from '../domain/voices.ts';
 import { VOICES, personaFor, previewToast, MODELS, type VoicePersona } from '../domain/voices.ts';
@@ -265,6 +266,8 @@ export default function Settings() {
                 <div className="row pref-row"><span className="srow-title">Live layout</span><Seg className="appear" value={prefs.liveLayout} options={LAYOUTS} onChange={(v) => setPref('liveLayout', v)} /></div>
               </div>
             </div>
+
+            <ProvidersSection />
 
             <BudgetSettings />
 

@@ -8,6 +8,7 @@ import { VERDICT_LABEL } from '../domain/verdict.ts';
 import type { Reporter } from '../live/reporter.ts';
 import { REPORT_SCHEMA } from './schemas.ts';
 import { generateJson } from './flash.ts';
+import type { TextLlm } from '../llm/chat.ts';
 
 export const REPORT_SYSTEM = 'You are the debrief lead of an interview loop writing the session report for the candidate. Be specific to their answers and their own stories; terse, imperative fixes; no generic advice.';
 
@@ -33,11 +34,11 @@ export function reportPrompt(input: ReportInput): string {
 }
 
 export class GeminiReporter implements Reporter {
-  constructor(private o: { key: string; model: string; fetch?: typeof fetch; onFallback?: (err: Error) => void }) {}
+  constructor(private o: { key: string; model: string; fetch?: typeof fetch; onFallback?: (err: Error) => void; llm?: TextLlm | null }) {}
   async report(input: ReportInput): Promise<Report> {
     if (!input.exchanges.some((e) => e.verdict)) return localReport(input);
     try {
-      const raw = await generateJson({ key: this.o.key, model: this.o.model, system: REPORT_SYSTEM, parts: [{ text: reportPrompt(input) }], schema: REPORT_SCHEMA, temperature: 0.3, fetch: this.o.fetch });
+      const raw = await generateJson({ key: this.o.key, model: this.o.model, system: REPORT_SYSTEM, parts: [{ text: reportPrompt(input) }], schema: REPORT_SCHEMA, temperature: 0.3, fetch: this.o.fetch, via: this.o.llm });
       return normalizeReport(raw, input);
     } catch (err) {
       this.o.onFallback?.(err as Error);

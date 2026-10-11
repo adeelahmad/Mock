@@ -6,6 +6,7 @@
 // (`response_format`); if generateContent is retired, only this module changes.
 
 import { reportUsage } from './usage.ts';
+import type { TextLlm } from '../llm/chat.ts';
 
 export const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta';
 /** Inline request ceiling; clips above it are sent as transcript only. */
@@ -27,6 +28,8 @@ export interface FlashRequest {
   fetch?: typeof fetch;
   /** The Leadership Principle the tokens are spent on, for the budget breakdown. */
   lpId?: string | null;
+  /** Another model (an OpenAI-compatible endpoint) instead of Gemini; text parts only. */
+  via?: TextLlm | null;
 }
 
 export class FlashError extends Error {
@@ -47,6 +50,11 @@ function body(r: FlashRequest): Record<string, unknown> {
 
 /** The reply's text, joined across parts. Throws FlashError on HTTP errors, blocks and empty replies. */
 export async function generateText(r: FlashRequest): Promise<string> {
+  if (r.via) {
+    const text = r.parts.map((p) => ('text' in p ? p.text : '')).filter(Boolean).join('\n\n');
+    try { return await r.via({ system: r.system, text, schema: r.schema, temperature: r.temperature, seed: r.seed, signal: r.signal, lpId: r.lpId }); }
+    catch (err) { throw new FlashError((err as Error).message || 'The model failed', (err as { status?: number }).status ?? 0); }
+  }
   const f = r.fetch ?? fetch;
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), r.timeoutMs ?? 60000);

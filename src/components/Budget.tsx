@@ -68,7 +68,7 @@ export function BudgetSettings() {
     <div className="stack g8">
       <div className="hstack between baseline"><span className="label">Budget · {fmtUsd(s.total)} spent</span><button className="btn link" onClick={() => void reset()}>Reset spend</button></div>
       <div className="card pad r12 stack g12">
-        <span className="srow-sub">USD per 1M tokens. Spend is counted from the tokens Gemini reports for each call, so a new price re-prices everything spent so far. Models not listed use the first row.</span>
+        <span className="srow-sub">USD per 1M tokens. Spend is counted from the tokens Gemini reports for each call, so a new price re-prices everything spent so far. Gemini models not listed use the first row; other models (Ollama, Chrome speech) are free unless you add a row.</span>
         <div className="price-table" role="table" aria-label="Gemini prices">
           <div className="price-row head" role="row"><span role="columnheader">Model</span>{FIELDS.map(([k, l]) => <span key={k} role="columnheader">{l}</span>)}<span /></div>
           {rows.map((r, i) => (
