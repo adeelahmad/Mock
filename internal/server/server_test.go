@@ -103,7 +103,7 @@ func jsonEq(t *testing.T, got, want any) {
 func TestStartsUnconfiguredAndNeedsTheSetupToken(t *testing.T) {
 	e := newEnv(t)
 	s := e.req("GET", "/api/status", nil, nil)
-	jsonEq(t, s.body, map[string]any{"server": true, "version": "test", "db": "sqlite", "configured": false, "providers": []any{}, "user": nil})
+	jsonEq(t, s.body, map[string]any{"server": true, "version": "test", "db": "sqlite", "configured": false, "providers": []any{}, "user": nil, "signal": "auth"})
 	if c := s.header.Get("Cache-Control"); c != "no-store" {
 		t.Fatalf("api cache-control %q", c)
 	}

@@ -247,7 +247,10 @@ func serve(args []string) error {
 	}
 
 	var br *meet.Bridge
-	o := server.Options{Store: st, Auth: a, SetupToken: tok, Static: static, Version: version}
+	o := server.Options{Store: st, Auth: a, SetupToken: tok, Static: static, Version: version, Signal: os.Getenv("MOCK_SIGNAL")}
+	if v := os.Getenv("MOCK_SIGNAL_ORIGINS"); v != "" {
+		o.SignalOrigins = strings.Split(v, ",")
+	}
 	if *withMeet {
 		br = newBridge(bf, true)
 		o.Bridge = br
