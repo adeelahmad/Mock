@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { open, waitForPhase } from './helpers.ts';
+import { isPhone, open, waitForPhase } from './helpers.ts';
 
 test.describe('live session on the simulated transport', () => {
   test.setTimeout(240_000);
@@ -31,7 +31,7 @@ test.describe('live session on the simulated transport', () => {
     await expect(page).toHaveURL(/#\/history\/s_/);
     await expect(page.getByText(/Session 15/).first()).toBeVisible();
     // the analysis tab holds the card for the coached answer
-    await page.getByRole('tab', { name: /Analysis/ }).click().catch(() => {});
+    if (isPhone(page)) await page.getByRole('tab', { name: /Analysis/ }).click();
     await expect(page.getByText(/You named the exact failing component/).first()).toBeVisible({ timeout: 10_000 });
   });
 
@@ -44,7 +44,8 @@ test.describe('live session on the simulated transport', () => {
     await expect(page.getByText(/Mic off · timer held/)).toBeVisible();
     await page.getByRole('button', { name: /^Resume$/ }).click();
     await expect(page.getByText('Paused', { exact: true })).toBeHidden();
-    await page.getByRole('button', { name: /^Hint$/ }).click();
+    if (isPhone(page)) await page.getByRole('button', { name: /^Hint$/ }).click();
+    else await page.keyboard.press('h');
     await expect(page.getByText(/Try the Payments outage story/)).toBeVisible();
     await page.getByRole('button', { name: /Dismiss hint/ }).click();
     await expect(page.getByText(/Try the Payments outage story/)).toBeHidden();

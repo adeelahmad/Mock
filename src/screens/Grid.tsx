@@ -64,7 +64,7 @@ export default function Grid() {
   const coverage = (
     <div className="gd-cov-block">
       <div className="gd-cov">
-        <span><span className="n">{coveredCount}</span> of {total} LPs covered<span className="gd-phone"> · one tap cycles none → primary → secondary</span></span>
+        <span><span className="n">{coveredCount}</span> of {total} LPs covered</span>
         {gapLps.length ? <span className="gd-gaps">{plural(gapLps.length, 'gap')}</span> : <span className="gd-gaps ok">every LP covered</span>}
       </div>
       <div className="progress-bar" role="progressbar" aria-valuenow={coveredCount} aria-valuemin={0} aria-valuemax={total} aria-label="LPs covered"><span style={{ width: pct + '%' }} /></div>

@@ -14,6 +14,8 @@ import { VERDICT_LABEL } from '../domain/verdict.ts';
 import { detectFileType, fileKind, parseExponentRows, parseQuestionsFromCsv, parseStoriesFromMarkdown, parsedQuestionsFromText, type ParsedQuestion, type ParsedStory } from '../domain/parsers.ts';
 import ImportReview, { prepareReview, type ReviewData } from './ImportReview.tsx';
 import ImportStories from './ImportStories.tsx';
+import { fileText } from '../domain/prep-import.ts';
+import { tagWithGemini } from '../gemini/tagging.ts';
 import '../styles/screens/library.css';
 
 export type LibrarySeg = 'lps' | 'stories' | 'questions' | 'files';
@@ -177,7 +179,7 @@ export function applyFilters(rows: QuestionRow[], f: Filters): QuestionRow[] {
 interface Importing { pct: number; msg: string }
 
 export default function Library({ seg }: { seg: LibrarySeg }) {
-  const { data, repo, refresh, go, route, toast, live, openSheet, dbMode } = useApp();
+  const { data, repo, refresh, go, route, toast, live, openSheet, dbMode, gemini } = useApp();
   const { lpRows, storyRows, questionRows, files, covered, lps } = data;
   const selected = route.parts[2];
 
@@ -193,6 +195,15 @@ export default function Library({ seg }: { seg: LibrarySeg }) {
   useEffect(() => { setLimit(PAGE); }, [filters, seg]);
 
   // ---- imports
+  /** With a key and a connection, Gemini re-tags the rows the keyword tagger is unsure of. */
+  const geminiTags = useCallback(async (rows: ParsedQuestion[]): Promise<ParsedQuestion[]> => {
+    if (!gemini.hasKey || !rows.some((r) => !(r.lpId && r.confidence === 'high'))) return rows;
+    setImporting({ pct: 100, msg: 'Tagging with Gemini…' });
+    const r = await tagWithGemini(rows, lps, { key: gemini.key, model: data.settings.textModel });
+    setImporting(null);
+    if (r.error) toast('Gemini tagging failed — keyword tags kept · ' + r.error);
+    return r.rows;
+  }, [gemini.hasKey, gemini.key, lps, data.settings.textModel, toast]);
   /** Parse picked/dropped files into a review; `keep` also files them under Files. */
   const importFiles = useCallback(async (list: File[], keep: boolean) => {
     const rows: ParsedQuestion[] = [];
@@ -201,17 +212,13 @@ export default function Library({ seg }: { seg: LibrarySeg }) {
     setImporting({ pct: 0, msg: 'Reading ' + list[0].name + '…' });
     for (const [i, f] of list.entries()) {
       const kind = fileKind(f.name);
-      if (kind === 'zst') {
-        // M2: bundle the fzstd decoder and stream the .zst export as the prototype did.
-        toast(f.name + ' is zstd-compressed — the streaming decoder lands in M2. Export it as .json for now.');
-        continue;
-      }
-      const text = await f.text();
+      let text: string;
+      try { text = await fileText(f); } catch { toast(f.name + ' could not be read'); continue; }
       setImporting({ pct: Math.round(((i + 0.5) / list.length) * 100), msg: 'Scanning ' + f.name + '…' });
       await tick();
       let found: ParsedQuestion[];
       if (kind === 'csv') found = parseQuestionsFromCsv(text, lps);
-      else if (kind === 'json') { found = parseExponentRows(text, lps) ?? parsedQuestionsFromText(text, 'custom', lps); if (found.length) source = 'common'; }
+      else if (kind === 'json' || kind === 'zst') { found = parseExponentRows(text, lps) ?? parsedQuestionsFromText(text, 'custom', lps); if (found.length) source = 'common'; }
       else {
         const type = detectFileType(text);
         const src: QuestionSource = type === 'Past interviews' ? 'previous' : 'custom';
@@ -234,8 +241,8 @@ export default function Library({ seg }: { seg: LibrarySeg }) {
     if (!names.length) return;
     if (!rows.length) { if (!kept) toast('No questions found in ' + names.join(', ')); return; }
     const fileName = names.length === 1 ? names[0] : names[0] + ' + ' + (names.length - 1) + ' more';
-    setReview(prepareReview(rows, { fileName, source, existing: data.questions }));
-  }, [data.questions, files, lps, refresh, repo, toast]);
+    setReview(prepareReview(await geminiTags(rows), { fileName, source, existing: data.questions }));
+  }, [data.questions, files, lps, refresh, repo, toast, geminiTags]);
 
   const importStoryFiles = useCallback(async (list: File[]) => {
     const all: ParsedStory[] = [];
@@ -256,8 +263,8 @@ export default function Library({ seg }: { seg: LibrarySeg }) {
     const src: QuestionSource = f.type === 'Past interviews' ? 'previous' : 'custom';
     const rows = parsedQuestionsFromText(f.content, src, lps);
     if (!rows.length) { toast('No questions found in ' + f.name); go(paths.library('questions'), true); return; }
-    setReview(prepareReview(rows, { fileName: f.name, source: src, existing: data.questions }));
-  }, [importParam, files, lps, data.questions, go, toast]);
+    void geminiTags(rows).then((tagged) => setReview(prepareReview(tagged, { fileName: f.name, source: src, existing: data.questions })));
+  }, [importParam, files, lps, data.questions, go, toast, geminiTags]);
   const closeReview = () => { setReview(null); if (importParam) go(paths.library('questions'), true); };
 
   // ---- actions
@@ -273,7 +280,7 @@ export default function Library({ seg }: { seg: LibrarySeg }) {
   const previousCount = filtered.filter((q) => q.source === 'previous').length;
   const includedCount = files.filter((f) => f.included).length;
   const gaps = lps.length - covered.size;
-  const dbBadge = dbMode === 'duckdb' ? 'DuckDB-WASM ✓' : dbMode === 'memory' ? 'in-memory · sample library' : 'starting';
+  const dbBadge = dbMode === 'duckdb' ? 'DuckDB-WASM ✓' : dbMode === 'memory' ? 'in-memory library' : 'starting';
   const lpOptions = lps.map((l) => ({ value: l.id, label: l.name }));
   const sourceOptions = (Object.keys(SOURCE_LABEL) as QuestionSource[]).map((s) => ({ value: s, label: SOURCE_LABEL[s] }));
   const verdictOptions = [...(Object.keys(VERDICT_LABEL) as Verdict[]).map((v) => ({ value: v, label: VERDICT_LABEL[v] })), { value: 'none', label: 'Not yet' }];

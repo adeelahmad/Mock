@@ -22,4 +22,4 @@ npm run dev
 
 ## Stack
 
-React 19 · TypeScript · Vite · DuckDB-Wasm (M2) · Gemini Live (M3). No backend.
+React 19 · TypeScript · Vite · DuckDB-Wasm + IndexedDB · Gemini Live (M3). No backend.

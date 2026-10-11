@@ -173,7 +173,8 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
 
   // Refresh the library when a live session writes.
   useEffect(() => {
-    if (repo instanceof MemoryRepo) { repo.onChange = () => { void refresh(); }; return () => { repo.onChange = null; }; }
+    repo.onChange = () => { void refresh(); };
+    return () => { repo.onChange = null; };
   }, [repo, refresh]);
 
   const value: AppStore = useMemo(() => ({
