@@ -123,6 +123,8 @@
    Story editor
    ====================================================================== */
 .se-body { padding-top: 6px; gap: 14px; }
+.se-body .textarea { field-sizing: content; min-height: 72px; max-height: none; height: auto; }
+.se-body > * { flex: none; }
 .se-save { height: 36px; padding: 0 14px; border-radius: 999px; border: none; background: transparent; color: var(--m-cool); font: 700 13px/1 var(--font-sans); cursor: pointer; transition: background var(--dur-fast), color var(--dur-fast); }
 .se-save:hover { background: var(--m-cool-tint); }
 .se-save:disabled { color: var(--m-fg3); cursor: default; background: transparent; }
@@ -247,7 +249,7 @@
   .gd-gapbar { height: 5px; border-radius: 3px; }
   .gd-panels { flex-direction: row; gap: 12px; align-items: stretch; }
   .gd-panel { flex: 1; padding: 14px 16px; font-size: 14px; line-height: 1.45; }
-  .gd-legend { order: 0; flex: none; gap: 16px; padding: 14px 16px; border-radius: 12px; background: var(--m-card); border: 1px solid var(--m-line); font-size: 12px; align-items: center; }
+  .gd-legend { order: 1; flex: none; gap: 16px; padding: 14px 16px; border-radius: 12px; background: var(--m-card); border: 1px solid var(--m-line); font-size: 12px; align-items: center; }
   .gd-legend > span { gap: 6px; }
   .gd-legend > span.phone { display: none; }
   .gd-legend > span.desk { display: inline-flex; }

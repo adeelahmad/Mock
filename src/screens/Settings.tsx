@@ -15,13 +15,15 @@ import { daysUntil } from '../domain/selectors.ts';
 import { detectFileType, parseExponentRows, parseQuestionsFromCsv, parseStoriesFromMarkdown, parsedQuestionsFromText, type ParsedQuestion } from '../domain/parsers.ts';
 import { DEFAULT_SYSTEM_INSTRUCTION } from '../fixtures/sample.ts';
 import '../styles/screens/settings.css';
+import { BackupSheet, RestoreSheet } from './BackupSheets.tsx';
 
 export { VOICES, personaFor, previewToast, MODELS, type VoicePersona } from '../domain/voices.ts';
 import { VOICES, personaFor, previewToast, MODELS, type VoicePersona } from '../domain/voices.ts';
 const OTHER = '__other__';
 
 // ---------- Small formatters ----------
-export const plural = (n: number, one: string, many = one + 's'): string => n + ' ' + (n === 1 ? one : many);
+export { plural } from '../domain/prep-import.ts';
+import { plural } from '../domain/prep-import.ts';
 export const fmtBytes = (n: number): string => {
   if (n < 1024) return Math.max(0, Math.round(n)) + ' B';
   if (n < 1048576) return Math.round(n / 1024) + ' KB';
@@ -39,118 +41,14 @@ export const fmtLongDate = (iso: string): string => {
 const today = (): string => new Date().toISOString().slice(0, 10);
 const ext = (mime: string): string => (mime.includes('mp4') ? '.m4a' : mime.includes('ogg') ? '.ogg' : mime.includes('wav') ? '.wav' : '.webm');
 
-export { isMockBackup, buildBackup, restoreBackup, type MockBackup } from '../db/backup.ts';
-import { isMockBackup, buildBackup, restoreBackup, type MockBackup } from '../db/backup.ts';
-
-export interface PrepImport {
-  files: number;
-  skipped: string[];
-  restored: number;
-  stories: { count: number; lps: number; numbers: number };
-  questions: { count: number; tagged: number; toCheck: number };
-  /** One row per stored file: the type label the design shows and a one-line sub. */
-  types: { type: FileType; name: string; sub: string }[];
-}
-const MONTH = /\b(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sept?|Oct|Nov|Dec)\.?\s+\d{4}\b/i;
-const firstHeading = (text: string): string => (/^#{1,3}\s+(.+?)\s*#*\s*$/m.exec(text)?.[1] ?? '').replace(/\*\*|__/g, '').trim();
-const shorten = (s: string, n = 34): string => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
-function subFor(type: FileType, text: string): string {
-  if (type === 'JD') { const h = firstHeading(text); return h ? shorten(h.replace(/^(senior|sr\.?)\s+software development manager/i, 'Senior SDM').replace(/,\s*/g, ' · ')) : 'included in prep'; }
-  if (type === 'Past interviews') {
-    const rounds = (text.match(/^#{1,6}\s*round\b/gim) ?? []).length;
-    const month = MONTH.exec(text)?.[0] ?? '';
-    const parts = [month, rounds ? plural(rounds, 'round') : ''].filter(Boolean);
-    return parts.length ? parts.join(' · ') : 'included in prep';
-  }
-  return 'included in prep';
-}
-export const typeLabel = (type: FileType): string => ({ JD: 'Job description', 'Past interviews': 'Past loop notes', Background: 'Background', Other: 'Notes' })[type];
-const toQuestion = (q: ParsedQuestion, source: QuestionSource, at: string): Question => ({
-  id: newId('q'), text: q.text, lpIds: q.lpId ? [q.lpId] : [], source: q.source ?? source, difficulty: q.difficulty ?? 2, timesAsked: 0, lastVerdict: null, bestExchangeId: null, tags: q.tags, votes: q.votes, sample: q.sample, createdAt: at,
-});
-
-export async function importPrepFiles(list: File[], ctx: { repo: Repo; lps: Lp[]; stories: Story[]; files: PrepFile[] }): Promise<PrepImport> {
-  const { repo, lps } = ctx;
-  const out: PrepImport = { files: 0, skipped: [], restored: 0, stories: { count: 0, lps: 0, numbers: 0 }, questions: { count: 0, tagged: 0, toCheck: 0 }, types: [] };
-  const titles = new Set(ctx.stories.map((s) => s.title.toLowerCase()));
-  const lpSet = new Set<string>();
-  const at = new Date().toISOString();
-  for (const f of list) {
-    const name = f.name.split('/').pop() ?? f.name;
-    if (name.startsWith('.')) continue;
-    const ex = (name.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1]) ?? '';
-    if (!['md', 'markdown', 'txt', 'text', 'csv', 'json'].includes(ex)) { out.skipped.push(name); continue; } // M2: .docx (converted on import) and .zst (streamed with fzstd)
-    const text = await f.text();
-    let rows: ParsedQuestion[] = [];
-    let source: QuestionSource = 'custom';
-    if (ex === 'json') {
-      let parsed: unknown = null;
-      try { parsed = JSON.parse(text); } catch { /* not json: fall through to the text parser */ }
-      if (isMockBackup(parsed)) { await restoreBackup(repo, parsed); out.restored++; out.files++; continue; }
-      const bank = parseExponentRows(text, lps);
-      if (bank) { rows = bank; source = 'common'; } else rows = parsedQuestionsFromText(text, 'custom', lps);
-    } else if (ex === 'csv') {
-      rows = parseQuestionsFromCsv(text, lps);
-    } else {
-      const type = detectFileType(text);
-      const stories = type === 'Other' || /stor/i.test(name) ? parseStoriesFromMarkdown(text, lps) : [];
-      if (stories.length && stories.some((s) => s.situation || s.action || s.result || s.numbers.length >= 2)) {
-        for (const s of stories) {
-          if (titles.has(s.title.toLowerCase())) continue;
-          titles.add(s.title.toLowerCase());
-          const links = s.suggestedLpIds.map((lpId, i) => ({ lpId, role: i === 0 ? 'primary' as const : 'secondary' as const }));
-          links.forEach((l) => lpSet.add(l.lpId));
-          await repo.upsertStory({ id: newId('st'), title: s.title, summary: s.summary, situation: s.situation, task: s.task, action: s.action, result: s.result, learning: s.learning, numbers: s.numbers, links, createdAt: at, updatedAt: at });
-          out.stories.count++; out.stories.numbers += s.numbers.length;
-        }
-        out.files++;
-        continue;
-      }
-      source = type === 'Past interviews' ? 'previous' : 'custom';
-      const existing = ctx.files.find((x) => x.name === name);
-      await repo.upsertFile({ id: existing?.id ?? newId('f'), name, type, content: text, included: true, size: f.size || text.length, updatedAt: at, summary: null });
-      out.types.push({ type, name, sub: subFor(type, text) });
-      rows = parsedQuestionsFromText(text, source, lps);
-    }
-    out.files++;
-    if (rows.length) {
-      const added = await repo.addQuestions(rows.map((r) => toQuestion(r, source, at)));
-      const high = rows.filter((r) => r.lpId && r.confidence === 'high').length;
-      out.questions.count += added; out.questions.tagged += Math.min(added, high); out.questions.toCheck += Math.max(0, added - Math.min(added, high));
-    }
-  }
-  out.stories.lps = lpSet.size;
-  return out;
-}
-export const importSummary = (r: PrepImport): string => {
-  const bits = [plural(r.files, 'file'), plural(r.questions.count, 'question')];
-  if (r.stories.count) bits.push(plural(r.stories.count, 'story', 'stories'));
-  if (r.restored) bits.push(r.restored === 1 ? 'a Mock export restored' : r.restored + ' Mock exports restored');
-  if (r.skipped.length) bits.push(r.skipped.length + ' skipped — .docx and .zst land in M2');
-  return 'Imported ' + bits.join(' · ');
-};
-
-// ---------- "Test · say hello" (M3: a real Live hello; M1 reports the demo transport) ----------
-export type HelloState = 'idle' | 'nokey' | 'connecting' | 'ok';
-export function useHelloTest(): { state: HelloState; text: string; run: (key: string) => void } {
-  const [state, setState] = useState<HelloState>('idle');
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
-  const run = useCallback((key: string) => {
-    if (timer.current) clearTimeout(timer.current);
-    if (!key.trim()) { setState('nokey'); return; }
-    setState('connecting');
-    // M3: open a Live session, send "say hello", measure the mic level and the pause from the first turn.
-    timer.current = setTimeout(() => { setState('ok'); timer.current = null; }, 1500);
-  }, []);
-  const text = state === 'nokey' ? 'Paste an API key first.' : state === 'connecting' ? 'Connecting…' : state === 'ok' ? '✓ Connected — demo transport' : '';
-  return { state, text, run };
-}
+export { importPrepFiles, importSummary, typeLabel, type PrepImport } from '../domain/prep-import.ts';
+import { importPrepFiles, importSummary } from '../domain/prep-import.ts';
+export { useHelloTest, type HelloState } from '../app/hello.ts';
+import { useHelloTest } from '../app/hello.ts';
+export { keyClick } from '../components/ui.tsx';
+import { keyClick } from '../components/ui.tsx';
 
 // ---------- Shared fields ----------
-/** Labels that wrap a hidden file input are not focusable; this makes Enter/Space open the picker. */
-export const keyClick = (e: React.KeyboardEvent<HTMLElement>): void => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.currentTarget.click(); } };
-
 export function KeyField({ value, onChange, onCommit, label = 'API key', hint }: { value: string; onChange: (v: string) => void; onCommit: () => void; label?: string; hint: React.ReactNode }) {
   return (
     <Input label={label} type="password" placeholder="AIza…" value={value} autoComplete="off" spellCheck={false}
@@ -231,41 +129,25 @@ export default function Settings() {
     let alive = true;
     const est = typeof navigator !== 'undefined' && navigator.storage && typeof navigator.storage.estimate === 'function' ? navigator.storage.estimate() : null;
     if (!est) { setStorage(''); return; }
-    est.then(({ usage = 0, quota = 0 }) => { if (alive) setStorage(fmtBytes(usage) + ' used of ' + fmtBytes(quota)); }).catch(() => { if (alive) setStorage(''); });
+    const persisted = typeof navigator.storage.persisted === 'function' ? navigator.storage.persisted().catch(() => false) : Promise.resolve(false);
+    Promise.all([est, persisted]).then(([{ usage = 0, quota = 0 }, p]) => {
+      if (alive) setStorage(fmtBytes(usage) + ' used of ' + fmtBytes(quota) + (p ? ' · persistent' : ' · the browser may clear it under storage pressure — back up'));
+    }).catch(() => { if (alive) setStorage(''); });
     return () => { alive = false; };
   }, [data]);
   const tablesBytes = useMemo(() => new Blob([JSON.stringify({ lps: data.lps, stories: data.stories, questions: data.questions, files: data.files, sessions: data.sessions, exchanges: data.exchanges, settings })]).size, [data, settings]);
   const exportSize = fmtBytes(tablesBytes + recBytes);
-  const storeNote = dbMode === 'duckdb' ? 'kept in IndexedDB' : 'kept in memory until M2';
+  const storeNote = dbMode === 'duckdb' ? 'kept in IndexedDB' : 'in memory only — this browser could not start the database';
 
   // Library & data actions.
-  const exportAll = async () => {
-    // M2: a zip of Parquet tables plus the recordings ("Library, sessions, audio"). M1 downloads the JSON backup.
-    const json = JSON.stringify(await buildBackup(repo));
-    download('mock-export-' + today() + '.json', new Blob([json], { type: 'application/json' }));
-    toast('Exported · ' + fmtBytes(json.length) + (recKeys.length ? ' · audio joins the export in M2' : ''));
-  };
-  const backup = async () => {
-    const json = JSON.stringify(await buildBackup(repo));
-    download('mock-backup-' + today() + '.json', new Blob([json], { type: 'application/json' }));
-    await repo.setSettings({ lastBackupAt: new Date().toISOString() });
-    await refresh();
-    toast('Backup downloaded · ' + fmtBytes(json.length));
-  };
-  const restoreFromFile = async (f: File): Promise<boolean> => {
-    let parsed: unknown = null;
-    try { parsed = JSON.parse(await f.text()); } catch { /* not json */ }
-    if (!isMockBackup(parsed)) return false;
-    if (!confirm('Replace everything on this device with ' + f.name + '?')) return true;
-    await restoreBackup(repo, parsed); // M2: validated by repo.importBackup()
-    await refresh();
-    toast('Restored ' + f.name + ' · ' + plural(parsed.tables.sessions.length, 'session') + ' · ' + plural(parsed.tables.questions.length, 'question'));
-    return true;
-  };
-  const restore = async (list: File[]) => { const f = list[0]; if (!f) return; if (!(await restoreFromFile(f))) toast(f.name + ' is not a Mock export'); };
+  const [backupSheet, setBackupSheet] = useState<'backup' | 'export' | null>(null);
+  const [restoring, setRestoring] = useState<File | null>(null);
+  const isBackupFile = (f: File): boolean => /\.(zip|mockbackup)$/i.test(f.name);
+  const restore = (list: File[]) => { const f = list[0]; if (f) setRestoring(f); };
   const importLibrary = async (list: File[]) => {
-    const rest: File[] = [];
-    for (const f of list) { if (/\.json$/i.test(f.name) && (await restoreFromFile(f))) continue; rest.push(f); }
+    const backups = list.filter(isBackupFile);
+    if (backups.length) setRestoring(backups[0]);
+    const rest = list.filter((f) => !isBackupFile(f));
     if (!rest.length) return;
     const r = await importPrepFiles(rest, { repo, lps: data.lps, stories: data.stories, files: data.files });
     await refresh();
@@ -382,26 +264,26 @@ export default function Settings() {
             {/* Library & data */}
             <div className="stack g8"><span className="label">Library &amp; data</span>
               <div className="list r12">
-                <button className="data-row" onClick={() => void exportAll()}>
+                <button className="data-row" onClick={() => setBackupSheet('export')}>
                   <span className="data-text"><span className="srow-title">Export everything</span><span className="srow-sub">Library, sessions, audio · {exportSize}</span></span>
                   <Icon.Download size={18} />
                 </button>
                 <label className="data-row" htmlFor="settings-import" role="button" tabIndex={0} onKeyDown={keyClick}>
                   <span className="data-text"><span className="srow-title">Import library</span><span className="srow-sub">A Mock export, or markdown files</span></span>
                   <Icon.Upload size={18} />
-                  <input id="settings-import" type="file" multiple accept=".json,.md,.markdown,.txt,.csv" hidden onChange={(e) => pick(e, (l) => void importLibrary(l))} />
+                  <input id="settings-import" type="file" multiple accept=".zip,.mockbackup,.json,.zst,.md,.markdown,.txt,.csv" hidden onChange={(e) => pick(e, (l) => void importLibrary(l))} />
                 </label>
-                <button className="data-row" onClick={() => void backup()}>
-                  <span className="data-text"><span className="srow-title">Back up everything</span><span className="srow-sub">All tables + settings as one JSON · {storeNote}{lastBackup}</span></span>
+                <button className="data-row" onClick={() => setBackupSheet('backup')}>
+                  <span className="data-text"><span className="srow-title">Back up everything</span><span className="srow-sub">A zip of every table + settings · {storeNote}{lastBackup}</span></span>
                   <span className="link">Download</span>
                 </button>
                 <label className="data-row" htmlFor="settings-restore" role="button" tabIndex={0} onKeyDown={keyClick}>
-                  <span className="data-text"><span className="srow-title">Restore a backup</span><span className="srow-sub">A Mock JSON export · replaces the database</span></span>
+                  <span className="data-text"><span className="srow-title">Restore a backup</span><span className="srow-sub">A Mock backup · replace or merge</span></span>
                   <span className="link">Choose file</span>
-                  <input id="settings-restore" type="file" accept=".json" hidden onChange={(e) => pick(e, (l) => void restore(l))} />
+                  <input id="settings-restore" type="file" accept=".zip,.mockbackup,.json" hidden onChange={(e) => pick(e, restore)} />
                 </label>
                 <button className="data-row" onClick={() => void downloadRecs()}>
-                  <span className="data-text"><span className="srow-title">Download recordings</span><span className="srow-sub">{plural(recKeys.length, 'session recording')} · {dbMode === 'duckdb' ? 'kept in IndexedDB' : 'kept in memory until M2'}</span></span>
+                  <span className="data-text"><span className="srow-title">Download recordings</span><span className="srow-sub">{plural(recKeys.length, 'session recording')} · {dbMode === 'duckdb' ? 'kept in IndexedDB' : 'in memory only'}</span></span>
                   <span className="link">Download</span>
                 </button>
                 <button className="data-row" onClick={() => void setupAgain()}>
@@ -426,6 +308,8 @@ export default function Settings() {
           <span className="foot-line">Mock 0.9 · everything stays on this device unless you export it.</span>
         </div>
       </div>
+      <BackupSheet open={!!backupSheet} onClose={() => setBackupSheet(null)} recordingsDefault={backupSheet === 'export'} recordingCount={recKeys.length} />
+      <RestoreSheet file={restoring} onClose={() => setRestoring(null)} />
     </div>
   );
 }

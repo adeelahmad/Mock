@@ -200,6 +200,10 @@ input[type="number"].seed { width: 84px; background: var(--m-card); font-family:
 }
 .toast { position: absolute; left: 16px; right: 16px; top: calc(env(safe-area-inset-top) + 20px); z-index: 40; padding: 12px 14px; border-radius: 12px; background: var(--m-fg); color: var(--m-canvas); font: 500 13px/1.4 var(--font-sans); box-shadow: var(--shadow-3); animation: mock-in var(--dur-slow) var(--ease-standard); }
 @media (min-width: 900px) { .toast { left: auto; right: 24px; top: 24px; max-width: 420px; } }
+.toast.update { top: auto; bottom: calc(env(safe-area-inset-bottom) + 96px); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+@media (min-width: 900px) { .toast.update { top: auto; bottom: 24px; } }
+.toast-btn { height: 30px; padding: 0 12px; border-radius: 999px; border: none; background: var(--m-canvas); color: var(--m-fg); font: 700 12px/1 var(--font-sans); cursor: pointer; }
+.toast-btn.ghost { background: transparent; color: var(--m-canvas); }
 .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--m-fg3); border-right-color: transparent; animation: mock-spin 1s linear infinite; flex: none; }
 .spinner.cool { border-color: var(--m-cool); border-right-color: transparent; }
 .spinner.gold { border-color: var(--m-gold); border-right-color: transparent; }

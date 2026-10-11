@@ -112,7 +112,11 @@ export default function Onboarding() {
     } finally { setBusy(false); }
   };
   const pickVoice = (p: typeof VOICES[number]) => { void setGemini({ voice: p.voice }); toast(previewToast(gemini.hasKey, p)); };
-  const finish = async () => { await repo.setSettings({ onboarded: true }); await refresh(); };
+  const finish = async () => {
+    // Ask once for persistent storage so the browser does not evict the library (iOS especially).
+    try { if (navigator.storage && typeof navigator.storage.persist === 'function') void navigator.storage.persist(); } catch { /* not offered */ }
+    await repo.setSettings({ onboarded: true }); await refresh();
+  };
   const start = async () => {
     await finish();
     if (focus) await live.start({ mode: 'lp', focus: focus.id, focusLabel: focus.name });

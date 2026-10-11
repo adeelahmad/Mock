@@ -77,7 +77,6 @@ export default function ImportReview({ review, onCancel, onSaved }: { review: Re
       id: newId('q'), text: it.text, lpIds: chosen(it) ? [chosen(it)] : [], source: it.source ?? review.source, difficulty: it.difficulty ?? 2,
       timesAsked: 0, lastVerdict: null, bestExchangeId: null, tags: it.tags, votes: it.votes, sample: it.sample, createdAt: now,
     }));
-    // M4: the Gemini batch tagger runs over the untagged rows here; the keyword guess stands in.
     const n = await repo.addQuestions(qs);
     await refresh();
     setBusy(false);
