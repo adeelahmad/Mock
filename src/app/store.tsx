@@ -213,7 +213,7 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     // Show the connecting screen while the mic is granted and the connection opens.
     setSheet({ setup: false, answer: null, addQuestion: false, addStory: false });
     routerGo('/live');
-    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: s.liveModel, voice: s.voice, questionText: o.questionText ?? null, retriever: index.current?.status().chunks ? searchIndex : null });
+    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: s.liveModel, voice: s.voice, questionText: o.questionText ?? null, retriever: index.current ? searchIndex : null });
   }, [data, gemini.hasKey, gemini.key, repo, exitLive, toast, searchIndex]);
 
   // Budget: every Gemini call's tokens go to the ledger, batched so a live session writes at

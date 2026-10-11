@@ -89,14 +89,12 @@ describe('geminiEmbedder', () => {
       const b = JSON.parse(String(init.body)); bodies.push(b);
       return new Response(JSON.stringify({ embeddings: b.requests.map(() => ({ values: [3, 4] })) }), { status: 200 });
     }) as unknown as typeof fetch;
-    let used = 0;
-    const e = geminiEmbedder({ key: 'k', fetchImpl, onUsage: (n) => { used += n; } });
+    const e = geminiEmbedder({ key: 'k', fetchImpl });
     const v = await e(Array.from({ length: 150 }, (_, i) => 'text ' + i), 'RETRIEVAL_DOCUMENT');
     expect(bodies.length).toBe(2);
     expect(bodies[0].requests[0].taskType).toBe('RETRIEVAL_DOCUMENT');
     expect(bodies[0].requests[0].outputDimensionality).toBe(768);
     expect(v[0][0]).toBeCloseTo(0.6);
-    expect(used).toBeGreaterThan(0);
   });
   it('surfaces API errors', async () => {
     const fetchImpl = (async () => new Response(JSON.stringify({ error: { message: 'bad key' } }), { status: 400 })) as unknown as typeof fetch;

@@ -128,7 +128,11 @@ export class SessionController {
   redo(): void { this.transport.stopPlayback(); this.transport.sendText('[REDO]'); }
   next(): void { this.transport.stopPlayback(); this.transport.sendText('[NEXT]'); }
   feedback(): void { this.transport.sendText('[FEEDBACK]'); }
-  hint(): void { this.dispatch({ type: 'HINT', now: this.now(), text: this.hintFor(this.state.lpName) }); this.transport.sendText('[HINT]'); }
+  hint(): void {
+    this.dispatch({ type: 'HINT', now: this.now(), text: this.hintFor(this.state.lpName) });
+    if (!this.meta.source) void this.findSource(this.state.qText, this.state.lpName);
+    this.transport.sendText('[HINT]');
+  }
   dismissHint(): void { this.dispatch({ type: 'DISMISS_HINT', now: this.now() }); }
   clearError(): void { this.dispatch({ type: 'CLEAR_ERROR', now: this.now() }); }
   /** The context builder's numbers (and the countTokens confirmation when it lands). */

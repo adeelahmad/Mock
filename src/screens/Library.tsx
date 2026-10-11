@@ -434,7 +434,7 @@ export default function Library({ seg }: { seg: LibrarySeg }) {
         {seg === 'files' && (
           <>
             <Dropzone id="lib-files" accept=".md,.markdown,.txt,.csv,.pdf" multiple onFiles={(l) => void importFiles(l, true)}
-              title={<><span className="drop-ic"><Icon.Upload size={20} /></span>Drop markdown here</>}
+              title={<><span className="drop-ic"><Icon.Upload size={20} /></span>Drop files here</>}
               sub={<>JD, resume, notes from past loops · markdown, text or PDF. <span className="drop-link">Browse</span></>} />
             <button type="button" className="btn sm folder-btn" style={{ alignSelf: 'flex-start' }} onClick={() => folderInput.current?.click()}>Add a folder</button>
             {importing && (

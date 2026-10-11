@@ -3,6 +3,7 @@
 // index like any markdown file.
 
 import { GEMINI_BASE, GeminiError } from './rest.ts';
+import { reportUsage } from './usage.ts';
 
 export const PDF_MAX_BYTES = 20 * 1024 * 1024;
 
@@ -30,7 +31,8 @@ export async function pdfToMarkdown(o: { key: string; model: string; file: Blob;
     try { msg = ((await res.json()) as { error?: { message?: string } }).error?.message ?? msg; } catch { /* not json */ }
     throw new GeminiError(res.status, msg);
   }
-  const body = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
+  const body = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[]; usageMetadata?: unknown };
+  if (body.usageMetadata) reportUsage(o.model, null, body.usageMetadata);
   const text = (body.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '').replace(/^```(?:markdown)?\s*|\s*```$/g, '').trim();
   if (!text) throw new GeminiError(0, 'Gemini returned no text for the PDF');
   return text;

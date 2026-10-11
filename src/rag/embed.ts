@@ -1,8 +1,9 @@
 // Mock — Gemini embeddings (batchEmbedContents). Documents and queries use their own task types;
 // vectors are cut to 768 dimensions and L2-normalised here (the API only normalises at 3072), so
-// cosine similarity is a dot product.
+// cosine similarity is a dot product. Tokens go to the budget ledger (spend tracker).
 
 import { GEMINI_BASE, GeminiError } from '../gemini/rest.ts';
+import { reportUsage } from '../gemini/usage.ts';
 
 export const EMBED_MODEL = 'gemini-embedding-001';
 export const EMBED_DIMS = 768;
@@ -22,7 +23,7 @@ export const normalise = (v: number[]): number[] => {
 /** Rough token count the embedding call is billed on (chars / 4). */
 export const embedTokens = (texts: string[]): number => texts.reduce((n, t) => n + Math.ceil(t.length / 4), 0);
 
-export function geminiEmbedder(o: { key: string; model?: string; fetchImpl?: typeof fetch; onUsage?: (tokens: number) => void }): Embedder {
+export function geminiEmbedder(o: { key: string; model?: string; fetchImpl?: typeof fetch }): Embedder {
   const model = o.model ?? EMBED_MODEL;
   return async (texts, task) => {
     const f = o.fetchImpl ?? fetch;
@@ -39,11 +40,12 @@ export function geminiEmbedder(o: { key: string; model?: string; fetchImpl?: typ
         try { msg = ((await res.json()) as { error?: { message?: string } }).error?.message ?? msg; } catch { /* not json */ }
         throw new GeminiError(res.status, msg);
       }
-      const body = (await res.json()) as { embeddings?: { values?: number[] }[] };
+      const body = (await res.json()) as { embeddings?: { values?: number[] }[]; usageMetadata?: unknown };
+      // The budget ledger: the API's count when it sends one, else the chars/4 estimate.
+      reportUsage(model, null, body.usageMetadata ?? { promptTokenCount: embedTokens(part) });
       const vecs = body.embeddings ?? [];
       if (vecs.length !== part.length) throw new GeminiError(0, 'Gemini returned ' + vecs.length + ' embeddings for ' + part.length + ' texts');
       for (const e of vecs) out.push(normalise(e.values ?? []));
-      o.onUsage?.(embedTokens(part));
     }
     return out;
   };
