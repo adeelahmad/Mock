@@ -162,7 +162,7 @@ function ListPanel({ selected, master }: { selected: string | null; master: bool
           <span className={master ? 'hist-master-title' : 'h1'}>History</span>
           <button type="button" className="icon-btn" aria-label={searching ? 'Close search' : 'Search'} aria-pressed={searching} onClick={() => { setSearching((x) => !x); if (searching) setQuery(''); }}>{searching ? <Icon.Close size={20} /> : <Icon.Search size={22} />}</button>
         </div>
-        {searching && <Input type="search" placeholder="Search questions, LPs or stories" value={query} onChange={(e) => setQuery(e.target.value)} autoFocus aria-label="Search sessions" />}
+        {searching && <Input type="search" placeholder="Search questions, areas or stories" value={query} onChange={(e) => setQuery(e.target.value)} autoFocus aria-label="Search sessions" />}
         <div className="filter-row hist-filters" role="group" aria-label="Filter by mode">
           <button type="button" className={'filter' + (mode === 'all' ? ' on' : '')} onClick={() => setMode('all')}>All · {data.sessions.length}</button>
           {modes.map((m) => <button key={m} type="button" className={'filter' + (mode === m ? ' on' : '')} onClick={() => setMode(m)}>{MODE_LABEL[m]}</button>)}
@@ -257,7 +257,7 @@ function Detail({ id, desktop }: { id: string; desktop: boolean }) {
   const playAnswer = (i: number) => { const c = chapters[i]; if (!c) return; pb.seek(c.startMs); pb.play(); setFocus(i); if (!desktop) setTab('transcript'); };
   const saveBest = async (e: Exchange) => { await repo.setBestAttempt(e.id); await refresh(); toast('Saved as your best attempt for this question'); };
   const drill = (e: Exchange) => {
-    if (!e.lpId) { toast('This answer has no LP to drill'); return; }
+    if (!e.lpId) { toast('This answer has no area to drill'); return; }
     void live.start({ mode: 'lp', focus: e.lpId, focusLabel: lpNameOf(data.lps, e.lpId) });
   };
   const exportMarkdown = () => { if (!session) return; download('mock-session-' + session.number + '.md', new Blob([sessionMarkdown(session, modeLabel, xs, cards, events)], { type: 'text/markdown' })); setMenu(false); };

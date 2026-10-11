@@ -1,10 +1,15 @@
 # Mock
 
-A personal voice app for rehearsing an AWS interview loop. A live interviewer (Gemini Live)
-asks Leadership Principle questions and probes with follow-ups; between answers a coach says,
-out loud, what to fix — judged against your own stories, numbers and notes. Every session is
-recorded, every answer gets an analysis card, every session a report, and progress builds
-across sessions.
+A personal voice app for rehearsing an interview loop. A live interviewer (Gemini Live)
+asks questions on the **areas** the interview assesses (competencies, values, a company's
+principles) and probes with follow-ups; between answers a coach says, out loud, what to fix —
+judged against your own stories, numbers and notes. Every session is recorded, every answer
+gets an analysis card, every session a report, and progress builds across sessions.
+
+Areas are yours to define: import an areas CSV, or load the **AWS interview defaults** (the 16
+Leadership Principles as areas plus all the sample stories, questions, files and sessions) from
+first-run setup or Settings → Library & data. Areas, stories and questions import from CSV;
+each import offers a sample CSV to download and fill in (`src/domain/csv-templates.ts`).
 
 Local-first: no backend, no account. Everything lives in your browser; backups move data
 between phone and laptop. Your Gemini API key is stored on the device and sent only to Google.
@@ -28,8 +33,8 @@ for the architecture and milestones, `docs/design-inventory.md` for the feature 
 
 Every Gemini call reports how many tokens it used, and Mock adds them up. The **Spent** pill
 always shows the total: top-right on phone, in the sidebar on desktop, and in the header during
-a live session. Tap it for the split per Leadership Principle. Live tokens count toward the LP
-of the question being asked, analysis cards toward the answer's LP, and session reports and
+a live session. Tap it for the split per area. Live tokens count toward the area
+of the question being asked, analysis cards toward the answer's area, and session reports and
 question tagging go under "Reports & other".
 
 The price is set in **Settings → Budget**: one row per model, in USD per 1M tokens, with text

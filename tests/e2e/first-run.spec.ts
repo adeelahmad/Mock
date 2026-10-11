@@ -4,9 +4,9 @@ import { open } from './helpers.ts';
 test.describe('first run', () => {
   test('walks drop → say hello → start and lands on Practice', async ({ page }) => {
     await open(page, '#/practice/setup');
-    await expect(page.getByText('Your 16 LPs are ready.')).toBeVisible();
+    await expect(page.getByText('Your 16 areas are ready.')).toBeVisible();
     await expect(page.getByText('CO', { exact: true })).toBeVisible();
-    await page.getByRole('button', { name: /Skip — start with the LPs/ }).click();
+    await page.getByRole('button', { name: /Skip — start with the areas/ }).click();
     await expect(page.getByText('Say hello.')).toBeVisible();
     await expect(page.getByText(/No key\? Skip/)).toBeVisible();
     await page.getByRole('button', { name: /^Next$/ }).click();
@@ -21,6 +21,6 @@ test.describe('first run', () => {
     await open(page, '#/practice/settings');
     await page.getByRole('button', { name: /Run first-run setup again/ }).click();
     await expect(page).toHaveURL(/#\/practice\/setup/);
-    await expect(page.getByText('Your 16 LPs are ready.')).toBeVisible();
+    await expect(page.getByText('Your 16 areas are ready.')).toBeVisible();
   });
 });
