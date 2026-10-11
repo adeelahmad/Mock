@@ -14,8 +14,8 @@ export const VOICES: VoicePersona[] = [
 
 export const personaFor = (voice: string): VoicePersona | null => VOICES.find((v) => v.voice === voice) ?? null;
 
-/** What the preview button can do before the live transport lands (M3). */
-export const previewToast = (hasKey: boolean, p: VoicePersona): string => (hasKey ? p.name + ' says hello here once the live transport lands — M3' : 'Voice preview needs a Gemini key — M3');
+/** The preview plays a live greeting; without a key it can only say so. */
+export const previewToast = (p: VoicePersona): string => 'Add a Gemini key to hear ' + p.name;
 
 /** Live model ids verified against the Gemini docs on 2026-10-10 (docs/plan.md §2). */
 export const MODELS: { value: string; label: string }[] = [

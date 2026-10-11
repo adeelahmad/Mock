@@ -1,5 +1,5 @@
 // Mock — the live connection interface. Two transports implement it: the real Gemini Live
-// WebSocket (M3) and a simulated one that replays scripted events for development, demos
+// WebSocket (`gemini.ts`) and a simulated one that replays scripted events for development, demos
 // and tests. The session controller never knows which one it has.
 
 export interface ToolDeclaration {
@@ -38,8 +38,10 @@ export type TransportEvent =
   | { type: 'turnComplete' }
   | { type: 'goAway'; timeLeftMs: number }
   | { type: 'resumption'; handle: string | null; resumable: boolean }
-  /** The recap has been spoken: the session is over (simulated; M3 derives it after [END]). */
+  /** The recap has been spoken: the session is over (simulated only; with Gemini the controller ends on [END] and waits for the recap). */
   | { type: 'sessionEnd'; focus?: string }
+  /** The next chunk of the mixed recording (real transport), in order from 0. */
+  | { type: 'recordingChunk'; blob: Blob; index: number }
   | { type: 'closed'; code?: number; reason?: string }
   | { type: 'error'; message: string };
 
@@ -61,6 +63,10 @@ export interface LiveTransport {
   on(listener: TransportListener): () => void;
   /** The mixed recording so far (mic + playback), when the transport records. */
   recordingBlob?(): Promise<Blob | null>;
+  /** Start recording a per-exchange clip of the mixed track. */
+  beginClip?(): void;
+  /** Stop the clip and return it. */
+  endClip?(): Promise<Blob | null>;
 }
 
 /** The one tool the model calls on every new main question. */

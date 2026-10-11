@@ -43,8 +43,8 @@ const ext = (mime: string): string => (mime.includes('mp4') ? '.m4a' : mime.incl
 
 export { importPrepFiles, importSummary, typeLabel, type PrepImport } from '../domain/prep-import.ts';
 import { importPrepFiles, importSummary } from '../domain/prep-import.ts';
-export { useHelloTest, type HelloState } from '../app/hello.ts';
-import { useHelloTest } from '../app/hello.ts';
+export { useHelloTest, useVoicePreview, type HelloState } from '../app/hello.ts';
+import { useHelloTest, useVoicePreview } from '../app/hello.ts';
 export { keyClick } from '../components/ui.tsx';
 import { keyClick } from '../components/ui.tsx';
 
@@ -93,6 +93,7 @@ export default function Settings() {
   useEffect(() => { setKeyDraft(gemini.key); }, [gemini.key]);
   const commitKey = () => { const k = keyDraft.trim(); if (k !== gemini.key) void setGemini({ key: k }); };
   const hello = useHelloTest();
+  const preview = useVoicePreview();
 
   // Pause slider: local value, written 150 ms after the last change.
   const [pause, setPause] = useState(settings.pauseMs);
@@ -226,7 +227,7 @@ export default function Settings() {
                         <span className="voice-mono">{p.mono}</span>
                         <span className="voice-text"><span className="voice-name">{p.name}</span><span className="voice-desc">{p.desc}</span></span>
                       </button>
-                      <button type="button" className="voice-play" aria-label={'Preview ' + p.name} onClick={() => toast(previewToast(gemini.hasKey, p))}><Icon.Play size={14} /></button>
+                      <button type="button" className="voice-play" aria-label={'Preview ' + p.name} onClick={() => preview(p)}><Icon.Play size={14} /></button>
                       <span className="voice-check" aria-hidden="true">{on ? '✓' : ''}</span>
                     </div>
                   );
