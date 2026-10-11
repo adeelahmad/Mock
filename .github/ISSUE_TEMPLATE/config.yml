@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/adeelahmad/Mock/discussions
+    about: Ask how to do something, share an areas CSV, or float an idea before filing it.
+  - name: Report a security issue
+    url: https://github.com/adeelahmad/Mock/security/advisories/new
+    about: Please report vulnerabilities privately, not as an issue.
+  - name: Docs
+    url: https://adeelahmad.github.io/Mock/
+    about: Guides for setup, imports, sync, Google Meet and running your own.

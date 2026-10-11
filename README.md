@@ -3,29 +3,145 @@
   <img alt="Mock - voice interview practice. Practise. Get coached. Try again." src=".github/assets/mock-banner-light.png" width="100%">
 </picture>
 
-# Mock
+<p align="center">
+  <b>Rehearse the interview out loud.</b><br>
+  A live voice interviewer asks the questions and follows up. Between answers, a coach tells you
+  what to fix, judged against your own stories and numbers.
+</p>
 
-A personal voice app for rehearsing an interview loop. A live interviewer (Gemini Live)
-asks questions on the **areas** the interview assesses (competencies, values, a company's
-principles) and probes with follow-ups; between answers a coach says, out loud, what to fix —
-judged against your own stories, numbers and notes. Every session is recorded, every answer
-gets an analysis card, every session a report, and progress builds across sessions.
+<p align="center">
+  <a href="https://github.com/adeelahmad/Mock/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/adeelahmad/Mock?sort=semver&color=F9AB00"></a>
+  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-1A73E8"></a>
+  <img alt="Go 1.26+" src="https://img.shields.io/badge/go-1.26%2B-00ADD8?logo=go&logoColor=white">
+  <img alt="Local-first PWA" src="https://img.shields.io/badge/PWA-local--first-5A0FC8">
+  <a href="https://adeelahmad.github.io/Mock/"><img alt="Docs" src="https://img.shields.io/badge/docs-site-202124"></a>
+</p>
 
-Areas are yours to define: import an areas CSV, or load the **AWS interview defaults** (the 16
-Leadership Principles as areas plus all the sample stories, questions, files and sessions) from
-first-run setup or Settings → Library & data. Areas, stories and questions import from CSV;
-each import offers a sample CSV to download and fill in (`src/domain/csv-templates.ts`).
+<p align="center">
+  <a href="https://adeelahmad.github.io/Mock/app/"><b>Try the demo</b></a> ·
+  <a href="https://adeelahmad.github.io/Mock/guide/getting-started">Get started</a> ·
+  <a href="#install">Install</a> ·
+  <a href="https://adeelahmad.github.io/Mock/">Docs</a>
+</p>
 
-Local-first: everything lives in your browser and works offline. Optionally, run the Mock
-binary (below: one file with the app, the server and the Meet bridge) and sign in with GitHub, Google or any OpenID Connect provider: your
-library, sessions and spend then follow you to every browser you sign in on. Without it,
-backups move data between phone and laptop. Your Gemini API key stays on each device and is
-sent only to Google.
+<p align="center">
+  <img src="docs/media/demo.gif" width="880" alt="A live drill: the interviewer asks a question, the answer is heard, and the coach scores it against the story notes">
+</p>
+
+```console
+curl -fsSL https://raw.githubusercontent.com/adeelahmad/Mock/main/install.sh | sh && mock
+```
+
+That's the whole app, the sign-in and sync server, and the Google Meet bridge in one binary.
+Open http://localhost:8787. No Gemini key yet? Everything runs on the built-in demo.
+
+## Why Mock
+
+Reading your notes is not rehearsing. Interviews are spoken, timed and interrupted, and the
+feedback you need is specific: *you said "significant" when your notes say $1.2M.*
+
+- **A live interviewer.** Gemini Live asks questions on the areas the loop assesses
+  (competencies, values, a company's principles), probes with follow-ups, and hears you out.
+  Hands-free: say "redo", "next" or "hint".
+- **A coach that knows your prep.** After each answer: a short spoken verdict and up to three
+  fixes, checked against your own stories, numbers and notes. The numbers you missed, your STAR
+  time split, "I" vs "we", pace and fillers.
+- **Progress across sessions.** Every session is recorded, every answer gets an analysis card,
+  every session a report. Weak areas come back until they aren't weak.
+- **Your areas, your library.** Import areas, stories and questions from CSV, or load the
+  built-in AWS Leadership Principles set to start.
+- **Local-first.** Everything lives in your browser and works offline. Your Gemini key stays
+  on your device and goes only to Google. Self-host the binary to sync across browsers.
+- **Interview in a real Google Meet call**, with a friend sitting in as a second interviewer.
+- **Know what it costs.** Every token is counted and priced, per area.
+
+<table>
+  <tr>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/media/practice-dark.png">
+        <img src="docs/media/practice-light.png" alt="Practice: today's suggested drill and readiness per area">
+      </picture>
+      <p align="center"><sub>Practice: today's drill, picked from your weakest areas</sub></p>
+    </td>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/media/session-dark.png">
+        <img src="docs/media/session-light.png" alt="A session report with an analysis card per answer">
+      </picture>
+      <p align="center"><sub>History: a report per session, a card per answer</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/media/progress-dark.png">
+        <img src="docs/media/progress-light.png" alt="Progress across sessions per area">
+      </picture>
+      <p align="center"><sub>Progress: every area, across every session</sub></p>
+    </td>
+    <td width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/media/library-dark.png">
+        <img src="docs/media/library-light.png" alt="The story library with numbers and notes">
+      </picture>
+      <p align="center"><sub>Library: your stories, with the numbers that matter</sub></p>
+    </td>
+  </tr>
+</table>
+
+## Install
+
+**One binary** (Linux and macOS, amd64 and arm64):
+
+```console
+curl -fsSL https://raw.githubusercontent.com/adeelahmad/Mock/main/install.sh | sh
+mock              # the app + sign-in + sync on http://localhost:8787
+mock --meet       # … and the Google Meet bridge
+```
+
+Or download a binary from [Releases](https://github.com/adeelahmad/Mock/releases/latest).
+`MOCK_VERSION=v0.1.0` pins a release; `MOCK_INSTALL_DIR` picks where it goes.
+
+**No install:** open the [hosted app](https://adeelahmad.github.io/Mock/app/) and add it to your
+home screen. **From source:** `make binary` (Node 22, Go 1.26+). **Proxmox:** a
+community-scripts helper, see [Deploy](#deploy).
+
+## How it works
+
+```
+ you ──voice──▶  Gemini Live interviewer  ──question / follow-up──▶ you
+                        │ tools: your stories, numbers, notes (RAG over your prep files)
+                        ▼
+                 coach (spoken)  ──▶  analysis card (Gemini Flash)  ──▶  session report
+                        │
+ browser: DuckDB-Wasm on IndexedDB · recordings · offline PWA
+ optional:  mock binary ── OAuth/OIDC sign-in · sync (SQLite/Postgres) · Meet bridge (Chromium)
+```
+
+## What it doesn't do
+
+- It doesn't invent your experience. The coach works from the stories and numbers you give it.
+- It isn't a hosted service. There's no account to create with us and no server of ours; the
+  only calls leave your browser for Google's Gemini API, with your key.
+- It doesn't run offline with a live interviewer: live sessions need a connection (the demo
+  doesn't).
+- No Windows binary yet; the hosted app works in any modern browser.
+
+## Status
+
+Young and moving fast. Every milestone in [`docs/plan.md`](docs/plan.md) has landed: the live
+interviewer and coach, recordings, analysis and reports, the installable PWA, sync, and Google
+Meet. Expect rough edges; [issues](https://github.com/adeelahmad/Mock/issues) and
+[ideas](https://github.com/adeelahmad/Mock/discussions) are welcome.
+
+## About this repo
 
 User docs: the site in `site/` (`make docs`), published with the app on GitHub Pages.
 Built to the Claude Design project in `design/` (the design is the spec). See `docs/plan.md`
 for the architecture and milestones, `docs/design-inventory.md` for the feature checklist, and
-`docs/STATUS.md` for where the work stands.
+`docs/STATUS.md` for where the work stands. Areas, stories and questions import from CSV; each
+import offers a sample CSV to download and fill in (`src/domain/csv-templates.ts`).
 
 ## Use it
 
@@ -97,7 +213,7 @@ bridge. It is pure Go (SQLite included), so it needs nothing else to run; only t
 needs a Chrome or Chromium beside it.
 
 ```
-make binary            # bin/mock for this machine (needs Node 22 and Go 1.24+ to build)
+make binary            # bin/mock for this machine (needs Node 22 and Go 1.26+ to build)
 make binaries          # bin/mock-{linux,darwin}-{amd64,arm64}
 ./bin/mock             # the app + sign-in + sync on http://localhost:8787
 ./bin/mock --meet      # … and the Meet bridge (ws://127.0.0.1:8788 and the main port)
@@ -172,7 +288,7 @@ script, using their engine): on the Proxmox host shell run
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/adeelahmad/Mock/main/proxmox/ct/mock.sh)"
 ```
 
-While the repo is private, either clone it on the host and run `bash proxmox/ct/mock.sh`, or
+From a private fork, either clone it on the host and run `bash proxmox/ct/mock.sh`, or
 `export MOCK_GITHUB_TOKEN=<read-only token>` and add
 `-H "Authorization: Bearer $MOCK_GITHUB_TOKEN"` to the curl (the token is kept in the
 container's git remote so `update` can pull).
@@ -254,3 +370,13 @@ scripts      design refs, app screenshots, icon renderer
 site         the docs and landing site (VitePress), published to GitHub Pages
 .github      assets/: README banners and the repository social preview (brand kit v1.0)
 ```
+
+
+## Contributing
+
+Bug reports, areas CSVs for interview loops you know, and PRs are all welcome. Start with
+[CONTRIBUTING.md](CONTRIBUTING.md); security reports go through [SECURITY.md](SECURITY.md).
+
+## License
+
+[MIT](LICENSE)

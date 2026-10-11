@@ -13,7 +13,7 @@ EMBED := internal/web/dist
 
 .DEFAULT_GOAL := help
 
-.PHONY: server serve start token bridge binary binaries embed go-test help install dev typecheck test test-watch build preview e2e check verify refs shots icons docs docs-build clean
+.PHONY: server serve start token bridge binary binaries embed go-test help install dev typecheck test test-watch build preview e2e check verify refs shots media icons docs docs-build clean
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-11s %s\n", $$1, $$2}'
@@ -96,6 +96,9 @@ refs: node_modules ## Design artboards -> tests/design-refs (needs network)
 
 shots: node_modules ## App screenshots -> tests/screenshots (dev server running)
 	npm run shots
+
+media: node_modules ## README screenshots + demo GIF -> docs/media (dev server running, needs ffmpeg)
+	npm run media
 
 icons: node_modules ## Re-render public/icons/*.png
 	npm run icons

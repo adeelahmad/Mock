@@ -7,7 +7,7 @@ a Chrome or Chromium beside it.
 
 ## Build
 
-Needs Node 22 and Go 1.24 or newer to build (not to run).
+Needs Node 22 and Go 1.26 or newer to build (not to run).
 
 ```sh
 make binary        # bin/mock for this machine

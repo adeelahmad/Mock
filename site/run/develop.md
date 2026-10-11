@@ -1,6 +1,6 @@
 # Develop
 
-Needs Node 22.18 or newer, and Go 1.24 or newer for the server and the [binary](/run/go-binary). Clone the repo, then use `make` (or the npm scripts underneath).
+Needs Node 22.18 or newer, and Go 1.26 or newer for the server and the [binary](/run/go-binary). Clone the repo, then use `make` (or the npm scripts underneath).
 
 ```sh
 git clone https://github.com/adeelahmad/Mock && cd Mock
