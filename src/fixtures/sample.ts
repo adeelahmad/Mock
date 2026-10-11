@@ -196,7 +196,7 @@ export const DEFAULT_SYSTEM_INSTRUCTION = 'You are interviewing me for a Senior 
 
 export const SETTINGS: Settings = {
   interviewDate: '2026-10-30', liveModel: 'gemini-3.8-live', textModel: 'gemini-3.8-flash', voice: 'Aoede', pauseMs: 2500,
-  systemInstruction: DEFAULT_SYSTEM_INSTRUCTION, loopSize: 5, coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 12345, lastBackupAt: null, onboarded: true,
+  systemInstruction: DEFAULT_SYSTEM_INSTRUCTION, loopSize: 5, coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 12345, lastBackupAt: null, onboarded: true, gamePlays: [],
 };
 
 /** What a brand-new install starts with: the LPs and settings only (plan D3). */
