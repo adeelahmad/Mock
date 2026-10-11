@@ -9,3 +9,6 @@ data
 bin
 /internal/web/dist/*
 !/internal/web/dist/.gitkeep
+site/public
+site/.vitepress/cache
+site/.vitepress/dist

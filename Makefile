@@ -13,7 +13,7 @@ EMBED := internal/web/dist
 
 .DEFAULT_GOAL := help
 
-.PHONY: server serve start token bridge binary binaries embed go-test help install dev typecheck test test-watch build preview e2e check verify refs shots icons clean
+.PHONY: server serve start token bridge binary binaries embed go-test help install dev typecheck test test-watch build preview e2e check verify refs shots icons docs docs-build clean
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-11s %s\n", $$1, $$2}'
@@ -85,6 +85,12 @@ check: node_modules ## Typecheck + unit tests + build, then Go vet + tests
 
 verify: check e2e ## Everything: check, then Playwright
 
+docs: node_modules ## This docs site, live on :5174
+	npm run docs
+
+docs-build: node_modules ## Build the docs site with the app at /app/ (site/.vitepress/dist)
+	npm run pages
+
 refs: node_modules ## Design artboards -> tests/design-refs (needs network)
 	npm run refs
 
@@ -95,5 +101,5 @@ icons: node_modules ## Re-render public/icons/*.png
 	npm run icons
 
 clean: ## Remove build output and test results
-	rm -rf dist bin test-results playwright-report
+	rm -rf dist bin test-results playwright-report site/.vitepress/dist site/.vitepress/cache
 	find $(EMBED) -mindepth 1 ! -name .gitkeep -delete
