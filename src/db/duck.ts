@@ -8,7 +8,8 @@ import { LPS, EMPTY_SETTINGS } from '../fixtures/sample.ts';
 import { sampleData as sampleTables } from './memory.ts';
 import type { Engine, Row } from './engine.ts';
 import type { Kv } from './kv.ts';
-import type { QuestionFilter, Repo, RepoMode } from './repo.ts';
+import type { QuestionFilter, Repo, RepoMode, UsageEntry } from './repo.ts';
+import { addToLedger } from '../domain/budget.ts';
 import type { MockBackup } from './backup.ts';
 import { SCHEMA_VERSION, TABLES, ddlAt, migrationsBetween, type Table } from './schema.ts';
 import { SnapshotStore, Snapshotter } from './snapshots.ts';
@@ -274,10 +275,19 @@ export class DuckRepo implements Repo {
   nextSessionNumber(): Promise<number> { return this.serial(async () => num((await this.q('SELECT coalesce(max(number), 0) AS n FROM session'))[0]?.n) + 1); }
 
   // ---------------------------------------------------------------- writes
+  addUsage(entries: UsageEntry[]): Promise<void> {
+    if (!entries.length) return Promise.resolve();
+    return this.serial(async () => {
+      const s = await this.readSettings();
+      await this.writeSettings({ ...s, usage: entries.reduce((l, e) => addToLedger(l, e.model, e.lpId, e.usage), s.usage ?? []) });
+      this.changed('setting');
+    });
+  }
   setSettings(patch: Partial<Settings>): Promise<void> {
     return this.serial(async () => { await this.writeSettings({ ...(await this.readSettings()), ...patch }); this.changed('setting'); });
   }
   resetLps(): Promise<void> { return this.serial(async () => { await this.writeLps(LPS); this.changed('lp'); }); }
+  setLps(lps: Lp[]): Promise<void> { return this.serial(async () => { await this.writeLps(lps); this.changed('lp'); }); }
   updateLp(id: string, patch: Partial<Pick<Lp, 'name' | 'description'>>): Promise<void> {
     return this.serial(async () => {
       if (patch.name !== undefined) await this.run('UPDATE lp SET name = ?, is_default = false WHERE id = ?', [patch.name, id]);

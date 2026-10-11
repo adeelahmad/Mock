@@ -15,7 +15,7 @@
 .live-mono { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--m-elev); border: 2px solid var(--m-line); color: var(--m-fg); font: 800 13px/1 var(--font-sans); letter-spacing: -.02em; transition: border-color var(--dur-base) var(--ease-standard); }
 .live-mono.speaking { border-color: var(--live-fg); }
 .live-round { font: 700 11px/1.2 var(--font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--live-fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.live-name { font: 700 15px/1.2 var(--font-sans); white-space: nowrap; }
+.live-name { font: 700 15px/1.2 var(--font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .live-elapsed { display: none; font: 500 13px/1.2 var(--font-sans); color: var(--m-fg2); white-space: nowrap; }
 .live-elapsed .mono { font-weight: 500; }
 .live-end { height: 36px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--m-line); background: transparent; color: var(--m-red); font: 700 13px/1 var(--font-sans); cursor: pointer; transition: background var(--dur-fast); }
@@ -95,6 +95,10 @@
 .live-hint { margin: 0 20px 10px; display: flex; align-items: center; gap: 10px; padding: 10px 8px 10px 12px; border-radius: 12px; background: var(--m-card); border: 1px solid var(--m-warm-line); animation: mock-in var(--dur-slow) var(--ease-standard); flex: none; }
 .live-hint > .ic-warm { flex: none; color: var(--m-warm); display: grid; }
 .live-hint-text { flex: 1; min-width: 0; font: 500 13px/1.35 var(--font-sans); }
+.live-source { display: flex; flex-direction: column; gap: 3px; padding: 8px 12px; border-top: 1px solid var(--m-line); }
+.live-hint-text .live-source { padding: 6px 0 0; border-top: none; }
+.live-source-from { font: 700 10px/1.2 var(--font-sans); letter-spacing: .06em; text-transform: uppercase; color: var(--m-fg3); }
+.live-source-text { font: 400 12.5px/1.45 var(--font-sans); color: var(--m-fg2); }
 .live-notes { margin: 0 20px 10px; border-radius: 12px; background: var(--m-card); border: 1px solid var(--m-line); overflow: hidden; animation: mock-in var(--dur-slow) var(--ease-standard); flex: none; }
 .live-notes-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border: none; background: transparent; color: var(--m-fg2); font: 700 11px/1.2 var(--font-sans); letter-spacing: .06em; text-transform: uppercase; text-align: left; }
 button.live-notes-head { cursor: pointer; }

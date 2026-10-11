@@ -67,7 +67,7 @@ describe('context tools', () => {
     const started = c.start({ mode: 'loop', focus: null, focusLabel: '', coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 1, systemInstruction: 'SYS', interviewers: INTERVIEWERS, lps: LPS, stories: STORIES, pauseMs: 2500, model: 'gemini-3.8-live', voice: 'Aoede', tools: contextTools(repo) });
     await until(() => !!sock()?.sent.length);
     const names = sock().sent[0].setup.tools[0].functionDeclarations.map((d: { name: string }) => d.name);
-    expect(names).toEqual(['new_question', 'get_story', 'find_questions', 'lp_history']);
+    expect(names).toEqual(['new_question', 'save_story', 'get_story', 'find_questions', 'lp_history']);
     sock().server({ setupComplete: {} });
     await started;
     sock().server({ toolCall: { functionCalls: [{ id: 'c1', name: 'get_story', args: { story: 'payments' } }, { id: 'c2', name: 'nope', args: {} }] } });

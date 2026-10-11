@@ -207,7 +207,7 @@ export function parseQuestionsFromCsv(text: string, lps: LpRef[] = DEFAULT_LPS):
   const col = (...names: string[]) => head.findIndex((h) => names.includes(h));
   const iText = col('text', 'question', 'prompt', 'title');
   const hasHeader = iText >= 0;
-  const iLp = hasHeader ? col('lp', 'lp_id', 'lpid', 'principle', 'leadership principle') : 1;
+  const iLp = hasHeader ? col('area', 'area_id', 'areas', 'lp', 'lp_id', 'lpid', 'principle', 'leadership principle', 'competency') : 1;
   const iSource = hasHeader ? col('source') : 2;
   const iDiff = hasHeader ? col('difficulty', 'level') : 3;
   const iTags = hasHeader ? col('tags', 'companies', 'company') : -1;
@@ -228,6 +228,76 @@ export function parseQuestionsFromCsv(text: string, lps: LpRef[] = DEFAULT_LPS):
     });
   }
   return out;
+}
+
+// ---------- stories and areas from CSV (the downloadable templates in csv-templates.ts) ----------
+
+const splitCells = (s: string): string[] => s.split(/\s*[;|·•]\s*/).map((x) => x.trim()).filter(Boolean);
+
+/**
+ * Header row required: title plus any of summary, situation, task, action, result, learning,
+ * areas ("Primary; Secondary", first is primary), numbers ("Label: value; Label: value").
+ * Rows without a title are skipped. Areas are resolved by id, short or name; unnamed ones are guessed.
+ */
+export function parseStoriesFromCsv(text: string, lps: LpRef[] = DEFAULT_LPS): ParsedStory[] {
+  const rows = splitCsv(text);
+  if (rows.length < 2) return [];
+  const head = rows[0].map((c) => c.toLowerCase().trim());
+  const col = (...names: string[]) => head.findIndex((h) => names.includes(h));
+  const iTitle = col('title', 'story', 'name');
+  if (iTitle < 0) return [];
+  const idx = { summary: col('summary'), situation: col('situation'), task: col('task'), action: col('action', 'actions'), result: col('result', 'results'), learning: col('learning', 'learnings', 'lesson') };
+  const iAreas = col('areas', 'area', 'lps', 'lp', 'principles');
+  const iNumbers = col('numbers', 'key numbers', 'metrics');
+  const at = (r: string[], i: number): string => (i >= 0 && i < r.length ? r[i] : '');
+  const out: ParsedStory[] = [];
+  for (const r of rows.slice(1)) {
+    const title = at(r, iTitle);
+    if (!title) continue;
+    const f = { summary: at(r, idx.summary), situation: at(r, idx.situation), task: at(r, idx.task), action: at(r, idx.action), result: at(r, idx.result), learning: at(r, idx.learning) };
+    const lpIds = Array.from(new Set(splitCells(at(r, iAreas)).map((n) => resolveLp(n, lps)).filter(Boolean)));
+    const numbers = splitCells(at(r, iNumbers)).map(keyNumber).filter((n) => n.value);
+    const summary = (f.summary || f.situation.split(/(?<=[.!?])\s/)[0] || '').slice(0, 240);
+    let suggestedLpIds = lpIds.slice();
+    if (!suggestedLpIds.length) { const g = guessLp([title, summary, f.situation, f.task, f.action, f.result].join(' '), lps); suggestedLpIds = [g.lpId, ...g.alternatives].filter(Boolean).slice(0, 2); }
+    out.push({ title, ...f, summary, numbers, lpIds, suggestedLpIds });
+  }
+  return out;
+}
+
+export interface ParsedArea { id: string; name: string; short: string; description: string }
+
+/** Header row: name plus optional short and description (and id). Rows without a name are skipped. */
+export function parseAreasFromCsv(text: string): ParsedArea[] {
+  const rows = splitCsv(text);
+  if (rows.length < 2) return [];
+  const head = rows[0].map((c) => c.toLowerCase().trim());
+  const col = (...names: string[]) => head.findIndex((h) => names.includes(h));
+  const iName = col('name', 'area', 'title');
+  if (iName < 0) return [];
+  const iShort = col('short', 'code', 'abbreviation'), iDesc = col('description', 'details', 'what it means'), iId = col('id');
+  const at = (r: string[], i: number): string => (i >= 0 && i < r.length ? r[i] : '');
+  const out: ParsedArea[] = [];
+  for (const r of rows.slice(1)) {
+    const name = at(r, iName);
+    if (!name || out.some((a) => loose(a.name) === loose(name))) continue;
+    const short = (at(r, iShort) || name.split(/\s+/).filter((w) => /^[A-Za-z]/.test(w)).slice(0, 2).map((w) => w[0]).join('')).toUpperCase().slice(0, 3);
+    const id = (at(r, iId) || loose(name).replace(/\s+/g, '_')).slice(0, 40);
+    out.push({ id, name, short, description: at(r, iDesc) });
+  }
+  return out;
+}
+
+/** Story rows from a file: CSV by extension, else the markdown parser (older story files still load). */
+export const parseStoriesFile = (name: string, text: string, lps: LpRef[] = DEFAULT_LPS): ParsedStory[] =>
+  /\.csv$/i.test(name) ? parseStoriesFromCsv(text, lps) : parseStoriesFromMarkdown(text, lps);
+
+/** What a CSV holds, from its header: stories (STAR columns), areas (name + description) or questions. */
+export function csvKind(text: string): 'stories' | 'areas' | 'questions' {
+  const head = (splitCsv(text.split(/\r?\n/, 1)[0] ?? '')[0] ?? []).map((c) => c.toLowerCase().trim());
+  if (head.some((h) => ['situation', 'action', 'result'].includes(h))) return 'stories';
+  if (head.includes('name') && !head.some((h) => ['question', 'text', 'prompt'].includes(h))) return 'areas';
+  return 'questions';
 }
 
 // ---------- stories from markdown ----------

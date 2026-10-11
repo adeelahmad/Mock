@@ -141,7 +141,7 @@ export default function Home() {
                   <span className="mono">{covered.size}/{lpRows.length || 16}</span> covered · <span style={{ color: 'var(--m-gold)' }}>{gaps} gaps</span>
                 </button>
               </div>
-              <div className="strip" aria-label="Readiness by Leadership Principle">
+              <div className="strip" aria-label="Readiness by area">
                 {lpRows.map((r) => { const d = v(r.verdict); return <button key={r.id} title={r.name + ' · ' + d.vLabel} aria-label={r.name + ' · ' + d.vLabel} style={{ background: d.vFill }} onClick={() => go(paths.lp(r.id))} />; })}
               </div>
               <div className="strip-labels" aria-hidden="true">{lpRows.map((r) => <span key={r.id}>{r.short}</span>)}</div>

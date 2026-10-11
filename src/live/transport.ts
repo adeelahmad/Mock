@@ -42,6 +42,8 @@ export type TransportEvent =
   | { type: 'sessionEnd'; focus?: string }
   /** The next chunk of the mixed recording (real transport), in order from 0. */
   | { type: 'recordingChunk'; blob: Blob; index: number }
+  /** Token counts for the budget (Gemini sends `usageMetadata` periodically, per response). */
+  | { type: 'usage'; usageMetadata: unknown }
   | { type: 'closed'; code?: number; reason?: string }
   | { type: 'error'; message: string };
 
@@ -79,10 +81,44 @@ export const NEW_QUESTION_TOOL: ToolDeclaration = {
     properties: {
       interviewer: { type: 'STRING', description: 'The interviewer asking, by name (e.g. "Dana Whitfield")' },
       question: { type: 'STRING', description: 'The exact question you will ask' },
-      lp: { type: 'STRING', description: 'The Leadership Principle being tested, by its full name' },
+      lp: { type: 'STRING', description: 'The area being tested, by its full name' },
       question_id: { type: 'STRING', description: 'The id of the question from the list, if it came from there' },
     },
     required: ['interviewer', 'question', 'lp'],
+  },
+};
+
+/** Retrieval over the candidate's prep files (resume, notes, past loops). Blocking: the model waits for the chunks. */
+export const SEARCH_PREP_TOOL: ToolDeclaration = {
+  name: 'search_prep',
+  description: "Search the candidate's uploaded prep files (resume, notes, past interview write-ups) for facts relevant to a query. Call it when the candidate is stuck, has no story, or asks for help, then use what comes back to build a STAR story with them. Returns the best passages with their file names.",
+  parameters: {
+    type: 'OBJECT',
+    properties: {
+      query: { type: 'STRING', description: 'What to look for: the question, the LP, or a project, team or skill the candidate mentioned' },
+      limit: { type: 'INTEGER', description: 'How many passages to return (default 4, max 8)' },
+    },
+    required: ['query'],
+  },
+};
+
+/** Saves a story the candidate built with the coach. */
+export const SAVE_STORY_TOOL: ToolDeclaration = {
+  name: 'save_story',
+  description: "Save a STAR story you built together with the candidate to their story library. Call it only after you read the story back and the candidate agreed to keep it.",
+  parameters: {
+    type: 'OBJECT',
+    properties: {
+      title: { type: 'STRING', description: 'A short title, e.g. "Payments outage rollback"' },
+      situation: { type: 'STRING', description: 'Situation, one or two sentences' },
+      task: { type: 'STRING', description: 'Task: what the candidate owned' },
+      action: { type: 'STRING', description: 'Actions the candidate took, first person' },
+      result: { type: 'STRING', description: 'Result, with numbers' },
+      learning: { type: 'STRING', description: 'What they learned or would do differently' },
+      lp: { type: 'STRING', description: 'The area it best answers, by its full name' },
+      numbers: { type: 'ARRAY', items: { type: 'STRING' }, description: 'Key numbers as "label: value", e.g. "latency: -40%"' },
+    },
+    required: ['title', 'situation', 'task', 'action', 'result'],
   },
 };
 

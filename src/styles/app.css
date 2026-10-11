@@ -148,7 +148,7 @@ input[type="number"].seed { width: 84px; background: var(--m-card); font-family:
 
 /* ---------- Tab bar (phone) + sidebar (desktop) ---------- */
 .tabbar { display: flex; justify-content: space-around; align-items: flex-start; padding: 10px 8px calc(env(safe-area-inset-bottom) + 10px); border-top: 1px solid var(--m-line); background: var(--m-card); }
-.tabbar > button { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 72px; border: none; background: transparent; cursor: pointer; color: var(--m-fg3); font: 600 11px/1 var(--font-sans); padding: 0; }
+.tabbar > button { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 64px; border: none; background: transparent; cursor: pointer; color: var(--m-fg3); font: 600 11px/1 var(--font-sans); padding: 0; }
 .tabbar > button.on { color: var(--m-fg); }
 .tabbar > button > svg { width: 24px; height: 24px; }
 .sidebar { display: none; }
@@ -244,3 +244,34 @@ button, a, [role="button"], input, select, textarea, label { -webkit-tap-highlig
 @media (display-mode: standalone) and (orientation: landscape) {
   .app { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
 }
+
+/* ---------- Gemini spend (header pill + per-LP popover) ---------- */
+.spendbar { position: absolute; z-index: 30; top: calc(env(safe-area-inset-top) + 10px); right: 12px; }
+.spend-pill { display: inline-flex; align-items: baseline; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--m-line); background: var(--m-card); color: var(--m-fg); cursor: pointer; font: 500 11px/24px var(--font-sans); box-shadow: 0 1px 2px rgb(0 0 0 / 0.06); }
+.spendbar.compact { position: relative; top: auto; right: auto; }
+@media (max-width: 899px) { .spendbar.compact .spend-label { display: none; } .spendbar.compact .spend-pill { padding: 0 8px; } .spendbar.compact .spend-pop { position: fixed; top: calc(env(safe-area-inset-top) + 92px); right: 12px; } }
+.spend-pill:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+.spend-label { color: var(--m-fg2); }
+.spend-total { font: 600 12px/24px var(--font-mono); font-variant-numeric: tabular-nums; }
+.spend-pop { position: absolute; right: 0; top: 32px; width: min(320px, calc(100vw - 24px)); max-height: min(70vh, 520px); overflow: auto; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--m-line); background: var(--m-card); box-shadow: 0 8px 28px rgb(0 0 0 / 0.16); display: flex; flex-direction: column; gap: 8px; }
+.spend-head { display: flex; justify-content: space-between; align-items: baseline; }
+.spend-row { display: grid; grid-template-columns: 1fr auto; column-gap: 10px; row-gap: 3px; font: 400 13px/1.25 var(--font-sans); }
+.spend-row.total { border-top: 1px solid var(--m-line); padding-top: 8px; font-weight: 600; }
+.spend-usd { font-variant-numeric: tabular-nums; font-size: 12px; }
+.spend-meter { grid-column: 1 / -1; height: 3px; border-radius: 2px; background: var(--m-line); overflow: hidden; }
+.spend-meter > span { display: block; height: 100%; background: var(--m-warm); }
+.spend-note { font-size: 11px; }
+/* Leave room for the pill in screen heads that put a control at the right edge. */
+@media (max-width: 899px) { .shell .screen-head, .shell .screen-head.back { padding-right: 104px; } }
+@media (min-width: 900px) { .spendbar.float { display: none; } }
+.spendbar.side { position: relative; top: auto; right: auto; margin: 0 0 8px; }
+.spendbar.side .spend-pill { width: 100%; height: 36px; border-radius: 10px; justify-content: space-between; padding: 0 12px; font-size: 12px; line-height: 34px; }
+.spendbar.side .spend-total { font-size: 14px; line-height: 34px; }
+.spendbar.side .spend-pop { top: auto; bottom: 42px; left: 0; right: auto; }
+.price-table { display: flex; flex-direction: column; gap: 6px; overflow-x: auto; }
+.price-row { display: grid; grid-template-columns: minmax(150px, 2fr) repeat(4, minmax(56px, 1fr)) 24px; gap: 6px; align-items: center; min-width: 440px; }
+.price-row.head { font: 500 11px/1.2 var(--font-sans); color: var(--m-fg2); }
+.price-in { height: 30px; min-width: 0; padding: 0 8px; border-radius: 8px; border: 1px solid var(--m-line); background: transparent; color: var(--m-fg); font: 400 12px/1 var(--font-mono); }
+.price-in.num { text-align: right; }
+.price-in:focus { outline: none; box-shadow: var(--ring-focus); }
+.price-x { border: none; background: transparent; color: var(--m-fg3); font-size: 16px; cursor: pointer; }

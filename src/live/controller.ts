@@ -6,13 +6,15 @@
 // subscribes to the state.
 
 import { initialState, reduce, type SessionEvent, type SessionState } from '../domain/session-machine.ts';
-import type { Analysis, Coaching, Exchange, Interviewer, Lp, Mode, QuestionSourceSetting, Session, Story, TranscriptEvent } from '../domain/types.ts';
+import type { Analysis, Coaching, Exchange, Interviewer, KeyNumber, Lp, Mode, QuestionSourceSetting, Session, Story, TranscriptEvent } from '../domain/types.ts';
 import type { Repo } from '../db/repo.ts';
 import { newId } from '../db/repo.ts';
-import { NEW_QUESTION_TOOL, type LiveTransport, type ToolCall, type TransportEvent } from './transport.ts';
+import { NEW_QUESTION_TOOL, SAVE_STORY_TOOL, SEARCH_PREP_TOOL, type LiveTransport, type ToolCall, type TransportEvent } from './transport.ts';
+import type { Hit } from '../rag/knowledge.ts';
 import type { Analyzer } from './analyzer.ts';
 import { LocalReporter, reportInput, type Reporter } from './reporter.ts';
 import type { ToolHandler } from './context-tools.ts';
+import { reportUsage } from '../gemini/usage.ts';
 
 export interface StartOptions {
   mode: Mode;
@@ -31,9 +33,13 @@ export interface StartOptions {
   voice: string;
   /** A fixed first question (the "ask me this live" path). */
   questionText?: string | null;
-  /** Extra tools next to new_question (the library lookups in context-tools.ts). */
+  /** Search over the prep files (the knowledge index): the hint's source and the search_prep tool. */
+  retriever?: Retriever | null;
+  /** Extra tools next to the built-in ones (the library lookups in context-tools.ts). */
   tools?: ToolHandler[];
 }
+
+export type Retriever = (query: string, k: number) => Promise<Hit[]>;
 
 export type Listener = (s: SessionState, meta: ControllerMeta) => void;
 export interface ControllerMeta {
@@ -43,6 +49,10 @@ export interface ControllerMeta {
   mode: Mode;
   /** The system prompt's token budget, for the debug panel. */
   context: ContextInfo | null;
+  /** The prep-file passage closest to the current question (the hint shows it). */
+  source: Hit | null;
+  /** The last story the coach saved with the candidate (save_story). */
+  savedStory: { id: string; title: string } | null;
 }
 
 export interface ContextInfo { estimated: number; counted: number | null; budget: number; trimmed: string[] }
@@ -54,7 +64,7 @@ const SPEECH_ON = 0.05, SPEECH_OFF = 0.025; // mic level hysteresis
 
 export class SessionController {
   state: SessionState = initialState(0);
-  meta: ControllerMeta = { sessionId: null, sessionNumber: 0, storyNotes: true, notes: [], demo: false, interviewer: null, mode: 'loop', context: null };
+  meta: ControllerMeta = { sessionId: null, sessionNumber: 0, storyNotes: true, notes: [], demo: false, interviewer: null, mode: 'loop', context: null, source: null, savedStory: null };
   private listeners = new Set<Listener>();
   private off: (() => void) | null = null;
   private tick: ReturnType<typeof setInterval> | null = null;
@@ -101,12 +111,12 @@ export class SessionController {
     };
     this.session = session;
     const first = opts.interviewers.find((i) => i.role === 'Bar Raiser') ?? opts.interviewers[0] ?? null;
-    this.meta = { ...this.meta, sessionId: session.id, sessionNumber: number, storyNotes: opts.storyNotes, notes: [], interviewer: first, mode: opts.mode };
+    this.meta = { ...this.meta, sessionId: session.id, sessionNumber: number, storyNotes: opts.storyNotes, notes: [], interviewer: first, mode: opts.mode, source: null, savedStory: null };
     await this.repo.insertSession(session);
     this.dispatch({ type: 'CONNECT', now: this.now() });
     this.off = this.transport.on((e) => this.onTransport(e));
     try {
-      await this.transport.connect({ model: opts.model, voice: opts.voice, systemInstruction: opts.systemInstruction, tools: [NEW_QUESTION_TOOL, ...(opts.tools ?? []).map((t) => t.declaration)], silenceDurationMs: opts.pauseMs, resumptionHandle: null, seed: opts.seed });
+      await this.transport.connect({ model: opts.model, voice: opts.voice, systemInstruction: opts.systemInstruction, tools: [NEW_QUESTION_TOOL, ...(opts.retriever ? [SEARCH_PREP_TOOL] : []), SAVE_STORY_TOOL, ...(opts.tools ?? []).map((t) => t.declaration)], silenceDurationMs: opts.pauseMs, resumptionHandle: null, seed: opts.seed });
     } catch (err) {
       this.dispatch({ type: 'ERROR', now: this.now(), message: (err as Error).message || 'Could not connect' });
       await this.end('');
@@ -121,7 +131,11 @@ export class SessionController {
   redo(): void { this.transport.stopPlayback(); this.transport.sendText('[REDO]'); }
   next(): void { this.transport.stopPlayback(); this.transport.sendText('[NEXT]'); }
   feedback(): void { this.transport.sendText('[FEEDBACK]'); }
-  hint(): void { this.dispatch({ type: 'HINT', now: this.now(), text: this.hintFor(this.state.lpName) }); this.transport.sendText('[HINT]'); }
+  hint(): void {
+    this.dispatch({ type: 'HINT', now: this.now(), text: this.hintFor(this.state.lpName) });
+    if (!this.meta.source) void this.findSource(this.state.qText, this.state.lpName);
+    this.transport.sendText('[HINT]');
+  }
   dismissHint(): void { this.dispatch({ type: 'DISMISS_HINT', now: this.now() }); }
   clearError(): void { this.dispatch({ type: 'CLEAR_ERROR', now: this.now() }); }
   /** The context builder's numbers (and the countTokens confirmation when it lands). */
@@ -217,6 +231,7 @@ export class SessionController {
       case 'turnComplete': if (this.ended) this.turnsAfterEnd++; break;
       case 'recordingChunk': void this.saveChunk(e.blob, e.index); break;
       case 'toolCallCancellation': break;
+      case 'usage': if (this.opts) reportUsage(this.opts.model, this.exchange?.lpId ?? (this.opts.mode === 'lp' ? this.opts.focus : null) ?? null, e.usageMetadata); break;
     }
   }
 
@@ -229,9 +244,26 @@ export class SessionController {
         await this.closeExchange(now);
         this.dispatch({ type: 'NEW_QUESTION', now, interviewer: iv, question: a.question ?? '', lp: a.lp ?? '', questionId: a.question_id ?? null, hint: this.hintFor(a.lp ?? '') });
         this.openExchange(a.question ?? '', a.lp ?? '', a.question_id ?? null, iv, now);
-        this.meta = { ...this.meta, notes: this.notesFor(a.lp ?? '') };
+        this.meta = { ...this.meta, notes: this.notesFor(a.lp ?? ''), source: null };
         this.emit();
+        void this.findSource(a.question ?? '', a.lp ?? '');
         responses.push({ id: c.id, name: c.name, response: { ok: true, scheduling: 'SILENT' } });
+      } else if (c.name === 'search_prep') {
+        const a = c.args as { query?: string; limit?: number };
+        const k = Math.min(8, Math.max(1, Math.round(Number(a.limit) || 4)));
+        try {
+          const hits = this.opts?.retriever && a.query ? await this.opts.retriever(a.query, k) : [];
+          responses.push({ id: c.id, name: c.name, response: { ok: true, passages: hits.map((h) => ({ file: h.fileName, section: h.heading || undefined, text: h.text })) } });
+        } catch (err) {
+          responses.push({ id: c.id, name: c.name, response: { ok: false, error: (err as Error).message || 'search failed' } });
+        }
+      } else if (c.name === 'save_story') {
+        try {
+          const story = await this.saveStory(c.args);
+          responses.push({ id: c.id, name: c.name, response: { ok: true, story_id: story.id } });
+        } catch (err) {
+          responses.push({ id: c.id, name: c.name, response: { ok: false, error: (err as Error).message || 'save failed' } });
+        }
       } else {
         const tool = this.opts?.tools?.find((t) => t.declaration.name === c.name);
         let response: Record<string, unknown>;
@@ -241,6 +273,40 @@ export class SessionController {
       }
     }
     this.transport.sendToolResponse(responses);
+  }
+
+  /** The passage the hint shows: the prep-file chunk closest to the question (kept only while it is still the current one). */
+  private async findSource(question: string, lp: string): Promise<void> {
+    const r = this.opts?.retriever;
+    if (!r || !question) return;
+    try {
+      const [hit] = await r(question + (lp ? ' (' + lp + ')' : ''), 1);
+      if (hit && this.state.qText === question) { this.meta = { ...this.meta, source: hit }; this.emit(); }
+    } catch { /* the hint falls back to the story nudge */ }
+  }
+
+  /** save_story: a story built live with the coach joins the library, linked to its LP. */
+  private async saveStory(args: Record<string, unknown>): Promise<Story> {
+    const s = (k: string): string => (typeof args[k] === 'string' ? (args[k] as string).trim() : '');
+    const title = s('title');
+    if (!title || !(s('situation') || s('action') || s('result'))) throw new Error('a story needs a title and its STAR parts');
+    const raw = Array.isArray(args.numbers) ? (args.numbers as unknown[]) : typeof args.numbers === 'string' ? String(args.numbers).split(/[;\n]/) : [];
+    const numbers: KeyNumber[] = raw.map((x) => String(x).trim()).filter(Boolean).map((x) => {
+      const i = x.indexOf(':');
+      return i > 0 ? { label: x.slice(0, i).trim(), value: x.slice(i + 1).trim() } : { label: '', value: x };
+    });
+    const lp = this.lpFor(s('lp') || this.state.lpName);
+    const at = new Date(this.now()).toISOString();
+    const existing = this.opts?.stories.find((x) => x.title.toLowerCase() === title.toLowerCase());
+    const story: Story = {
+      id: existing?.id ?? newId('st'), title, summary: s('result').split(/(?<=[.!?])\s/)[0] ?? '', situation: s('situation'), task: s('task'), action: s('action'), result: s('result'), learning: s('learning'),
+      numbers, links: lp ? [{ lpId: lp.id, role: 'primary' }] : [], createdAt: existing?.createdAt ?? at, updatedAt: at,
+    };
+    await this.repo.upsertStory(story);
+    if (this.opts) this.opts = { ...this.opts, stories: [...this.opts.stories.filter((x) => x.id !== story.id), story] };
+    this.meta = { ...this.meta, savedStory: { id: story.id, title: story.title }, notes: this.notesFor(this.state.lpName) };
+    this.emit();
+    return story;
   }
 
   /** Chunks land in storage as they arrive, so a crash loses at most a second of audio. */

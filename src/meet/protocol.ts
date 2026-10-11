@@ -5,7 +5,7 @@
 // and the Node bridge, so this file uses erasable TypeScript only (Node runs it unbuilt).
 
 export const BRIDGE_VERSION = 1;
-export const DEFAULT_BRIDGE_URL = 'ws://127.0.0.1:8787';
+export const DEFAULT_BRIDGE_URL = 'ws://127.0.0.1:8788';
 export const DEFAULT_BOT_NAME = 'Mock · Interviewer';
 
 /** Where the bot is: launching the browser, on the join screen, waiting to be let in, in the call, out of it. */

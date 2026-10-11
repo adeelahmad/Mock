@@ -18,7 +18,7 @@ test.describe('history and progress', () => {
 
   test('progress shows the heatmap, weakest LPs and the trend', async ({ page }) => {
     await open(page, '#/progress');
-    await expect(page.getByText(/Weakest LPs/)).toBeVisible();
+    await expect(page.getByText(/Weakest areas/)).toBeVisible();
     await expect(page.getByRole('button', { name: /^Drill / }).first()).toBeVisible();
     await expect(page.getByText(/Trend · average verdict/).filter({ visible: true })).toBeVisible();
     await expect(page.getByText(/Story usage/)).toBeVisible();

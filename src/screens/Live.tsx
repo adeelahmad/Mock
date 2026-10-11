@@ -5,6 +5,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../app/store.tsx';
 import { paths } from '../app/router.ts';
+import { SpendBar } from '../components/Budget.tsx';
 import LiveScreen, { type AnalysisCardData, type LiveAction, type LiveCoaching, type LivePhase, type LiveRecap, type LiveTurn } from '../components/LiveScreen.tsx';
 import { fmtClock } from '../components/ui.tsx';
 import { isPaused, visiblePhase, NO_ONE, type SessionState, type Turn } from '../domain/session-machine.ts';
@@ -172,6 +173,10 @@ export default function Live() {
 
   const turns: LiveTurn[] = useMemo(() => (state?.turns ?? []).map((t) => ({ speaker: t.speaker, text: t.text, mono: state?.interviewer.mono ?? 'AI' })), [state]);
 
+  // ---- a story the coach built with you lands in the library
+  const savedId = meta?.savedStory?.id;
+  useEffect(() => { if (savedId && meta?.savedStory) toast('Saved “' + meta.savedStory.title + '” to your stories.'); }, [savedId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ---- errors surface as toasts; the session carries on
   useEffect(() => { if (state?.error) { toast(state.error); controller?.clearError(); } }, [state?.error, controller, toast]);
 
@@ -243,6 +248,7 @@ export default function Live() {
     <>
     {debug && <ContextPanel meta={meta} onClose={() => setDebug(false)} />}
     <LiveScreen
+      spend={<SpendBar variant="compact" />}
       phase={phase}
       paused={paused}
       reconnecting={state.reconnecting}
@@ -264,6 +270,7 @@ export default function Live() {
       turns={turns}
       hint={state.hint}
       hintText={state.hintText}
+      source={meta.source ? { file: meta.source.fileName, heading: meta.source.heading, text: meta.source.text } : null}
       notes={meta.storyNotes ? meta.notes : []}
       notesAllowed={meta.storyNotes}
       coaching={coaching}

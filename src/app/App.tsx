@@ -7,6 +7,7 @@ import { useApp } from './store.tsx';
 import { paths } from './router.ts';
 import { useDeepLinks } from './deeplinks.ts';
 import { Icon } from '../components/ui.tsx';
+import { SpendBar } from '../components/Budget.tsx';
 import { daysUntil } from '../domain/selectors.ts';
 import Home from '../screens/Home.tsx';
 import Library from '../screens/Library.tsx';
@@ -20,6 +21,7 @@ import Settings from '../screens/Settings.tsx';
 import { usePwa } from './pwa.ts';
 import Onboarding from '../screens/Onboarding.tsx';
 import Live from '../screens/Live.tsx';
+import Game from '../screens/Game.tsx';
 import { SetupSheet, AnswerSheet, AddQuestionSheet, AddStorySheet } from '../screens/Sheets.tsx';
 
 function Sidebar() {
@@ -35,12 +37,14 @@ function Sidebar() {
       {item('library', 'Library', <Icon.Library />, paths.library('lps'))}
       {route.tab === 'library' && (
         <div className="nav-sub">
-          {(['lps', 'stories', 'questions', 'files'] as const).map((s) => <button key={s} className={lib === s ? 'on' : ''} onClick={() => go(paths.library(s))}>{{ lps: 'LPs', stories: 'Stories', questions: 'Questions', files: 'Files' }[s]}</button>)}
+          {(['lps', 'stories', 'questions', 'files'] as const).map((s) => <button key={s} className={lib === s ? 'on' : ''} onClick={() => go(paths.library(s))}>{{ lps: 'Areas', stories: 'Stories', questions: 'Questions', files: 'Files' }[s]}</button>)}
         </div>
       )}
       {item('history', 'History', <Icon.Clock />, paths.history)}
       {item('progress', 'Progress', <Icon.Trend />, paths.progress)}
+      {item('game', 'Game', <Icon.Target />, paths.game)}
       <span style={{ flex: 1 }} />
+      <SpendBar variant="side" />
       <div className="nav-days"><span className="sub" style={{ font: '500 12px/1.2 var(--font-sans)' }}>Interview</span><span className="mono" style={{ font: '500 14px/1 var(--font-mono)', color: 'var(--m-warm)' }}>{daysUntil(data.settings.interviewDate)} days</span></div>
       <button className={'nav-item' + (route.path === paths.settings ? ' on' : '')} onClick={() => go(paths.settings)}><Icon.Settings />Settings</button>
     </nav>
@@ -51,7 +55,7 @@ function TabBar() {
   const { route, go } = useApp();
   const tabs: [string, string, React.ReactNode, string][] = [
     ['practice', 'Practice', <Icon.Mic key="p" />, paths.practice], ['library', 'Library', <Icon.Library key="l" />, paths.library('lps')],
-    ['history', 'History', <Icon.Clock key="h" />, paths.history], ['progress', 'Progress', <Icon.Trend key="g" />, paths.progress],
+    ['history', 'History', <Icon.Clock key="h" />, paths.history], ['progress', 'Progress', <Icon.Trend key="g" />, paths.progress], ['game', 'Game', <Icon.Target key="t" />, paths.game],
   ];
   return (
     <nav className="tabbar" aria-label="Tabs">
@@ -74,6 +78,7 @@ function Screen() {
   }
   if (a === 'history') return b ? <SessionDetail id={b} /> : <History />;
   if (a === 'progress') return <Progress />;
+  if (a === 'game') return <Game />;
   if (!data.settings.onboarded) return <Onboarding />;
   return <Home />;
 }
@@ -84,12 +89,13 @@ export default function App() {
   const pwa = usePwa();
   const inLive = route.path === paths.live && live.state;
   const firstRun = !data.settings.onboarded || route.path === paths.onboarding;
-  const showTabs = !inLive && ['practice', 'library', 'history', 'progress'].includes(route.tab) && route.parts.length <= 2 && route.path !== paths.settings && route.path !== paths.onboarding;
+  const showTabs = !inLive && ['practice', 'library', 'history', 'progress', 'game'].includes(route.tab) && route.parts.length <= 2 && route.path !== paths.settings && route.path !== paths.onboarding;
   return (
     <div className="app">
       {!inLive && !firstRun && <Sidebar />}
-      <div className="shell">
+      <div className="shell" style={{ position: 'relative' }}>
         {inLive ? <Live /> : <Screen />}
+        {ready && !firstRun && !inLive && <SpendBar />}
         {showTabs && <TabBar />}
       </div>
       <SetupSheet open={sheet.setup} onClose={closeSheets} />

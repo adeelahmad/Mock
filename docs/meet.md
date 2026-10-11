@@ -11,7 +11,7 @@ other.
 ```
  Mock app (browser tab)                     Meet bridge (Node, same computer)        Google Meet
  ─────────────────────────                  ──────────────────────────────────       ───────────
- SessionController ── GeminiLiveTransport   ws://127.0.0.1:8787                      Chromium (Playwright)
+ SessionController ── GeminiLiveTransport   ws://127.0.0.1:8788                      Chromium (Playwright)
         │                 │  AudioIO = MeetAudio ◄─ pcm 16 kHz ── server.ts ◄── bot.ts ◄── inpage.ts: RTCPeerConnection hook
         │                 │                      ── play 24 kHz ─►          ──►       ──► inpage.ts: getUserMedia = Mock's voice
    repo / History    Gemini Live (key stays here)  ── tile ───────►                    ──► canvas camera tile
@@ -26,7 +26,7 @@ second Gemini client and no session logic in Node.
 ## Flow
 
 1. **Bridge.** `npm run meet-bridge` on the candidate's computer prints a pairing code. In
-   Practice → *Interview in Google Meet* the app connects to `ws://127.0.0.1:8787` with that code.
+   Practice → *Interview in Google Meet* the app connects to `ws://127.0.0.1:8788` with that code.
 2. **Meeting.** Paste a Meet link or code, or *Sign in with Google · create a meeting*: Google
    Identity Services' token client (scope `meetings.space.created`, token kept in memory), then
    `POST https://meet.googleapis.com/v2/spaces` with `config.accessType = OPEN`.

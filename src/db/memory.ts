@@ -4,7 +4,8 @@
 
 import type { Analysis, Exchange, Lp, LpRole, PrepFile, Question, Report, Session, Settings, Story, TranscriptEvent } from '../domain/types.ts';
 import * as SAMPLE from '../fixtures/sample.ts';
-import type { QuestionFilter, Repo, RepoMode } from './repo.ts';
+import type { QuestionFilter, Repo, RepoMode, UsageEntry } from './repo.ts';
+import { addToLedger } from '../domain/budget.ts';
 import type { MockBackup } from './backup.ts';
 import { MemoryKv, type Kv } from './kv.ts';
 
@@ -63,7 +64,13 @@ export class MemoryRepo implements Repo {
   async settings(): Promise<Settings> { return this.clone(this.d.settings); }
 
   async setSettings(patch: Partial<Settings>): Promise<void> { this.d.settings = { ...this.d.settings, ...patch }; this.changed(); }
+  async addUsage(entries: UsageEntry[]): Promise<void> {
+    if (!entries.length) return;
+    this.d.settings = { ...this.d.settings, usage: entries.reduce((l, e) => addToLedger(l, e.model, e.lpId, e.usage), this.d.settings.usage ?? []) };
+    this.changed();
+  }
   async resetLps(): Promise<void> { this.d.lps = this.clone(SAMPLE.LPS); this.changed(); }
+  async setLps(lps: Lp[]): Promise<void> { this.d.lps = this.clone(lps); this.changed(); }
   async updateLp(id: string, patch: Partial<Pick<Lp, 'name' | 'description'>>): Promise<void> { const l = this.d.lps.find((x) => x.id === id); if (l) Object.assign(l, patch, { isDefault: false }); this.changed(); }
   async upsertStory(story: Story): Promise<void> { const i = this.d.stories.findIndex((s) => s.id === story.id); if (i >= 0) this.d.stories[i] = this.clone(story); else this.d.stories.push(this.clone(story)); this.changed(); }
   async deleteStory(id: string): Promise<void> { this.d.stories = this.d.stories.filter((s) => s.id !== id); this.changed(); }

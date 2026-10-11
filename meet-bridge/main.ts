@@ -1,4 +1,4 @@
-// Mock Meet bridge — `npm run meet-bridge [-- --headed] [--port 8787] [--chrome] [--profile DIR]`.
+// Mock Meet bridge — `npm run meet-bridge [-- --headed] [--port 8788] [--chrome] [--profile DIR]`.
 // Prints the pairing code the app asks for. Environment: MOCK_BRIDGE_CODE (fixed code),
 // MOCK_BRIDGE_ORIGINS (comma-separated app origins), MOCK_BRIDGE_CHROMIUM (browser binary).
 
@@ -8,7 +8,7 @@ import { DEFAULT_ORIGINS, pairingCode, startBridge } from './server.ts';
 
 const { values } = parseArgs({
   options: {
-    port: { type: 'string', default: '8787' },
+    port: { type: 'string', default: '8788' },
     headed: { type: 'boolean', default: false },
     chrome: { type: 'boolean', default: false },
     profile: { type: 'string' },

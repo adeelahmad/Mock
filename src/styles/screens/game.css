@@ -1,0 +1,49 @@
+/* Game: the start view (result, best score, accuracy by area, recent games) and the play view
+   (question card, area buttons, reveal). Tokens only; shared vocabulary lives in app.css. */
+
+.game .screen-body > * { max-width: 760px; width: 100%; }
+.gm-result { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.gm-big { font: 700 36px/1 var(--font-mono); }
+.game .of { color: var(--m-fg3); font-size: .55em; }
+.gm-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.gm-tile { display: flex; flex-direction: column; gap: 6px; }
+.gm-tile-n { font: 700 26px/1 var(--font-mono); }
+.gm-note { text-align: center; }
+.gm-acc { gap: 12px; }
+.gm-acc-name { flex: 0 1 46%; min-width: 0; font: 500 13px/1.25 var(--font-sans); }
+.gm-bar { flex: 1; height: 8px; border-radius: 999px; background: var(--m-elev); overflow: hidden; }
+.gm-bar > span { display: block; height: 100%; border-radius: 999px; }
+.gm-bar > .good { background: var(--m-green-fill); }
+.gm-bar > .mid { background: var(--m-gold-fill); }
+.gm-bar > .low { background: var(--m-red-fill); }
+.gm-acc-pct { width: 40px; text-align: right; font-size: 12px; }
+.gm-play { justify-content: space-between; }
+.gm-play-score { font-size: 14px; font-weight: 700; }
+
+.gm-progress { font-size: 13px; color: var(--m-fg2); }
+.gm-score { font: 700 20px/1 var(--font-mono); min-width: 40px; text-align: right; }
+.gm-q { display: flex; flex-direction: column; gap: 8px; }
+.gm-q-text { margin: 0; font: 600 18px/1.4 var(--font-sans); text-wrap: pretty; }
+.gm-areas { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.gm-area {
+  position: relative; min-height: 56px; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--m-line);
+  background: var(--m-card); color: var(--m-fg); text-align: left; cursor: pointer; display: flex; flex-direction: column;
+  justify-content: center; gap: 4px; font: 600 13px/1.25 var(--font-sans);
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none;
+  transition: background var(--dur-fast), border-color var(--dur-fast), transform var(--dur-fast);
+}
+.gm-area:hover { background: var(--m-elev); }
+.gm-area:active { transform: scale(.97); }
+.gm-area:focus-visible { outline: none; box-shadow: var(--ring-focus); }
+.gm-area.sel { background: var(--m-cool-tint); border-color: var(--m-cool-fill); color: var(--m-cool); }
+.gm-area.hit { background: var(--m-green-tint); border-color: var(--m-green-fill); color: var(--m-green); }
+.gm-area.wrong { background: var(--m-red-tint); border-color: var(--m-red-fill); color: var(--m-red); }
+.gm-area.miss { border-style: dashed; border-color: var(--m-green-fill); color: var(--m-green); }
+.gm-area.dim { opacity: .45; cursor: default; }
+.gm-area.dim:hover { background: var(--m-card); }
+.gm-area-badge { font: 700 11px/1 var(--font-mono); text-transform: uppercase; letter-spacing: .02em; }
+.gm-delta { display: flex; align-items: baseline; gap: 10px; justify-content: center; }
+.gm-delta > .mono { font: 700 22px/1 var(--font-mono); }
+.gm-delta.up > .mono { color: var(--m-green); }
+.gm-delta.down > .mono { color: var(--m-red); }
+@media (min-width: 900px) { .game .screen-foot, .game .screen-head { max-width: 800px; width: 100%; } }
