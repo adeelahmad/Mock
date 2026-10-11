@@ -72,7 +72,7 @@ for (const theme of ['light', 'dark']) {
         const want = ['connecting', 'interviewer', 'answering', 'thinking', 'coaching', 'ended'];
         const got = new Set();
         while (Date.now() - t0 < 150_000 && got.size < want.length) {
-          const st = await page.locator('.live').getAttribute('data-state').catch(() => null);
+          const st = await page.locator('.live').getAttribute('data-phase').catch(() => null);
           const paused = await page.locator('.live').getAttribute('data-paused').catch(() => null);
           if (st && !got.has(st) && want.includes(st) && paused !== 'true') { got.add(st); await page.waitForTimeout(st === 'coaching' ? 2500 : 300); await shoot(page, dir, 'live-' + st); }
           if (st === 'coaching' && got.has('coaching') && !got.has('paused')) { got.add('paused'); await page.keyboard.press('Space').catch(() => {}); await page.waitForTimeout(400); await shoot(page, dir, 'live-paused'); await page.keyboard.press('Space').catch(() => {}); }

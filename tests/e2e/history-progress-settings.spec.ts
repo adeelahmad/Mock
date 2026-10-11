@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { open } from './helpers.ts';
+import { isPhone, open } from './helpers.ts';
 
 test.describe('history and progress', () => {
   test('session list → detail → analysis cards', async ({ page }) => {
@@ -8,7 +8,9 @@ test.describe('history and progress', () => {
     await page.getByRole('button', { name: /Session 14/ }).first().click();
     await expect(page).toHaveURL(/#\/history\/s14/);
     await expect(page.getByText(/Full loop/).first()).toBeVisible();
-    await page.getByRole('tab', { name: /Analysis/ }).click().catch(() => {});
+    // phone: the Analysis tab lists every card; desktop: the panel shows one answer until "All N"
+    if (isPhone(page)) await page.getByRole('tab', { name: /Analysis/ }).click();
+    else await page.getByRole('button', { name: /^All \d+$/ }).click();
     await expect(page.getByText(/Numbers you missed/).first()).toBeVisible();
     await expect(page.getByText(/41 min to mitigate/).first()).toBeVisible();
     await expect(page.getByText(/Legacy data migration/).first()).toBeVisible();
@@ -17,10 +19,10 @@ test.describe('history and progress', () => {
   test('progress shows the heatmap, weakest LPs and the trend', async ({ page }) => {
     await open(page, '#/progress');
     await expect(page.getByText(/Weakest LPs/)).toBeVisible();
-    await expect(page.getByRole('button', { name: /^Drill$/ }).first()).toBeVisible();
-    await expect(page.getByText(/Trend · average verdict/)).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Drill / }).first()).toBeVisible();
+    await expect(page.getByText(/Trend · average verdict/).filter({ visible: true })).toBeVisible();
     await expect(page.getByText(/Story usage/)).toBeVisible();
-    await expect(page.getByText('NOW')).toBeVisible();
+    await expect(page.getByText('NOW', { exact: true })).toBeVisible();
   });
 });
 

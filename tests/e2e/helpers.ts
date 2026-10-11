@@ -10,7 +10,7 @@ export async function open(page: Page, hash = '#/practice'): Promise<void> {
 export const isPhone = (page: Page): boolean => (page.viewportSize()?.width ?? 1000) < 900;
 
 /** The live screen's current machine phase, from the data attribute the screen carries. */
-export const livePhase = (page: Page) => page.locator('.live').getAttribute('data-state');
+export const livePhase = (page: Page) => page.locator('.live').getAttribute('data-phase');
 
 export async function waitForPhase(page: Page, phase: string | string[], timeout = 90_000): Promise<string> {
   const want = Array.isArray(phase) ? phase : [phase];
