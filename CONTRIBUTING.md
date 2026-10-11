@@ -15,7 +15,7 @@ optional Go binary that embeds it with the sign-in/sync server and the Google Me
 
 ## Set up
 
-Needs Node 22 and, for the binary, Go 1.24+. `make help` lists every target.
+Needs Node 22 and, for the binary, Go 1.26+. `make help` lists every target.
 
 ```
 git clone https://github.com/adeelahmad/Mock && cd Mock

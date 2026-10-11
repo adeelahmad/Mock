@@ -13,7 +13,7 @@
 <p align="center">
   <a href="https://github.com/adeelahmad/Mock/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/adeelahmad/Mock?sort=semver&color=F9AB00"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-1A73E8"></a>
-  <img alt="Go 1.24+" src="https://img.shields.io/badge/go-1.24%2B-00ADD8?logo=go&logoColor=white">
+  <img alt="Go 1.26+" src="https://img.shields.io/badge/go-1.26%2B-00ADD8?logo=go&logoColor=white">
   <img alt="Local-first PWA" src="https://img.shields.io/badge/PWA-local--first-5A0FC8">
   <a href="https://adeelahmad.github.io/Mock/"><img alt="Docs" src="https://img.shields.io/badge/docs-site-202124"></a>
 </p>
@@ -105,7 +105,7 @@ Or download a binary from [Releases](https://github.com/adeelahmad/Mock/releases
 `MOCK_VERSION=v0.1.0` pins a release; `MOCK_INSTALL_DIR` picks where it goes.
 
 **No install:** open the [hosted app](https://adeelahmad.github.io/Mock/app/) and add it to your
-home screen. **From source:** `make binary` (Node 22, Go 1.24+). **Proxmox:** a
+home screen. **From source:** `make binary` (Node 22, Go 1.26+). **Proxmox:** a
 community-scripts helper, see [Deploy](#deploy).
 
 ## How it works
@@ -214,7 +214,7 @@ bridge. It is pure Go (SQLite included), so it needs nothing else to run; only t
 needs a Chrome or Chromium beside it.
 
 ```
-make binary            # bin/mock for this machine (needs Node 22 and Go 1.24+ to build)
+make binary            # bin/mock for this machine (needs Node 22 and Go 1.26+ to build)
 make binaries          # bin/mock-{linux,darwin}-{amd64,arm64}
 ./bin/mock             # the app + sign-in + sync on http://localhost:8787
 ./bin/mock --meet      # … and the Meet bridge (ws://127.0.0.1:8788 and the main port)
