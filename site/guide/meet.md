@@ -10,11 +10,13 @@ History; the call is only where the audio goes.
 1. **Start the bridge** on the same computer as the app:
 
    ```sh
-   npm run meet-bridge
+   mock bridge        # the Go binary; from a checkout: make bridge
    ```
 
-   It prints a pairing code. Options: `-- --headed` to watch the bot's browser, `--chrome` to
-   use installed Chrome, `--profile DIR` for a signed-in bot profile.
+   It prints a pairing code. It needs Chrome or Chromium (found on `PATH`, or
+   `MOCK_BRIDGE_CHROMIUM=/path/to/chrome`). Options: `--headed` to watch the bot's browser,
+   `--profile DIR` for a signed-in bot profile. Running the app from the binary on this
+   computer? `mock --meet` serves the bridge too.
 2. **Pair.** Practice → **Interview in Google Meet** → enter the code.
 3. **Pick a meeting.** Paste a Meet link, or sign in with Google to create one. Creating needs
    an OAuth client id (`VITE_GOOGLE_CLIENT_ID` at build time, or typed in the sheet) with the
@@ -27,7 +29,7 @@ app ends the session and keeps what was said.
 ## How it works
 
 The Gemini connection, session logic, tools, cards, report and recording all stay in the app
-tab. The bridge (`meet-bridge/`, Node + Playwright) runs a Chromium that joins the call, sends
+tab. The bridge (part of the [Go binary](/run/go-binary)) drives a Chromium that joins the call, sends
 the call's audio to the app at 16 kHz and plays Mock's voice into the call as its microphone.
 Its camera tile shows Mock's name, the phase, the area and the current question.
 

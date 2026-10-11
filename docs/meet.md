@@ -9,11 +9,11 @@ other.
 ## Shape
 
 ```
- Mock app (browser tab)                     Meet bridge (Node, same computer)        Google Meet
+ Mock app (browser tab)                     Meet bridge (`mock bridge`, same computer) Google Meet
  ─────────────────────────                  ──────────────────────────────────       ───────────
- SessionController ── GeminiLiveTransport   ws://127.0.0.1:8788                      Chromium (Playwright)
-        │                 │  AudioIO = MeetAudio ◄─ pcm 16 kHz ── server.ts ◄── bot.ts ◄── inpage.ts: RTCPeerConnection hook
-        │                 │                      ── play 24 kHz ─►          ──►       ──► inpage.ts: getUserMedia = Mock's voice
+ SessionController ── GeminiLiveTransport   ws://127.0.0.1:8788                      Chromium (chromedp)
+        │                 │  AudioIO = MeetAudio ◄─ pcm 16 kHz ── bridge.go ◄── bot.go ◄── inpage.js: RTCPeerConnection hook
+        │                 │                      ── play 24 kHz ─►          ──►       ──► inpage.js: getUserMedia = Mock's voice
    repo / History    Gemini Live (key stays here)  ── tile ───────►                    ──► canvas camera tile
 ```
 
@@ -21,11 +21,12 @@ The design kept the session in the app: the Gemini connection, controller, state
 builder, tools, Flash cards, report, recording and History are unchanged. Only the audio endpoints
 move. M3's `GeminiLiveTransport` already took an `AudioIO`, so the Meet path is a new `AudioIO`
 (`src/meet/meet-audio.ts`) and a bridge that carries audio to and from the call. There is no
-second Gemini client and no session logic in Node.
+second Gemini client and no session logic in the bridge.
 
 ## Flow
 
-1. **Bridge.** `npm run meet-bridge` on the candidate's computer prints a pairing code. In
+1. **Bridge.** `mock bridge` (the Mock binary; `make bridge` from a checkout) on the candidate's
+   computer prints a pairing code. `mock --meet` runs it alongside the app instead. In
    Practice → *Interview in Google Meet* the app connects to `ws://127.0.0.1:8788` with that code.
 2. **Meeting.** Paste a Meet link or code, or *Sign in with Google · create a meeting*: Google
    Identity Services' token client (scope `meetings.space.created`, token kept in memory), then
@@ -45,17 +46,17 @@ second Gemini client and no session logic in Node.
 
 | Piece | File | Notes |
 |---|---|---|
-| Wire protocol | `src/meet/protocol.ts` | JSON messages + validation, Meet link parser; erasable TS so Node runs it |
+| Wire protocol | `src/meet/protocol.ts` | JSON messages + validation, Meet link parser (mirrored in `internal/meet/protocol.go`) |
 | Bridge client | `src/meet/bridge-client.ts` | pairing handshake, bot status, audio in/out, tile |
 | Meet audio | `src/meet/meet-audio.ts` | `AudioIO` over the bridge; a silent `BrowserAudio` records and keeps timing |
 | Meet link state | `src/meet/meet.ts` | the app's one bridge connection, saved address/code, tile mirroring |
 | Google | `src/meet/google.ts` | GIS token client, create space |
 | Sheet | `src/screens/MeetSheet.tsx` | bridge → meeting → Mock in the call → start |
 | Context tools | `src/live/context-tools.ts` | `get_story`, `find_questions`, `lp_history`, answered from the repo |
-| Server | `meet-bridge/server.ts` | 127.0.0.1 only, origin allow-list, pairing code, one app tab, one bot |
-| Bot | `meet-bridge/bot.ts` | Playwright launch, join loop, in-call monitor, page calls in order |
-| Meet's page | `meet-bridge/meet-page.ts` | every selector and Meet string in one file (role + name, not classes) |
-| In-page | `meet-bridge/inpage.ts` | `getUserMedia` override, `RTCPeerConnection` hook, AudioWorklet tap, tile |
+| Bridge | `internal/meet/bridge.go` | 127.0.0.1 only, origin allow-list, pairing code, one app tab, one bot |
+| Bot | `internal/meet/bot.go` | Chromium over the DevTools protocol (chromedp), join loop with real mouse clicks, in-call monitor, page calls in order |
+| Meet's page | `internal/meet/page.js` | every selector and Meet string in one file (role + accessible name, not classes) |
+| In-page | `internal/meet/inpage.js` | `getUserMedia` override, `RTCPeerConnection` hook, AudioWorklet tap, tile |
 
 ### Audio in the call
 
@@ -66,7 +67,7 @@ second Gemini client and no session logic in Node.
 - **In (call → Mock).** A subclass of `RTCPeerConnection` catches every remote audio track. Each
   track also goes to a muted `<audio>` element, because Chrome only feeds remote WebRTC audio
   into Web Audio while an element plays it. The tracks are mixed and tapped by an AudioWorklet,
-  then resampled to 16 kHz PCM16 and passed to Node with `exposeBinding`. The bot never hears
+  then resampled to 16 kHz PCM16 and passed to Go through a DevTools binding (`Runtime.addBinding`). The bot never hears
   its own voice because it is not a remote track.
 - **Levels** for the controller's speech hysteresis come from the RMS of the incoming frames.
 
@@ -90,8 +91,8 @@ minute ago is what the interviewer sees.
 
 | Risk | Handling |
 |---|---|
-| Meet changes its join screen | selectors by role and accessible name in `meet-page.ts`; the bot reports "Nobody let Mock in" / the denial text instead of hanging |
-| Headless Chromium turned away | user agent without "HeadlessChrome"; `--headed` and `--chrome` options |
+| Meet changes its join screen | selectors by role and accessible name in `page.js`; the bot reports "Nobody let Mock in" / the denial text instead of hanging |
+| Headless Chromium turned away | user agent without "HeadlessChrome"; `--headed`; `MOCK_BRIDGE_CHROMIUM` for installed Chrome |
 | Guest needs admitting, or the domain blocks guests | OPEN spaces from the app; the sheet says "admit Mock"; `--profile DIR` for a signed-in bot |
 | Automated participants and Google's terms | personal, user-invited use only. The Meet Media API (official WebRTC access) is receive-only and in developer preview, so it can't speak yet; it could replace the input hook later |
 | The app tab must stay open | the session lives there by design; the live screen is the control panel |
@@ -100,9 +101,10 @@ minute ago is what the interviewer sees.
 ## Tests
 
 - Unit: protocol validation, Meet links, space creation, `MeetAudio` routing and muting, camera
-  tile, context tools, controller tool dispatch, and the bridge server with a fake bot over a real
-  socket (pairing, origin, link checks, one tab, leave on disconnect).
-- Playwright: the real bot joins a fake Meet page (`tests/fixtures/fake-meet.html`): it types its
+  tile, context tools, controller tool dispatch. Go (`internal/meet`): the bridge with a fake bot
+  over a real socket (pairing, origin, link checks, one tab, leave on disconnect), and the real
+  Chromium bot against the fake Meet page (runs when Chrome or Chromium is found).
+- Playwright, against `bin/mock bridge`: the real bot joins a fake Meet page (`tests/fixtures/fake-meet.html`): it types its
   name, knocks, and is let in. It hears a 440 Hz participant through the `RTCPeerConnection`
   hook. Its microphone stays silent until it speaks, then a 1 kHz tone comes back through a real
   peer connection. A second test drives the sheet: pair, invite, in the call, remove.

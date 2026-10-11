@@ -11,8 +11,8 @@ Leadership Principles as areas plus all the sample stories, questions, files and
 first-run setup or Settings → Library & data. Areas, stories and questions import from CSV;
 each import offers a sample CSV to download and fill in (`src/domain/csv-templates.ts`).
 
-Local-first: everything lives in your browser and works offline. Optionally, run the small
-Mock server (below) and sign in with GitHub, Google or any OpenID Connect provider: your
+Local-first: everything lives in your browser and works offline. Optionally, run the Mock
+binary (below: one file with the app, the server and the Meet bridge) and sign in with GitHub, Google or any OpenID Connect provider: your
 library, sessions and spend then follow you to every browser you sign in on. Without it,
 backups move data between phone and laptop. Your Gemini API key stays on each device and is
 sent only to Google.
@@ -72,9 +72,10 @@ questions out loud, hears everyone in the call (a friend can sit in as a second 
 and coaches as usual. The session still runs in the app, with your library, tools, cards and
 History; the call is only where the audio goes. See `docs/meet.md`.
 
-1. On the same computer: `npm run meet-bridge` (add `-- --headed` to watch the bot's browser,
-   `--chrome` to use installed Chrome, `--profile DIR` for a signed-in bot profile). It prints a
-   pairing code.
+1. On the same computer: `mock bridge` (or `make bridge`; add `--headed` to watch the bot's
+   browser, `--profile DIR` for a signed-in bot profile). It needs Chrome or Chromium installed
+   (found on `PATH`, or `MOCK_BRIDGE_CHROMIUM=/path/to/chrome`) and prints a pairing code.
+   Running the app from the binary on your own computer? `mock --meet` serves the bridge too.
 2. Practice → **Interview in Google Meet** → enter the code → paste a Meet link, or sign in with
    Google to create one (needs an OAuth client id: `VITE_GOOGLE_CLIENT_ID` at build time or typed
    in the sheet, with the Meet REST API enabled and the app's origin allowed).
@@ -83,6 +84,27 @@ History; the call is only where the audio goes. See `docs/meet.md`.
 The bridge only listens on 127.0.0.1, only accepts the app's origins (`MOCK_BRIDGE_ORIGINS` to
 change), and only after the pairing code. The Gemini key never leaves the app.
 
+## One binary
+
+`make binary` builds `bin/mock`: the whole app in one self-contained file. The built web app is
+embedded with `go:embed`, and the same binary is the sign-in and sync server and the Google Meet
+bridge. It is pure Go (SQLite included), so it needs nothing else to run; only the Meet bot
+needs a Chrome or Chromium beside it.
+
+```
+make binary            # bin/mock for this machine (needs Node 22 and Go 1.24+ to build)
+make binaries          # bin/mock-{linux,darwin}-{amd64,arm64}
+./bin/mock             # the app + sign-in + sync on http://localhost:8787
+./bin/mock --meet      # … and the Meet bridge (ws://127.0.0.1:8788 and the main port)
+./bin/mock token       # the setup token the sign-in wizard asks for
+./bin/mock bridge      # only the Meet bridge, for the app hosted elsewhere (GitHub Pages)
+./bin/mock help
+```
+
+Copy it anywhere and run it; data goes to `data/mock.db` next to where it runs (`MOCK_DB` to
+move it). Put HTTPS in front of it for anything but localhost: the microphone and service
+worker need a secure origin.
+
 ## Develop
 
 With `make` (run `make help` for the list):
@@ -90,16 +112,18 @@ With `make` (run `make help` for the list):
 ```
 make install           # npm install, devDependencies included
 make dev               # http://localhost:5173 (PORT=… to change)
-make check             # typecheck + unit tests + build
-make e2e               # Playwright (PW_CHROMIUM=/path/to/chromium for a local browser)
+make check             # typecheck + unit tests + build, then Go vet + tests
+make e2e               # Playwright; the production build runs from bin/mock (PW_CHROMIUM=/path/to/chromium)
 make verify            # check, then e2e
-make preview           # build, then serve dist/
-make server            # the Mock server on :8787 (sign-in + sync)
-make start             # build, then serve app + API from the Mock server
+make preview           # build, then serve dist/ with Vite
+make server            # the Go server's API on :8787 (sign-in + sync); `make dev` proxies to it
+make serve             # build bin/mock, then serve app + API from it
+make bridge            # only the Meet bridge on 127.0.0.1:8788
 make token             # print the sign-in setup token
+make binary            # bin/mock (see One binary)
 make docs              # the docs site on :5174
 make docs-build        # docs + app at /app/ into site/.vitepress/dist
-make clean             # remove dist/ and test results
+make clean             # remove dist/, bin/ and test results
 ```
 
 Or the npm scripts directly:
@@ -115,9 +139,8 @@ npm run e2e            # Playwright; set PW_CHROMIUM=/path/to/chromium to use a 
 npm run refs           # design artboards → tests/design-refs (needs network)
 npm run shots          # app screenshots → tests/screenshots (dev server running)
 npm run icons          # re-render public/icons/*.png from the SVG sources
-npm run server         # the Mock server on :8787 (sign-in + sync); `npm run dev` proxies to it
-npm start              # build, then serve the app + API from the Mock server
-npm run meet-bridge    # the local Google Meet bridge on :8788 (Node 22.18+, runs the TypeScript directly)
+npm run server         # = make server
+npm start              # = make serve
 ```
 
 Dev-only: Settings → Library & data → *Load sample data*.
@@ -150,21 +173,22 @@ While the repo is private, either clone it on the host and run `bash proxmox/ct/
 container's git remote so `update` can pull).
 
 You get the usual helper-script wizard (Default / Advanced, `var_*` overrides). It creates an
-unprivileged Debian 13 container (2 vCPU, 2 GiB, 8 GB), installs Node 22 and Caddy, builds the
-app, runs the Mock server (`mock-server` service, SQLite in `/var/lib/mock`; Postgres or
-`AUTH_URL` via `/etc/mock/server.env`) and serves it on `https://<ip>/` (Caddy's internal CA: trust its root, printed at the end,
+unprivileged Debian 13 container (2 vCPU, 2 GiB, 8 GB), installs Caddy, builds the Mock binary
+(Node 22 and Go for the build) into `/usr/local/bin/mock`, runs it as the `mock` service (SQLite
+in `/var/lib/mock`; Postgres or `AUTH_URL` via `/etc/mock/server.env`) and serves it through Caddy on `https://<ip>/` (Caddy's internal CA: trust its root, printed at the end,
 since the microphone needs trusted HTTPS) and `http://<ip>/`. Run `update` inside the container
-to pull and rebuild when `main` moves.
+to pull and rebuild the binary when `main` moves.
 
 ## Sign-in and sync (Mock server)
 
-`server/` is a small Node 22 server: Auth.js (`@auth/express`) for OAuth sign-in, a database
-for the synced libraries, and the built app. Run it with `npm start` (or `npm run server`
-after `npm run build`), behind HTTPS in production.
+The Mock binary (`cmd/mock`, `internal/`) is a small Go server: OAuth 2 / OpenID Connect sign-in
+(`golang.org/x/oauth2`, `go-oidc`, PKCE, signed session cookies), a database for the synced
+libraries, and the embedded app. Run it with `make serve` (or `./bin/mock`), behind HTTPS in
+production.
 
 1. **First run.** Open the app; it finds an unconfigured server and opens the setup wizard.
-   Paste the **setup token** from the server log (`npm run server -- token` prints it again;
-   on Proxmox `mock-token`).
+   Paste the **setup token** from the server log (`mock token` prints it again; on Proxmox
+   `mock-token`).
 2. **Providers.** Add an OAuth client for GitHub, Google and/or an OIDC issuer. The wizard shows
    the callback URL to register (`https://<host>/auth/callback/<provider>`). Secrets are stored
    on the server only and never sent back to the browser.
@@ -181,22 +205,30 @@ Gemini key stay on each device. "Use without an account" keeps Mock local-only.
 
 | Variable | Default | |
 |---|---|---|
-| `PORT` / `HOST` | `8787` / `0.0.0.0` | listen address |
-| `MOCK_DB` | `data/mock.db` | SQLite file (`node:sqlite`, no native build) |
+| `PORT` / `HOST` | `8787` / every interface | listen address (`--port`, `--host`) |
+| `MOCK_DB` | `data/mock.db` | SQLite file (pure Go, no native build) |
 | `DATABASE_URL` | – | `postgres://…` to use Postgres instead |
-| `MOCK_STATIC` | `dist` | the built app to serve; empty for API only |
-| `AUTH_SECRET` | generated, kept in the DB | cookie/JWT secret |
+| `MOCK_STATIC` | the embedded app | a directory to serve instead; `-` for API only |
+| `AUTH_SECRET` | generated, kept in the DB | session cookie secret |
 | `AUTH_URL` | from the request | public URL, if your proxy hides it |
 | `MOCK_SETUP_TOKEN` | generated, kept in the DB | the wizard's token |
+| `MOCK_MEET` | off | `1` = also run the Meet bridge (`--meet`) |
+| `MOCK_BRIDGE_PORT` | `8788` | the bridge's own port on 127.0.0.1 |
+| `MOCK_BRIDGE_CODE` | random | a fixed pairing code |
+| `MOCK_BRIDGE_ORIGINS` | dev, preview, GitHub Pages | app origins allowed to use the bridge |
+| `MOCK_BRIDGE_CHROMIUM` | found on `PATH` | the Chrome/Chromium the Meet bot runs |
+
+Accounts from the earlier Node server keep their libraries (same account ids, same database);
+everyone signs in once more.
 
 Static hosts (GitHub Pages) have no server: the app sees that and stays local-only.
 
 ## Stack
 
 React 19 · TypeScript · Vite · DuckDB-Wasm on IndexedDB snapshots · Gemini Live and Flash ·
-Workbox service worker · web app manifest with shortcuts · optional Node server: Express,
-Auth.js, SQLite (`node:sqlite`) or Postgres · optional Meet bridge on your own computer (Node,
-Playwright, ws).
+Workbox service worker · web app manifest with shortcuts · optional single Go binary: the app
+embedded, OAuth/OIDC sign-in, SQLite (modernc.org/sqlite) or Postgres (pgx), and the Meet bridge
+(WebSocket, Chromium over the DevTools protocol with chromedp).
 
 ## Layout
 
@@ -204,11 +236,12 @@ Playwright, ws).
 src/domain   types, state machine, readiness, parsers, selectors (pure, unit-tested)
 src/live     transport interface, simulated + Gemini transports, session controller, context tools
 src/meet     Google Meet: bridge client, Meet audio, sign-in and meeting creation
-meet-bridge  the local bridge: WebSocket server, Playwright bot, in-page audio for Meet
 src/db       Repo interface and implementations, backup
 src/app      router, store, theme, prefs, install / offline / deep links
 src/sync     sync engine (pull / push / merge) and the server API client
-server       the Mock server: Auth.js sign-in, setup, library sync API, SQLite/Postgres
+cmd/mock     the binary: serve, token, bridge
+internal     Go: server (API + static), auth (OAuth/OIDC), store (SQLite/Postgres),
+             meet (bridge, Chromium bot, in-page audio for Meet), web (the embedded app)
 src/screens  one file per screen; src/components shared pieces
 public       manifest, icons, the distilled Exponent question bank
 design       the Claude Design export (the spec)

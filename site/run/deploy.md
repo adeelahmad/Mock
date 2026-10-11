@@ -34,6 +34,6 @@ Upload `dist/` to Netlify, Cloudflare Pages, S3 or any web server.
 
 ## With the server
 
-`make start` builds the app and serves it with the sign-in and sync API from one process on
-:8787. Put it behind a reverse proxy with HTTPS. See [Proxmox](/run/proxmox) for a ready
-container, and the [Go binary](/run/go-binary) for a single-file server.
+`make serve` builds the [Go binary](/run/go-binary) and serves the app with the sign-in and sync
+API from that one file on :8787. Put it behind a reverse proxy with HTTPS. See
+[Proxmox](/run/proxmox) for a ready container.

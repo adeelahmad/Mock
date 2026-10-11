@@ -68,20 +68,23 @@ function update_script() {
   fi
 
   NODE_VERSION="22" setup_nodejs
+  setup_go
 
   msg_info "Updating ${APP} to ${RELEASE:0:7}"
   $STD git reset --hard FETCH_HEAD
+  export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 GOTOOLCHAIN=auto
   $STD npm ci --include=dev --no-audit --no-fund
-  $STD npm run build
-  rm -rf /var/www/mock.new && cp -a dist /var/www/mock.new
-  mv /var/www/mock /var/www/mock.old && mv /var/www/mock.new /var/www/mock && rm -rf /var/www/mock.old
+  $STD make binary
+  install -m 0755 bin/mock /usr/local/bin/mock.new && mv /usr/local/bin/mock.new /usr/local/bin/mock
   echo "${RELEASE}" >/opt/mock_version.txt
   $STD npm cache clean --force
+  $STD go clean -cache -modcache
+  $STD make clean && rm -rf node_modules
   msg_ok "Updated ${APP}"
 
-  msg_info "Restarting the Mock server and Caddy"
+  msg_info "Restarting Mock and Caddy"
   $STD bash /opt/mock/proxmox/install/mock-server.sh
-  msg_ok "Restarted the Mock server and Caddy"
+  msg_ok "Restarted Mock and Caddy"
   msg_ok "Updated successfully!"
   exit
 }

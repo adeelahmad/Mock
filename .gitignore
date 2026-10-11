@@ -1,11 +1,14 @@
 node_modules
-dist
+/dist
 .DS_Store
 *.log
 test-results
 tests/design-refs
 tests/screenshots
 data
+bin
+/internal/web/dist/*
+!/internal/web/dist/.gitkeep
 site/public
 site/.vitepress/cache
 site/.vitepress/dist

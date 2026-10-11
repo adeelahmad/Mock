@@ -13,10 +13,12 @@ network_check
 update_os
 
 msg_info "Installing Dependencies"
-$STD apt install -y git caddy
+$STD apt install -y git caddy make
 msg_ok "Installed Dependencies"
 
+# Node builds the web app and Go builds the binary that embeds it; only the binary runs.
 NODE_VERSION="22" setup_nodejs
+setup_go
 
 msg_info "Cloning ${APP}"
 MOCK_REPO="${MOCK_REPO:-adeelahmad/Mock}"
@@ -32,16 +34,15 @@ msg_ok "Cloned ${APP} ${RELEASE:0:7}"
 
 msg_info "Building ${APP}"
 cd /opt/mock || exit
-export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 GOTOOLCHAIN=auto
 $STD npm ci --include=dev --no-audit --no-fund
-$STD npm run build
-mkdir -p /var/www
-cp -a dist /var/www/mock
-msg_ok "Built ${APP}"
+$STD make binary
+install -m 0755 bin/mock /usr/local/bin/mock
+msg_ok "Built ${APP} (/usr/local/bin/mock)"
 
 msg_info "Configuring Caddy and the Mock server"
 bash /opt/mock/proxmox/install/mock-server.sh
-for svc in caddy mock-server; do
+for svc in caddy mock; do
   if ! systemctl is-active --quiet "$svc"; then
     msg_error "$svc failed to start"
     journalctl -u "$svc" -n 20 --no-pager
@@ -66,5 +67,7 @@ customize
 
 msg_info "Cleaning up"
 $STD npm cache clean --force
+$STD go clean -cache -modcache
+$STD make -C /opt/mock clean && rm -rf /opt/mock/node_modules
 msg_ok "Cleaned up"
 cleanup_lxc

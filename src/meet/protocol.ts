@@ -1,8 +1,8 @@
 // Mock — the wire protocol between the app and the Meet bridge (docs/meet.md). JSON over a
 // WebSocket on localhost. The app keeps the session (Gemini Live, the controller, the library);
 // the bridge only puts a bot in the Meet call and carries audio: meeting audio up as 16 kHz PCM,
-// interviewer audio down as Gemini's 24 kHz PCM, plus the bot's camera tile. Shared by the app
-// and the Node bridge, so this file uses erasable TypeScript only (Node runs it unbuilt).
+// interviewer audio down as Gemini's 24 kHz PCM, plus the bot's camera tile. The bridge's Go
+// mirror is internal/meet/protocol.go: keep the two in step.
 
 export const BRIDGE_VERSION = 1;
 export const DEFAULT_BRIDGE_URL = 'ws://127.0.0.1:8788';

@@ -6,13 +6,13 @@ spend follow you to every browser you sign in on.
 
 ::: info Static hosting has no server
 The hosted app on GitHub Pages has no server, so it stays local-only. Sync needs the
-server, from `npm start`, [Proxmox](/run/proxmox) or the [Go binary](/run/go-binary).
+server: the [Go binary](/run/go-binary) (`make serve`) or [Proxmox](/run/proxmox).
 :::
 
 ## Set it up
 
 1. **First run.** Open the app; it finds an unconfigured server and opens the setup wizard.
-   Paste the **setup token** from the server log (`make token` or `npm run server -- token`
+   Paste the **setup token** from the server log (`mock token` or `make token`
    prints it again; on Proxmox, `mock-token`).
 2. **Providers.** Add an OAuth client for GitHub, Google and/or any OpenID Connect issuer. The
    wizard shows the callback URL to register: `https://<host>/auth/callback/<provider>`.
@@ -36,12 +36,17 @@ Recordings, clips, uploaded originals and the Gemini key stay on each device.
 
 | Variable | Default | |
 |---|---|---|
-| `PORT` / `HOST` | `8787` / `0.0.0.0` | listen address |
-| `MOCK_DB` | `data/mock.db` | SQLite file (`node:sqlite`, no native build) |
+| `PORT` / `HOST` | `8787` / every interface | listen address (`--port`, `--host`) |
+| `MOCK_DB` | `data/mock.db` | SQLite file (pure Go, no native build) |
 | `DATABASE_URL` | – | `postgres://…` to use Postgres instead |
-| `MOCK_STATIC` | `dist` | the built app to serve; empty for API only |
-| `AUTH_SECRET` | generated, kept in the DB | cookie/JWT secret |
+| `MOCK_STATIC` | the embedded app | a directory to serve instead; `-` for API only |
+| `AUTH_SECRET` | generated, kept in the DB | session cookie secret |
 | `AUTH_URL` | from the request | public URL, if your proxy hides it |
 | `MOCK_SETUP_TOKEN` | generated, kept in the DB | the wizard's token |
+| `MOCK_MEET` | off | `1` = also run the [Meet bridge](/guide/meet) (`--meet`) |
+| `MOCK_BRIDGE_PORT` | `8788` | the bridge's own port on 127.0.0.1 |
+| `MOCK_BRIDGE_CODE` | random | a fixed pairing code |
+| `MOCK_BRIDGE_ORIGINS` | dev, preview, GitHub Pages | app origins allowed to use the bridge |
+| `MOCK_BRIDGE_CHROMIUM` | found on `PATH` | the Chrome/Chromium the Meet bot runs |
 
 Run it behind HTTPS in production: the microphone and service worker need it.

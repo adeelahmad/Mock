@@ -1,4 +1,4 @@
-// Account & sync — only when the app is served by the Mock server (server/). Three pieces:
+// Account & sync — only when the app is served by the Mock server (the Go binary). Three pieces:
 //
 //   ServerSetup     first-run wizard on a fresh server: setup token → sign-in providers (OAuth
 //                   client id/secret, with the callback URL to register) → who may sign in →
@@ -90,7 +90,7 @@ export function ServerSetup() {
   const checkToken = async () => {
     setBusy(true); setError('');
     try {
-      if (!(await verifySetupToken(token.trim()))) { setError('That is not the setup token. The server prints it when it starts; `npm run server -- token` prints it again.'); return; }
+      if (!(await verifySetupToken(token.trim()))) { setError('That is not the setup token. The server prints it when it starts; `mock token` prints it again.'); return; }
       load(await getSetup(token.trim()));
       setStep(2);
     } catch (e) { setError(errText(e)); } finally { setBusy(false); }
@@ -124,7 +124,7 @@ export function ServerSetup() {
       <div className="card pad r12 stack g12">
         <Input label="Setup token" mono autoFocus autoComplete="off" spellCheck={false} value={token} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setToken(e.target.value)}
           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter' && token.trim()) void checkToken(); }}
-          error={error || undefined} hint={<>Printed when the server starts. <span className="mono">npm run server -- token</span> prints it again (on Proxmox: <span className="mono">mock-token</span>).</>} />
+          error={error || undefined} hint={<>Printed when the server starts. <span className="mono">mock token</span> prints it again (on Proxmox: <span className="mono">mock-token</span>).</>} />
       </div>
     </Shell>
   );
