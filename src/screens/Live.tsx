@@ -5,6 +5,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../app/store.tsx';
 import { paths } from '../app/router.ts';
+import { SpendBar } from '../components/Budget.tsx';
 import LiveScreen, { type AnalysisCardData, type LiveAction, type LiveCoaching, type LivePhase, type LiveRecap, type LiveTurn } from '../components/LiveScreen.tsx';
 import { fmtClock } from '../components/ui.tsx';
 import { isPaused, visiblePhase, NO_ONE, type SessionState, type Turn } from '../domain/session-machine.ts';
@@ -243,6 +244,7 @@ export default function Live() {
     <>
     {debug && <ContextPanel meta={meta} onClose={() => setDebug(false)} />}
     <LiveScreen
+      spend={<SpendBar variant="compact" />}
       phase={phase}
       paused={paused}
       reconnecting={state.reconnecting}

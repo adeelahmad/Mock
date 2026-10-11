@@ -12,6 +12,7 @@ import { newId } from '../db/repo.ts';
 import { NEW_QUESTION_TOOL, type LiveTransport, type ToolCall, type TransportEvent } from './transport.ts';
 import type { Analyzer } from './analyzer.ts';
 import { LocalReporter, reportInput, type Reporter } from './reporter.ts';
+import { reportUsage } from '../gemini/usage.ts';
 
 export interface StartOptions {
   mode: Mode;
@@ -214,6 +215,7 @@ export class SessionController {
       case 'turnComplete': if (this.ended) this.turnsAfterEnd++; break;
       case 'recordingChunk': void this.saveChunk(e.blob, e.index); break;
       case 'toolCallCancellation': break;
+      case 'usage': if (this.opts) reportUsage(this.opts.model, this.exchange?.lpId ?? (this.opts.mode === 'lp' ? this.opts.focus : null) ?? null, e.usageMetadata); break;
     }
   }
 

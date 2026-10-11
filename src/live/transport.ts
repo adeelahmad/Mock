@@ -42,6 +42,8 @@ export type TransportEvent =
   | { type: 'sessionEnd'; focus?: string }
   /** The next chunk of the mixed recording (real transport), in order from 0. */
   | { type: 'recordingChunk'; blob: Blob; index: number }
+  /** Token counts for the budget (Gemini sends `usageMetadata` periodically, per response). */
+  | { type: 'usage'; usageMetadata: unknown }
   | { type: 'closed'; code?: number; reason?: string }
   | { type: 'error'; message: string };
 
