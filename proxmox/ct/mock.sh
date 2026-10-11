@@ -20,7 +20,7 @@ if [[ -n "$_mock_dir" && -f "$_mock_dir/install/mock-install.sh" ]]; then
 elif [[ -n "${MOCK_GITHUB_TOKEN:-}" ]]; then
   # The engine's own fetches are unauthenticated, so stage our two files locally.
   COMMUNITY_SCRIPTS_ROOT="$(mktemp -d)" && mkdir -p "$COMMUNITY_SCRIPTS_ROOT"/{ct,install}
-  for _f in ct/mock.sh install/mock-install.sh; do
+  for _f in ct/mock.sh install/mock-install.sh banner.sh; do
     curl -fsSL -H "Authorization: Bearer ${MOCK_GITHUB_TOKEN}" \
       "https://raw.githubusercontent.com/${MOCK_REPO}/${MOCK_BRANCH}/proxmox/${_f}" -o "$COMMUNITY_SCRIPTS_ROOT/$_f" || exit 1
   done
@@ -43,6 +43,21 @@ var_disk="${var_disk:-8}"
 var_os="${var_os:-debian}"
 var_version="${var_version:-13}"
 var_unprivileged="${var_unprivileged:-1}"
+
+# Mock's own banner: the engine looks headers up in its own repo, which has none for Mock.
+if [[ -n "${COMMUNITY_SCRIPTS_ROOT:-}" && -f "$COMMUNITY_SCRIPTS_ROOT/banner.sh" ]]; then
+  source "$COMMUNITY_SCRIPTS_ROOT/banner.sh"
+else
+  source <(curl -fsSL "https://raw.githubusercontent.com/${MOCK_REPO}/${MOCK_BRANCH}/proxmox/banner.sh") 2>/dev/null || true
+fi
+if declare -f mock_banner >/dev/null; then
+  header_info() {
+    [[ "${_MOCK_HEADER_SHOWN:-0}" == "1" ]] && return 0
+    _MOCK_HEADER_SHOWN=1
+    clear 2>/dev/null || true
+    mock_banner
+  }
+fi
 
 header_info "$APP"
 variables

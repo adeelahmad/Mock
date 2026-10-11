@@ -97,43 +97,92 @@ registerProcessor('mock-tap', MockTap);`;
     }
     if (line && n < lines) g.fillText(line, x, y + n * lh);
   }
+  // The brand kit's robot (dark-surface colours), drawn in its own 56-unit grid centred on cx, cy.
+  function robot(g, cx, cy, size) {
+    const k = size / 60;
+    g.save();
+    g.translate(cx - 27.8 * k, cy - 55 * k);
+    g.scale(k, k);
+    const rr = (x, y, w, h, r, fill) => {
+      g.beginPath();
+      g.roundRect(x, y, w, h, r);
+      g.fillStyle = fill;
+      g.fill();
+    };
+    g.strokeStyle = "#8AB4F8";
+    g.lineWidth = 4;
+    g.lineCap = "round";
+    g.beginPath();
+    g.moveTo(28.05, 37.9);
+    g.lineTo(28.05, 32.3);
+    g.stroke();
+    g.beginPath();
+    g.arc(28.05, 29.7, 4.1, 0, Math.PI * 2);
+    g.fillStyle = "#F9AB00";
+    g.fill();
+    rr(1.5, 51.1, 5.5, 15, 2.75, "#8AB4F8");
+    rr(49.1, 51.1, 4.5, 15, 2.25, "#8AB4F8");
+    rr(4, 37.9, 48.1, 46.2, 13, "#8AB4F8");
+    rr(10, 44.3, 36.1, 30.8, 8.5, "#E8F0FE");
+    rr(16.1, 51.7, 5.9, 7.9, 2.95, "#202124");
+    rr(34.1, 51.7, 5.9, 7.9, 2.95, "#202124");
+    g.strokeStyle = "#202124";
+    g.lineWidth = 2.8;
+    g.beginPath();
+    g.moveTo(23.1, 66.5);
+    g.quadraticCurveTo(28.05, 71, 33, 66.5);
+    g.stroke();
+    g.restore();
+  }
+  // Brand palette (brand kit v1.0): dark canvas, gold = interview, blue = coaching / Mock itself.
+  const FONT = "'DM Sans', system-ui, sans-serif";
   function draw() {
     if (!canvas) return;
     const g = canvas.getContext("2d");
     const w = canvas.width, h = canvas.height;
-    g.fillStyle = "#16181d";
+    g.fillStyle = "#18191B";
     g.fillRect(0, 0, w, h);
     const speaking = playing.size > 0;
     const cx = 150, cy = h / 2, r = 72;
+    const self = tile.mono === "M";
     if (speaking) {
       g.beginPath();
       g.arc(cx, cy, r + 10 + 4 * Math.sin(Date.now() / 120), 0, Math.PI * 2);
-      g.fillStyle = "rgba(232,163,61,.28)";
+      g.fillStyle = self ? "rgba(138,180,248,.24)" : "rgba(249,171,0,.28)";
       g.fill();
     }
     g.beginPath();
     g.arc(cx, cy, r, 0, Math.PI * 2);
-    g.fillStyle = "#e8a33d";
+    g.fillStyle = self ? "#292A2D" : "#F9AB00";
     g.fill();
-    g.fillStyle = "#16181d";
-    g.font = "800 54px system-ui, sans-serif";
-    g.textAlign = "center";
-    g.textBaseline = "middle";
-    g.fillText(tile.mono.slice(0, 2), cx, cy + 2);
+    if (self) robot(g, cx, cy, 96);
+    else {
+      g.fillStyle = "#202124";
+      g.font = "800 54px " + FONT;
+      g.textAlign = "center";
+      g.textBaseline = "middle";
+      g.fillText(tile.mono.slice(0, 2), cx, cy + 2);
+    }
     g.textAlign = "left";
     g.textBaseline = "alphabetic";
-    g.fillStyle = "#f4f1ea";
-    g.font = "800 34px system-ui, sans-serif";
+    g.fillStyle = "#E8EAED";
+    g.font = "800 34px " + FONT;
     g.fillText(tile.name, 270, 120);
-    g.fillStyle = "#a7a39a";
-    g.font = "600 20px system-ui, sans-serif";
+    g.fillStyle = "#9AA0A6";
+    g.font = "600 20px " + FONT;
     g.fillText(tile.role + " \xB7 " + tile.phase + (tile.lp ? " \xB7 " + tile.lp : ""), 270, 152);
-    g.fillStyle = "#f4f1ea";
-    g.font = "500 24px system-ui, sans-serif";
+    g.fillStyle = "#E8EAED";
+    g.font = "500 24px " + FONT;
     wrap(g, tile.question, 270, 210, w - 300, 32, 5);
-    g.fillStyle = "#6d6a63";
-    g.font = "700 16px system-ui, sans-serif";
-    g.fillText("MOCK", 30, h - 26);
+    robot(g, 44, h - 33, 26);
+    g.fillStyle = "#9AA0A6";
+    g.font = "800 18px " + FONT;
+    g.fillText("Mock", 64, h - 26);
+    const mw = g.measureText("Mock").width;
+    g.beginPath();
+    g.arc(64 + mw + 5, h - 30, 3, 0, Math.PI * 2);
+    g.fillStyle = "#F9AB00";
+    g.fill();
   }
   function camera() {
     if (!canvas) {

@@ -7,6 +7,7 @@ import React, { useMemo, useState } from 'react';
 import { useApp, type AppData } from '../app/store.tsx';
 import { paths } from '../app/router.ts';
 import { Icon, VerdictChip, v } from '../components/ui.tsx';
+import { Wordmark } from '../components/Wordmark.tsx';
 import Notices from '../components/Notices.tsx';
 import { useOnline } from '../app/install.ts';
 import { daysUntil, latestSessionNumber, type LpRow } from '../domain/selectors.ts';
@@ -80,7 +81,7 @@ export default function Home() {
   return (
     <div className="screen">
       <div className="screen-head">
-        <span className="wordmark">Mock</span>
+        <Wordmark />
         <div className="hstack">
           <span className="pill-warm" title={'Interview on ' + settings.interviewDate}>{daysLeft} days</span>
           <button className="icon-btn" aria-label="Settings" onClick={() => go(paths.settings)}><Icon.Settings size={22} /></button>

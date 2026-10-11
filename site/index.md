@@ -6,8 +6,8 @@ hero:
   text: Rehearse the interview out loud
   tagline: A live voice interviewer asks the questions, probes with follow-ups, and between answers a coach tells you what to fix, judged against your own stories and numbers.
   image:
-    src: /logo.svg
-    alt: Mock
+    src: /app-icon.svg
+    alt: The Mock robot
   actions:
     - theme: brand
       text: Open the app
