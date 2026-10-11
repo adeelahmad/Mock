@@ -9,9 +9,11 @@ import { useApp } from '../app/store.tsx';
 import { paths } from '../app/router.ts';
 import { Icon, Input, Seg, download, fmt, v } from '../components/ui.tsx';
 import AnalysisCard, { cardFromExchange, iNote, starNote, type AnalysisCardData } from '../components/AnalysisCard.tsx';
-import Player, { usePlayback, type Chapter, type PlaybackSpan } from '../components/Player.tsx';
+import Player, { usePlayback, useWaveform, type Chapter, type PlaybackSpan } from '../components/Player.tsx';
 import { fmtDuration, fmtSessionDate, sessionModeLabel } from '../domain/selectors.ts';
 import { buildBackup, backupFileName } from '../db/backup.ts';
+import { reportInput } from '../live/reporter.ts';
+import { analysisPipeline } from '../gemini/setup.ts';
 import { MODE_LABEL, type Exchange, type Lp, type Mode, type Session, type Story, type TranscriptEvent } from '../domain/types.ts';
 import { VERDICT_LABEL } from '../domain/verdict.ts';
 import '../styles/screens/history.css';
@@ -175,7 +177,8 @@ function ListPanel({ selected, master }: { selected: string | null; master: bool
 
 // ---------- the detail ----------
 function Detail({ id, desktop }: { id: string; desktop: boolean }) {
-  const { data, repo, refresh, back, go, toast, live, route } = useApp();
+  const { data, repo, refresh, back, go, toast, live, route, gemini } = useApp();
+  const [writing, setWriting] = useState(false);
   const session = data.sessions.find((s) => s.id === id) ?? null;
   const xs = useMemo(() => exchangesOf(data.exchanges, id), [data.exchanges, id]);
   const [events, setEvents] = useState<TranscriptEvent[]>([]);
@@ -209,6 +212,7 @@ function Detail({ id, desktop }: { id: string; desktop: boolean }) {
     return [{ startMs: t.tMs, endMs: events[i + 1]?.tMs ?? ex?.endMs ?? totalMs }];
   }), [events, xs, totalMs]);
   const pb = usePlayback({ src: rec?.url ?? null, totalMs, skipSpans });
+  const peaks = useWaveform(rec?.blob ?? null, 72);
   const current = useMemo(() => chapters.reduce<Chapter | null>((acc, c) => (c.startMs <= pb.positionMs ? c : acc), null), [chapters, pb.positionMs]);
   const curLine = useMemo(() => events.reduce((acc, t, i) => (t.tMs <= pb.positionMs ? i : acc), -1), [events, pb.positionMs]);
   const cards = useMemo(() => xs.map((e, i) => cardFromExchange(e, i, lpNameOf(data.lps, e.lpId))), [xs, data.lps]);
@@ -283,16 +287,31 @@ function Detail({ id, desktop }: { id: string; desktop: boolean }) {
   }
 
   const sub = <>{fmtSessionDate(session)} · {modeLabel} · <span className="mono">{fmtSessionClock(session)}</span> · {xs.length} questions{session.mode === 'loop' && interviewers > 0 ? ' · ' + interviewers + ' interviewers' : ''}</>;
-  const playerNote = rec ? undefined : xs.length ? 'No recording for this session — playback follows the transcript timings.' : undefined; // M4: every live session records; the sample sessions have no audio
-  const player = <div className={'card hist-player' + (desktop ? ' desk' : '')}><Player pb={pb} chapters={chapters} seed={id} current={current} note={playerNote} /></div>;
+  const playerNote = rec ? undefined : xs.length ? 'No recording for this session — playback follows the transcript timings.' : undefined; // live sessions record (M3); the sample sessions have no audio
+  const player = <div className={'card hist-player' + (desktop ? ' desk' : '')}><Player pb={pb} chapters={chapters} seed={id} current={current} note={playerNote} peaks={peaks} /></div>;
 
-  const reportRows = report && (
+  const writeReport = async () => {
+    setWriting(true);
+    try {
+      const input = await reportInput(repo, id);
+      if (!input) return;
+      const { reporter } = analysisPipeline({ key: gemini.key || null, textModel: data.settings.textModel, lps: data.lps, stories: data.stories, script: null, onFallback: (_w, err) => toast('Flash report failed — wrote it offline (' + err.message + ')') });
+      await repo.updateSession(id, { report: await reporter.report(input) });
+      await refresh();
+    } finally { setWriting(false); }
+  };
+  const canWrite = !report && xs.some((e) => e.verdict);
+  const writeButton = canWrite && <button type="button" className="btn md hist-write" disabled={writing} onClick={() => void writeReport()}>{writing ? 'Writing the report…' : 'Write the report'}</button>;
+
+  const reportRows = report ? (
     <>
+      {!!report.summary && <span className="sub hist-summary">{report.summary}</span>}
       {!!report.nextFocus && <div className="hist-focus"><span className="label cool">Focus next</span><span className="hist-focus-text">{report.nextFocus}</span></div>}
       {!!report.improvement && <div className="hist-focus"><span className="label green">Improved</span><span className="hist-focus-text">{report.improvement}</span></div>}
       {report.fixes.length > 0 && <div className="hist-focus"><span className="label">Fixes</span><span className="hist-fixes">{report.fixes.map((f, i) => <span key={i}><span className="mono muted">{i + 1}</span> {f}</span>)}</span></div>}
+      {report.storySwaps.length > 0 && <div className="hist-focus"><span className="label">Story swaps</span><span className="hist-fixes">{report.storySwaps.map((x, i) => <span key={i}>{x.lpName}: use <b>{x.useStory}</b>{x.insteadOf ? ' instead of ' + x.insteadOf : ''}</span>)}</span></div>}
     </>
-  );
+  ) : writeButton;
 
   const transcriptRows = events.length ? (
     events.map((t, i) => (
@@ -321,6 +340,7 @@ function Detail({ id, desktop }: { id: string; desktop: boolean }) {
             <span className="h2">Session {session.number}</span>
             <span className="hist-sub">{sub}</span>
             {!!report?.nextFocus && <span className="hist-focus inline"><span className="label cool">Focus next</span><span className="hist-focus-text">{report.nextFocus}</span></span>}
+            {writeButton}
           </div>
           <div className="hist-dright">
             {xs.length > 0 && (

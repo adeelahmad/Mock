@@ -10,7 +10,7 @@ import { lpRows, storyRows, questionRows, coveredLpIds, heatmap, trend, weakestA
 import type { SessionState } from '../domain/session-machine.ts';
 import { SessionController, type ControllerMeta, type StartOptions } from '../live/controller.ts';
 import { SimulatedTransport } from '../live/simulated.ts';
-import { SimulatedAnalyzer } from '../live/analyzer.ts';
+import { analysisPipeline } from '../gemini/setup.ts';
 import { DEMO_SCRIPT } from '../live/scripts/demo.ts';
 import { INTERVIEWERS } from '../fixtures/sample.ts';
 import { buildContext, prioritiseQuestions } from '../live/context.ts';
@@ -148,8 +148,9 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     // the Gemini transport when a key is configured.
     const demo = !gemini.hasKey;
     const transport = new SimulatedTransport(DEMO_SCRIPT);
-    const analyzer = new SimulatedAnalyzer(DEMO_SCRIPT);
-    const c = new SessionController(transport, analyzer, repo, () => Date.now(), demo);
+    // M4: with a key the cards and the report come from Flash (falling back to the offline ones).
+    const { analyzer, reporter } = analysisPipeline({ key: gemini.key || null, textModel: s.textModel, lps: data.lps, stories: data.stories, script: DEMO_SCRIPT, onFallback: (what, err) => toast((what === 'analysis' ? 'Flash card failed' : 'Flash report failed') + ' — used the offline one (' + err.message + ')') });
+    const c = new SessionController(transport, analyzer, repo, () => Date.now(), demo, { reporter });
     controller.current = c;
     c.subscribe((st, meta) => { setLiveState(st); setLiveMeta(meta); });
     const focusLp = o.mode === 'lp' && o.focus ? data.lps.find((l) => l.id === o.focus) : null;
@@ -160,7 +161,7 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: s.liveModel, voice: s.voice, questionText: o.questionText ?? null });
     setSheet({ setup: false, answer: null, addQuestion: false, addStory: false });
     routerGo('/live');
-  }, [data, gemini.hasKey, repo, exitLive]);
+  }, [data, gemini.hasKey, gemini.key, repo, exitLive, toast]);
 
   // Refresh the library when a live session writes.
   useEffect(() => {

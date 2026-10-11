@@ -10,6 +10,7 @@ import { newId } from '../db/repo.ts';
 import { latestSessionNumber, type LpRow, type QuestionRow, type StoryRow } from '../domain/selectors.ts';
 import type { Coaching, Lp, PrepFile, Question, QuestionSource, QuestionSourceSetting, Story } from '../domain/types.ts';
 import { INTERVIEWERS } from '../fixtures/sample.ts';
+import { writeModelAnswer } from '../gemini/model-answer.ts';
 import { todayQueue, focusWhy } from './Home.tsx';
 import '../styles/screens/home.css';
 
@@ -325,8 +326,8 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
 /**
  * A STAR answer composed locally from the candidate's own stories, deterministic from the
  * seed: the seed picks the story (primary-mapped first) and the angle.
- * M4: replace with the Flash call (gemini/rest.ts generateText, same seed, same format:
- * Situation · Task · Action · Result, then "Why this works for {LP}"; under 220 words).
+ * With a key the sheet asks Flash instead (gemini/model-answer.ts, same seed, same format);
+ * this stays the offline answer and the fallback when that call fails.
  */
 export function composeModelAnswer(q: QuestionRow, stories: Story[], lps: Lp[], seed: number): string {
   const r = rng(seed ^ hashText(q.id));
@@ -350,26 +351,37 @@ export function composeModelAnswer(q: QuestionRow, stories: Story[], lps: Lp[], 
 }
 
 export function AnswerSheet({ question, onClose }: { question: QuestionRow | null; onClose: () => void }) {
-  const { data, repo, refresh, live } = useApp();
+  const { data, repo, refresh, live, gemini, toast } = useApp();
   const seed = data.settings.seed;
   const [loading, setLoading] = useState(false);
   const [text, setText] = useState('');
+  const [byFlash, setByFlash] = useState(false);
   const questionId = question?.id ?? null;
 
   useEffect(() => {
     if (!question) return;
-    setLoading(true); setText('');
-    // M4: replace with the Flash call; the local composer stands in (a short pause so the sheet reads as "writing").
-    const t = setTimeout(() => { setText(composeModelAnswer(question, data.stories, data.lps, seed)); setLoading(false); }, 450);
-    return () => clearTimeout(t);
+    setLoading(true); setText(''); setByFlash(false);
+    const local = () => composeModelAnswer(question, data.stories, data.lps, seed);
+    if (!gemini.key || !data.stories.length) {
+      // Offline: the local composer (a short pause so the sheet reads as "writing").
+      const t = setTimeout(() => { setText(local()); setLoading(false); }, 450);
+      return () => clearTimeout(t);
+    }
+    const ctl = new AbortController();
+    const lp = data.lps.find((l) => l.id === question.lpIds[0]) ?? null;
+    writeModelAnswer({ key: gemini.key, model: data.settings.textModel, question: question.text, lp, stories: data.stories, seed, signal: ctl.signal })
+      .then((t) => { if (!ctl.signal.aborted) { setText(t); setByFlash(true); } })
+      .catch((err: Error) => { if (ctl.signal.aborted) return; setText(local()); toast('Flash unavailable — wrote it offline (' + err.message + ')'); })
+      .finally(() => { if (!ctl.signal.aborted) setLoading(false); });
+    return () => ctl.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionId, seed]);
+  }, [questionId, seed, gemini.key]);
 
   const another = async () => { await repo.setSettings({ seed: newSeed() }); await refresh(); };
   const askLive = () => { if (question) void live.start({ mode: 'question_set', focus: question.id, questionText: question.text, focusLabel: question.lpName }); };
 
   return (
-    <Sheet open={!!question} onClose={onClose} tall zIndex={12} eyebrow={'✦ Model answer · seed ' + seed} title="From your own stories"
+    <Sheet open={!!question} onClose={onClose} tall zIndex={12} eyebrow={'✦ Model answer · seed ' + seed + (byFlash ? ' · Flash' : '')} title="From your own stories"
       foot={<div className="hstack" style={{ gap: 8 }}><button type="button" className="btn cool grow" onClick={() => void another()}>Another take · new seed</button><button type="button" className="btn grow" onClick={askLive}>Ask me this live</button></div>}>
       {question && (
         <div className="stack g14">
