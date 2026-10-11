@@ -6,7 +6,7 @@ test-results
 tests/design-refs
 tests/screenshots
 data
-bin
+/bin
 /internal/web/dist/*
 !/internal/web/dist/.gitkeep
 site/public
