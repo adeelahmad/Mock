@@ -7,6 +7,7 @@ import { useApp } from './store.tsx';
 import { paths } from './router.ts';
 import { useDeepLinks } from './deeplinks.ts';
 import { Icon } from '../components/ui.tsx';
+import { SpendBar } from '../components/Budget.tsx';
 import { daysUntil } from '../domain/selectors.ts';
 import Home from '../screens/Home.tsx';
 import Library from '../screens/Library.tsx';
@@ -43,6 +44,7 @@ function Sidebar() {
       {item('progress', 'Progress', <Icon.Trend />, paths.progress)}
       {item('game', 'Game', <Icon.Target />, paths.game)}
       <span style={{ flex: 1 }} />
+      <SpendBar variant="side" />
       <div className="nav-days"><span className="sub" style={{ font: '500 12px/1.2 var(--font-sans)' }}>Interview</span><span className="mono" style={{ font: '500 14px/1 var(--font-mono)', color: 'var(--m-warm)' }}>{daysUntil(data.settings.interviewDate)} days</span></div>
       <button className={'nav-item' + (route.path === paths.settings ? ' on' : '')} onClick={() => go(paths.settings)}><Icon.Settings />Settings</button>
     </nav>
@@ -91,8 +93,9 @@ export default function App() {
   return (
     <div className="app">
       {!inLive && !firstRun && <Sidebar />}
-      <div className="shell">
+      <div className="shell" style={{ position: 'relative' }}>
         {inLive ? <Live /> : <Screen />}
+        {ready && !firstRun && !inLive && <SpendBar />}
         {showTabs && <TabBar />}
       </div>
       <SetupSheet open={sheet.setup} onClose={closeSheets} />

@@ -174,9 +174,18 @@ export interface Settings {
   seed: number;
   lastBackupAt: string | null;
   onboarded: boolean;
+  /** USD per 1M tokens, per model; editable in Settings. */
+  pricing: ModelPrice[];
+  /** Tokens spent so far, per model and Leadership Principle. */
+  usage: UsageBucket[];
   /** Finished rounds of the Areas game, oldest first (domain/game.ts). */
   gamePlays: GamePlay[];
 }
+
+/** Billable tokens of one or more Gemini calls. */
+export interface TokenUsage { input: number; output: number; audioInput: number; audioOutput: number }
+export interface ModelPrice { model: string; input: number; output: number; audioInput: number; audioOutput: number }
+export interface UsageBucket extends TokenUsage { model: string; lpId: string | null; calls: number }
 
 export interface UiPrefs {
   theme: 'light' | 'dark' | 'system';
