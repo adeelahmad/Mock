@@ -75,6 +75,9 @@ make check             # typecheck + unit tests + build
 make e2e               # Playwright (PW_CHROMIUM=/path/to/chromium for a local browser)
 make verify            # check, then e2e
 make preview           # build, then serve dist/
+make server            # the Mock server on :8787 (sign-in + sync)
+make start             # build, then serve app + API from the Mock server
+make token             # print the sign-in setup token
 make clean             # remove dist/ and test results
 ```
 

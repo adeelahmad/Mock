@@ -4,7 +4,8 @@
 PORT ?= 5173
 
 .DEFAULT_GOAL := help
-.PHONY: help install dev typecheck test test-watch build preview e2e check verify refs shots icons clean
+
+.PHONY: server start token help install dev typecheck test test-watch build preview e2e check verify refs shots icons clean
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-11s %s\n", $$1, $$2}'
@@ -18,6 +19,15 @@ install: ## Install dependencies (dev included)
 
 dev: node_modules ## Run the dev server (PORT=5173)
 	npx vite --port $(PORT)
+
+server: node_modules ## Run the Mock server on :8787 (sign-in + sync; dev proxies /api, /auth to it)
+	npm run server
+
+start: node_modules ## Build, then serve the app + API from the Mock server
+	npm start
+
+token: node_modules ## Print the setup token the sign-in wizard asks for
+	@npm run --silent server -- token
 
 typecheck: node_modules ## Type-check
 	npm run typecheck
