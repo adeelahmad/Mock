@@ -62,6 +62,26 @@ describe('session controller on the simulated transport', () => {
     const transcript = await repo.transcript(mine.id);
     expect(transcript.some((t) => t.speaker === 'me')).toBe(true);
     expect(transcript.some((t) => t.speaker === 'coach')).toBe(true);
+    // The report is written once every card is in.
+    const ended = await repo.session(mine.id);
+    expect(ended?.report?.verdicts.map((v) => [v.lpName, v.verdict])).toEqual([['Dive Deep', 'not_inclined'], ['Bias for Action', 'inclined']]);
+    expect(ended?.report?.nextFocusLpId).toBe('deep');
+    expect(ended?.report?.fixes.length).toBeGreaterThan(0);
+    c.destroy();
+  });
+
+  it('writes the card on close when coaching never came, then the report', async () => {
+    const { repo, c, state, start } = make();
+    await start();
+    await until(() => state().turns.some((t) => t.speaker === 'me'), 15000);
+    expect(state().analysis).toBeNull();
+    await c.end();
+    expect(state().answers).toHaveLength(1);
+    const mine = (await repo.sessions())[0];
+    const [e] = await repo.exchanges(mine.id);
+    expect(e.analysis).not.toBeNull();
+    expect(e.verdict).toBe('not_inclined');
+    expect((await repo.session(mine.id))?.report?.verdicts).toHaveLength(1);
     c.destroy();
   });
 

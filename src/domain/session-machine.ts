@@ -62,7 +62,8 @@ export type SessionEvent =
   | { type: 'OUTPUT_TRANSCRIPT'; now: number; text: string }
   | { type: 'COACHING_START'; now: number }
   | { type: 'COACHING_END'; now: number }
-  | { type: 'ANALYSIS'; now: number; analysis: Analysis }
+  /** A card arrived. `answer` names an earlier question (analysed on close): it joins the recap rows without replacing the card on screen. */
+  | { type: 'ANALYSIS'; now: number; analysis: Analysis; answer?: { qIndex: number; lpName: string; interviewer: Interviewer } }
   | { type: 'HINT'; now: number; text?: string }
   | { type: 'DISMISS_HINT'; now: number }
   | { type: 'PAUSE'; now: number }
@@ -109,8 +110,8 @@ function appendTurn(turns: Turn[], speaker: Turn['speaker'], text: string, tMs: 
 const speakerOf = (s: SessionState): Speaker => (s.aiSpeaking ? 'ai' : s.meSpeaking ? 'me' : 'none');
 
 export function reduce(s: SessionState, e: SessionEvent): SessionState {
-  // Everything after END is final; only CLEAR_ERROR still applies.
-  if (s.phase === 'ended' && e.type !== 'CLEAR_ERROR') return s;
+  // Everything after END is final; only CLEAR_ERROR and late cards (recap rows) still apply.
+  if (s.phase === 'ended' && e.type !== 'CLEAR_ERROR' && e.type !== 'ANALYSIS') return s;
 
   switch (e.type) {
     case 'CONNECT':
@@ -197,10 +198,13 @@ export function reduce(s: SessionState, e: SessionEvent): SessionState {
     }
 
     case 'ANALYSIS': {
-      const answers = s.answers.filter((a) => a.qIndex !== s.qIndex);
-      answers.push({ qIndex: s.qIndex, lpName: e.analysis.lp || s.lpName, verdict: e.analysis.verdict, interviewer: s.interviewer, fixes: e.analysis.fixes.length });
+      const current = !e.answer || e.answer.qIndex === s.qIndex;
+      const q = e.answer?.qIndex ?? s.qIndex;
+      const answers = s.answers.filter((a) => a.qIndex !== q);
+      answers.push({ qIndex: q, lpName: e.analysis.lp || (current ? s.lpName : e.answer!.lpName), verdict: e.analysis.verdict, interviewer: current ? s.interviewer : e.answer!.interviewer, fixes: e.analysis.fixes.length });
       answers.sort((a, b) => a.qIndex - b.qIndex);
-      return { ...s, analysis: e.analysis, spokenVerdict: e.analysis.spokenVerdict, answers };
+      if (s.phase === 'ended') return { ...s, answers };
+      return current ? { ...s, analysis: e.analysis, spokenVerdict: e.analysis.spokenVerdict, answers } : { ...s, answers };
     }
 
     case 'HINT':
