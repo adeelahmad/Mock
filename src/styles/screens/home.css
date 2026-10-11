@@ -52,3 +52,12 @@ button.opt:hover:not(.on) { background: var(--m-elev); }
 .lp-field { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 14px; height: 44px; border-radius: 8px; border: 1px solid var(--m-line); background: var(--m-bg); font: 500 14px/1 var(--font-sans); }
 .seg.diff > button { height: 36px; font-weight: 500; }
 .seg.diff > button.on { font-weight: 700; }
+
+/* Notices above Start (M5): offline, backup nudge, install hint. */
+.notice { display: flex; align-items: center; gap: 10px; padding: 12px 8px 12px 14px; border-radius: 14px; border: 1px solid var(--m-line); background: var(--m-card); }
+.notice.gold { background: var(--m-gold-tint); border-color: var(--m-gold-line); }
+.notice-title { font: 700 13px/1.25 var(--font-sans); color: var(--m-fg); }
+.notice.gold .notice-title { color: var(--m-gold); }
+.notice-sub { font: 400 12px/1.4 var(--font-sans); color: var(--m-fg2); }
+.notice .btn.sm { flex-shrink: 0; }
+.notice-x { width: 36px; height: 36px; flex-shrink: 0; color: var(--m-fg3); }

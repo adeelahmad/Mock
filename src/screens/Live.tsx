@@ -11,6 +11,7 @@ import { isPaused, visiblePhase, NO_ONE, type SessionState, type Turn } from '..
 import { MODE_LABEL, verdictCode, type Analysis, type Exchange, type Mode } from '../domain/types.ts';
 import { VERDICT_LABEL, verdictPoints } from '../domain/verdict.ts';
 import { SPOKEN_WPS } from '../live/script.ts';
+import { LIVE_INPUT_TOKENS } from '../live/context.ts';
 
 const AUTO_NEXT_SEC = 5;
 
@@ -153,7 +154,7 @@ export default function Live() {
 
   const recap: LiveRecap = useMemo(() => {
     const answers = state?.answers ?? [];
-    // M4: the Flash recap writes the session report; until then the focus is the weakest answer's first fix.
+    // The written report's focus wins once it lands; until then the spoken recap's, then the weakest answer's first fix.
     const weakest = exchanges.filter((e) => e.analysis).sort((a, b) => verdictPoints(a.analysis!.verdict) - verdictPoints(b.analysis!.verdict) || a.index - b.index)[0];
     const local = weakest?.analysis
       ? (weakest.analysis.lp || data.lps.find((l) => l.id === weakest.lpId)?.name || 'Next time') + ' — ' + lcFirst(weakest.analysis.fixes[0] ?? 'redo it with the numbers first.')
@@ -165,7 +166,7 @@ export default function Live() {
       questions: answers.length,
       fixes: answers.reduce((n, a) => n + a.fixes, 0),
       rows: answers.map((a) => ({ mono: a.interviewer.mono, name: a.interviewer.name, role: a.interviewer.role, lp: a.lpName, verdict: a.verdict })),
-      focus: state?.focus || session?.report?.nextFocus || local,
+      focus: session?.report?.nextFocus || state?.focus || local,
     };
   }, [state, exchanges, data.lps, session, mode, now]);
 
@@ -221,12 +222,26 @@ export default function Live() {
     toast('Session ' + (meta?.sessionNumber ?? '') + ' saved · drilling ' + lp.name + '.');
     await live.start({ mode: 'lp', focus: lp.id, focusLabel: lp.name });
   }, [state?.analysis?.lp, lpName, data.lps, controller, toast, meta?.sessionNumber, live]);
-  // M3: "Play answer" replays the clip of the mixed recording; the simulated transport records nothing.
+  // M4: "Play answer" replays the exchange clip (saved under clip:{exchangeId} when the exchange closes).
   const onPlay = undefined;
+
+  // ---- context debug panel (D): the system prompt's tokens against its budget and what was trimmed
+  const [debug, setDebug] = useState(false);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && /input|textarea|select/i.test(t.tagName)) return;
+      if (!e.metaKey && !e.ctrlKey && !e.altKey && e.key.toLowerCase() === 'd') setDebug((d) => !d);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   if (!state || !meta) return null;
 
   return (
+    <>
+    {debug && <ContextPanel meta={meta} onClose={() => setDebug(false)} />}
     <LiveScreen
       phase={phase}
       paused={paused}
@@ -259,5 +274,23 @@ export default function Live() {
       onSaveBest={current ? onSaveBest : undefined}
       onDrill={state.analysis ? onDrill : undefined}
     />
+    </>
+  );
+}
+
+function ContextPanel({ meta, onClose }: { meta: NonNullable<ReturnType<typeof useApp>['live']['meta']>; onClose: () => void }) {
+  const c = meta.context;
+  const n = (x: number) => x.toLocaleString('en-US');
+  return (
+    <div className="ctx-debug" role="dialog" aria-label="Context debug">
+      <div className="ctx-debug-head"><span>Context · {meta.demo ? 'demo' : 'Gemini Live'}</span><button type="button" onClick={onClose} aria-label="Close">×</button></div>
+      {c ? (
+        <>
+          <div>System prompt ≈ {n(c.estimated)} tokens (estimate){c.counted != null ? ' · ' + n(c.counted) + ' counted' : ''}</div>
+          <div>Budget {n(c.budget)} of {n(LIVE_INPUT_TOKENS)} · audio ≈ 32 tokens/s, compression on</div>
+          <div>{c.trimmed.length ? 'Trimmed: ' + c.trimmed.join(' · ') : 'Nothing trimmed'}</div>
+        </>
+      ) : <div>No context built yet.</div>}
+    </div>
   );
 }

@@ -126,3 +126,5 @@
   .hist-col { flex: none; }
   .hist-scroll { overflow: visible; flex: none; }
 }
+.hist-summary { display: block; padding-top: 10px; border-top: 1px solid var(--m-line); text-wrap: pretty; }
+.hist-write { align-self: flex-start; margin-top: 10px; }

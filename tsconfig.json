@@ -17,7 +17,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["vite/client", "vitest/globals", "node"],
+    "types": ["vite/client", "vite-plugin-pwa/client", "vitest/globals", "node"],
     "baseUrl": ".",
     "paths": { "@/*": ["src/*"] }
   },

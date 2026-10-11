@@ -1,8 +1,9 @@
 import { expect, type Page } from '@playwright/test';
 
-/** Waits for the splash to go and the first screen to render. */
-export async function open(page: Page, hash = '#/practice'): Promise<void> {
-  await page.goto('/' + hash);
+/** Waits for the splash to go and the first screen to render. Flows run on the in-memory
+ *  sample library unless `repo` says otherwise ('duckdb' = the real storage, empty install). */
+export async function open(page: Page, hash = '#/practice', repo: 'sample' | 'memory' | 'duckdb' = 'sample'): Promise<void> {
+  await page.goto('/' + (repo === 'duckdb' ? '' : '?repo=' + repo) + hash);
   await page.waitForSelector('.splash', { state: 'detached', timeout: 30_000 }).catch(() => {});
   await expect(page.locator('.app')).toBeVisible();
 }
@@ -10,7 +11,7 @@ export async function open(page: Page, hash = '#/practice'): Promise<void> {
 export const isPhone = (page: Page): boolean => (page.viewportSize()?.width ?? 1000) < 900;
 
 /** The live screen's current machine phase, from the data attribute the screen carries. */
-export const livePhase = (page: Page) => page.locator('.live').getAttribute('data-state');
+export const livePhase = (page: Page) => page.locator('.live').getAttribute('data-phase');
 
 export async function waitForPhase(page: Page, phase: string | string[], timeout = 90_000): Promise<string> {
   const want = Array.isArray(phase) ? phase : [phase];

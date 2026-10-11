@@ -11,7 +11,8 @@ import { Icon } from '../components/ui.tsx';
 import Viz from '../components/Viz.tsx';
 import { latestSessionNumber, type LpRow } from '../domain/selectors.ts';
 import { practiceQueue } from '../domain/readiness.ts';
-import { KeyField, ModelField, VOICES, personaFor, previewToast, importPrepFiles, importSummary, typeLabel, useHelloTest, keyClick, fmtPause, plural, type PrepImport } from './Settings.tsx';
+import type { HelloResult } from '../live/hello.ts';
+import { KeyField, ModelField, VOICES, personaFor, useVoicePreview, importPrepFiles, importSummary, typeLabel, useHelloTest, keyClick, fmtPause, plural, type PrepImport } from './Settings.tsx';
 import '../styles/screens/settings.css';
 
 type Step = 1 | 2 | 3;
@@ -73,6 +74,7 @@ export default function Onboarding() {
   useEffect(() => { setKeyDraft(gemini.key); }, [gemini.key]);
   const commitKey = () => { const k = keyDraft.trim(); if (k !== gemini.key) void setGemini({ key: k }); };
   const hello = useHelloTest();
+  const preview = useVoicePreview();
 
   const nextN = latestSessionNumber(sessions) + 1;
   const persona = personaFor(gemini.voice) ?? VOICES[0];
@@ -111,8 +113,12 @@ export default function Onboarding() {
       toast(importSummary(r));
     } finally { setBusy(false); }
   };
-  const pickVoice = (p: typeof VOICES[number]) => { void setGemini({ voice: p.voice }); toast(previewToast(gemini.hasKey, p)); };
-  const finish = async () => { await repo.setSettings({ onboarded: true }); await refresh(); };
+  const pickVoice = (p: typeof VOICES[number]) => { void setGemini({ voice: p.voice }); preview(p); };
+  const finish = async () => {
+    // Ask once for persistent storage so the browser does not evict the library (iOS especially).
+    try { if (navigator.storage && typeof navigator.storage.persist === 'function') void navigator.storage.persist(); } catch { /* not offered */ }
+    await repo.setSettings({ onboarded: true }); await refresh();
+  };
   const start = async () => {
     await finish();
     if (focus) await live.start({ mode: 'lp', focus: focus.id, focusLabel: focus.name });
@@ -159,8 +165,7 @@ export default function Onboarding() {
               {hello.state === 'ok' ? (
                 <div className="ob-hello-text">
                   <span className="ob-hello-title"><span style={{ color: 'var(--m-green)' }}>✓</span>Heard you</span>
-                  {/* M3: the level and the measured pause come from the real "say hello" turn. */}
-                  <span className="ob-hello-sub">Earbuds · level ok · pause length set to {fmtPause(settings.pauseMs)} from how you speak</span>
+                  <span className="ob-hello-sub">{helloSub(hello.result, settings.pauseMs)}</span>
                 </div>
               ) : (
                 <div className="ob-hello-text">
@@ -222,4 +227,11 @@ export default function Onboarding() {
       </div>
     </div>
   );
+}
+
+/** The line under "Heard you": level and the pause measured from the hello turn (suggested, not applied). */
+function helloSub(r: HelloResult | null, pauseMs: number): string {
+  const level = r?.peakLevel == null ? 'level ok' : r.peakLevel < 0.08 ? 'level low — move the mic closer' : 'level ok';
+  const pause = r?.suggestedPauseMs && r.suggestedPauseMs !== pauseMs ? 'from how you speak, try a ' + fmtPause(r.suggestedPauseMs) + ' pause in Settings' : 'pause length ' + fmtPause(pauseMs);
+  return level[0].toUpperCase() + level.slice(1) + ' · ' + pause;
 }

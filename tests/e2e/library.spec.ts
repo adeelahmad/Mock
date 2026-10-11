@@ -26,7 +26,7 @@ test.describe('library', () => {
 
     await open(page, '#/library/stories/grid');
     await expect(page.getByText(/of 16 LPs covered/)).toBeVisible();
-    const cell = page.getByRole('button', { name: /Launch under ambiguity × Think Big/ }).first();
+    const cell = page.getByRole('gridcell', { name: /Launch under ambiguity × Think Big/ }).first();
     await cell.click(); // none → primary
     await open(page, '#/library/lps/big');
     await expect(page.getByText('Launch under ambiguity').first()).toBeVisible();

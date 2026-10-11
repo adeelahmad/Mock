@@ -3,7 +3,7 @@
    application palette (--m-*) in light and dark. Light is the default; dark reuses
    Aladdin's terminal palette. Two mode accents only: gold = interview, blue = coaching. */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..800;1,9..40,400..700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+/* Fonts are self-hosted (@fontsource-variable, imported in main.tsx) so the app works offline. */
 
 :root {
   /* Aladdin core brand */
@@ -28,8 +28,8 @@
   --radius-xs: 4px; --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px; --radius-pill: 999px;
 
   /* Type */
-  --font-sans: 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-sans: 'DM Sans Variable', 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   /* Mock palette — light */
   --m-canvas: #FFFFFF; --m-bg: #F8F9FA; --m-card: #FFFFFF; --m-elev: #F1F3F4; --m-line: #DADCE0; --m-line2: #BDC1C6;

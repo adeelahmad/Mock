@@ -4,9 +4,11 @@
 // "Skip my answers". `usePlayback` owns the clock so the transcript can follow it and the
 // analysis cards can seek it. With a recording the <audio> element drives the clock; without
 // one the clock runs on the transcript timings so the sync still works on sample data.
-// M4: the waveform is drawn from the real recording (today: deterministic bars from the id).
+// The waveform is drawn from the decoded recording (`useWaveform`); sessions without one get
+// deterministic bars from the id.
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Icon, fmt } from './ui.tsx';
+import { waveformPeaks } from '../domain/waveform.ts';
 import '../styles/screens/player.css';
 
 export type Speed = 1 | 1.5 | 2;
@@ -145,6 +147,28 @@ export function usePlayback({ src, totalMs, skipSpans }: { src: string | null; t
   return { positionMs, totalMs: total, playing, speed, skipMine, hasAudio: useAudio, play, pause, toggle, seek, skip, cycleSpeed, setSkipMine, audioProps };
 }
 
+// ---------- waveform ----------
+
+/** Bar heights from the recording, decoded once per blob; null until decoded or when it cannot be. */
+export function useWaveform(blob: Blob | null, n: number): number[] | null {
+  const [peaks, setPeaks] = useState<number[] | null>(null);
+  useEffect(() => {
+    setPeaks(null);
+    if (!blob || !blob.size) return;
+    const AC = (globalThis as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext }).AudioContext ?? (globalThis as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return;
+    let alive = true;
+    const ctx = new AC();
+    void blob.arrayBuffer()
+      .then((buf) => ctx.decodeAudioData(buf))
+      .then((audio) => { if (alive) setPeaks(waveformPeaks(Array.from({ length: audio.numberOfChannels }, (_, i) => audio.getChannelData(i)), n)); })
+      .catch(() => { /* undecodable: keep the placeholder */ })
+      .finally(() => { void ctx.close().catch(() => {}); });
+    return () => { alive = false; };
+  }, [blob, n]);
+  return peaks;
+}
+
 // ---------- waveform placeholder ----------
 const hash = (s: string): number => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 
@@ -165,6 +189,8 @@ export interface PlayerProps {
   chapters: Chapter[];
   /** Seed for the placeholder waveform (the session id). */
   seed: string;
+  /** Bar heights from the recording (useWaveform); the placeholder is drawn while null. */
+  peaks?: number[] | null;
   current: Chapter | null;
   /** One line under the controls (e.g. "No recording — playback follows the transcript timings"). */
   note?: React.ReactNode;
@@ -172,10 +198,10 @@ export interface PlayerProps {
   className?: string;
 }
 
-export default function Player({ pb, chapters, seed, current, note, bars = 72, className = '' }: PlayerProps) {
+export default function Player({ pb, chapters, seed, current, note, peaks, bars = 72, className = '' }: PlayerProps) {
   const total = pb.totalMs;
   const pct = clamp((pb.positionMs / total) * 100, 0, 100);
-  const heights = useMemo(() => waveBars(seed, bars, chapters.map((c) => c.startMs / total)), [seed, bars, chapters, total]);
+  const heights = useMemo(() => (peaks?.length ? peaks : waveBars(seed, bars, chapters.map((c) => c.startMs / total))), [peaks, seed, bars, chapters, total]);
   const waveRef = useRef<HTMLDivElement | null>(null);
 
   const seekAt = (clientX: number) => {

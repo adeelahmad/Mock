@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { open } from './helpers.ts';
+import { isPhone, open } from './helpers.ts';
 
 test.describe('history and progress', () => {
   test('session list → detail → analysis cards', async ({ page }) => {
@@ -8,19 +8,21 @@ test.describe('history and progress', () => {
     await page.getByRole('button', { name: /Session 14/ }).first().click();
     await expect(page).toHaveURL(/#\/history\/s14/);
     await expect(page.getByText(/Full loop/).first()).toBeVisible();
-    await page.getByRole('tab', { name: /Analysis/ }).click().catch(() => {});
+    // phone: the Analysis tab lists every card; desktop: the panel shows one answer until "All N"
+    if (isPhone(page)) await page.getByRole('tab', { name: /Analysis/ }).click();
+    else await page.getByRole('button', { name: /^All \d+$/ }).click();
     await expect(page.getByText(/Numbers you missed/).first()).toBeVisible();
     await expect(page.getByText(/41 min to mitigate/).first()).toBeVisible();
-    await expect(page.getByText(/Legacy data migration/).first()).toBeVisible();
+    await expect(page.getByText(/Legacy data migration/).filter({ visible: true }).first()).toBeVisible(); // also named in the report's story swaps, on the hidden tab
   });
 
   test('progress shows the heatmap, weakest LPs and the trend', async ({ page }) => {
     await open(page, '#/progress');
     await expect(page.getByText(/Weakest LPs/)).toBeVisible();
-    await expect(page.getByRole('button', { name: /^Drill$/ }).first()).toBeVisible();
-    await expect(page.getByText(/Trend · average verdict/)).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Drill / }).first()).toBeVisible();
+    await expect(page.getByText(/Trend · average verdict/).filter({ visible: true })).toBeVisible();
     await expect(page.getByText(/Story usage/)).toBeVisible();
-    await expect(page.getByText('NOW')).toBeVisible();
+    await expect(page.getByText('NOW', { exact: true })).toBeVisible();
   });
 });
 
@@ -34,9 +36,10 @@ test.describe('settings', () => {
     const slider = page.locator('input[type="range"]').first();
     await slider.fill('3000');
     await expect(page.getByText(/^3 s$/)).toBeVisible();
+    await page.getByRole('button', { name: /Back up everything/ }).first().click();
     const dl = page.waitForEvent('download');
-    await page.getByRole('button', { name: /Back up everything|Export everything/ }).first().click();
+    await page.getByRole('button', { name: /^Download$/ }).click();
     const d = await dl;
-    expect(d.suggestedFilename()).toMatch(/mock.*\.json$/);
+    expect(d.suggestedFilename()).toMatch(/^mock-backup-\d{4}-\d{2}-\d{2}\.zip$/);
   });
 });

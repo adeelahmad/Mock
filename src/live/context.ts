@@ -1,6 +1,7 @@
-// Mock — fills prompts/coach.md for one session. M1 ships the template fill and the tag
-// wrappers; M3 adds token counting against the live model and the trim ladder
-// (old reports → low-priority questions → long files), with tests.
+// Mock — fills prompts/coach.md for one session: the template fill, the tag wrappers, a
+// local token estimate and the trim ladder that keeps the system prompt inside its budget
+// (old reports → low-priority questions → long files). `confirmTokens` checks the estimate
+// with the API's countTokens when a key is available.
 
 import coachTemplate from '../../prompts/coach.md?raw';
 import type { Coaching, Lp, Mode, PrepFile, Question, QuestionSourceSetting, Report, Session, Story } from '../domain/types.ts';
@@ -21,7 +22,24 @@ export interface ContextInput {
   userInstruction?: string;
 }
 
-export interface BuiltContext { text: string; estimatedTokens: number; trimmed: string[] }
+export interface BuiltContext {
+  text: string;
+  estimatedTokens: number;
+  /** What the ladder removed or shortened, in order, for the debug panel. */
+  trimmed: string[];
+  budget: number;
+}
+
+/** gemini-3.8-live input window (plan §2). */
+export const LIVE_INPUT_TOKENS = 131_072;
+/** Target for the system prompt, so a long session's audio has room. */
+export const SYSTEM_PROMPT_BUDGET = 40_000;
+/** Audio is billed at 32 tokens per second. */
+export const audioTokens = (seconds: number): number => Math.ceil(seconds * 32);
+/** Questions the ladder never trims below. */
+const MIN_QUESTIONS = 10;
+/** A long file without a cached summary is cut to this many characters. */
+export const FILE_TRIM_CHARS = 6000;
 
 const esc = (s: string) => s.replace(/</g, '‹').replace(/>/g, '›');
 
@@ -76,12 +94,56 @@ export function prioritiseQuestions(questions: Question[], opts: { mode: Mode; f
   return qs.slice(0, opts.limit ?? 40);
 }
 
-export function buildContext(input: ContextInput): BuiltContext {
+function render(input: ContextInput): string {
   const fill: Record<string, string> = {
     SESSION_NUMBER: String(input.sessionNumber), DATE: input.date, MODE: input.mode, FOCUS: input.focus || 'none', COACHING: input.coaching, QUESTION_SOURCE: input.questionSource,
     PREVIOUS_SESSIONS: renderPrevious(input.previous), LPS: renderLps(input.lps), STORIES: renderStories(input.stories, input.lps), QUESTIONS: renderQuestions(input.questions, input.lps), FILES: renderFiles(input.files),
   };
   let text = coachTemplate.replace(/\{\{(\w+)\}\}/g, (_m, k: string) => fill[k] ?? '');
   if (input.userInstruction?.trim()) text += '\n\n## Candidate’s own instruction\n' + input.userInstruction.trim() + '\n';
-  return { text, estimatedTokens: estimateTokens(text), trimmed: [] };
+  return text;
+}
+
+const plural = (n: number, one: string, many = one + 's') => `${n} ${n === 1 ? one : many}`;
+
+/**
+ * Fill the template, then trim until the estimate fits the budget: drop the oldest reports
+ * (keeping the latest), then the lowest-priority questions (the list is already in priority
+ * order; at least ten stay), then shorten the longest files (cached summary, else the head).
+ */
+export function buildContext(input: ContextInput, opts: { budget?: number } = {}): BuiltContext {
+  const budget = opts.budget ?? SYSTEM_PROMPT_BUDGET;
+  const cur: ContextInput = { ...input, previous: input.previous.slice(), questions: input.questions.slice(), files: input.files.filter((f) => f.included) };
+  const trimmed: string[] = [];
+  let text = render(cur);
+  const over = () => estimateTokens(text) > budget;
+
+  let reports = 0;
+  while (over() && cur.previous.length > 1) { cur.previous.pop(); reports++; text = render(cur); }
+  if (reports) trimmed.push(plural(reports, 'old report'));
+
+  let questions = 0;
+  while (over() && cur.questions.length > MIN_QUESTIONS) {
+    const drop = Math.min(5, cur.questions.length - MIN_QUESTIONS);
+    cur.questions.splice(cur.questions.length - drop, drop); questions += drop; text = render(cur);
+  }
+  if (questions) trimmed.push(plural(questions, 'low-priority question'));
+
+  const byLength = cur.files.map((f, i) => ({ i, len: (f.summary ?? f.content).length })).sort((a, b) => b.len - a.len);
+  for (const { i } of byLength) {
+    if (!over()) break;
+    const f = cur.files[i];
+    if (f.summary) continue; // already rendered as its cached summary
+    if (f.content.length <= FILE_TRIM_CHARS) continue;
+    cur.files[i] = { ...f, content: f.content.slice(0, FILE_TRIM_CHARS) + '\n[… trimmed to fit the session context]' };
+    trimmed.push(`${f.name} shortened`);
+    text = render(cur);
+  }
+
+  return { text, estimatedTokens: estimateTokens(text), trimmed, budget };
+}
+
+/** Confirm the estimate with the API (countTokens); keeps the estimate when the call fails. */
+export async function confirmTokens(ctx: BuiltContext, count: (text: string) => Promise<number>): Promise<number | null> {
+  try { return await count(ctx.text); } catch { return null; }
 }

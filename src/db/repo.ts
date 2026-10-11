@@ -1,5 +1,6 @@
 // Mock — the storage interface the screens and the session controller use. M1 implements it
-// in memory on sample data; M2 implements it on DuckDB-Wasm with IndexedDB persistence.
+// in memory (sample data, tests, fallback); `duck.ts` implements it on DuckDB-Wasm with
+// IndexedDB snapshots.
 // The shapes are the domain types; derived numbers (counts, latest verdicts, heat, trend)
 // are computed by `domain/selectors.ts` from these reads, or by SQL in the DuckDB repo.
 
@@ -22,6 +23,12 @@ export interface QuestionFilter {
 export interface Repo {
   init(onStatus?: (status: string) => void): Promise<RepoMode>;
   mode(): RepoMode;
+  /** Called after every write so the app can refresh. */
+  onChange: (() => void) | null;
+  /** Persists pending writes now (no-op in memory). */
+  flush(): Promise<void>;
+  /** Every table as Parquet, when the repository can (DuckDB); backups include them. */
+  exportParquet?(): Promise<Record<string, Uint8Array>>;
 
   // ---- reads
   lps(): Promise<Lp[]>;

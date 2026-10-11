@@ -1,0 +1,23 @@
+{
+  "name": "Mock — interview practice",
+  "short_name": "Mock",
+  "description": "Rehearse an AWS interview loop with a live interviewer and a coach who judges you against your own prep.",
+  "id": "./",
+  "start_url": "./#/practice",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F8F9FA",
+  "theme_color": "#FFFFFF",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Start today's drill", "short_name": "Start", "url": "./#/start", "icons": [{ "src": "icons/shortcut-start.png", "sizes": "96x96", "type": "image/png" }] },
+    { "name": "Review last session", "short_name": "Last session", "url": "./#/last", "icons": [{ "src": "icons/shortcut-last.png", "sizes": "96x96", "type": "image/png" }] }
+  ]
+}

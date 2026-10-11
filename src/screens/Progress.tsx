@@ -8,7 +8,7 @@ import { useMemo, type CSSProperties } from 'react';
 import { useApp } from '../app/store.tsx';
 import { paths } from '../app/router.ts';
 import { v } from '../components/ui.tsx';
-import { daysUntil, verdictCounts, type HeatRow, type LpRow, type StoryRow } from '../domain/selectors.ts';
+import { daysUntil, verdictCounts, weakestLps, type HeatRow, type LpRow, type StoryRow } from '../domain/selectors.ts';
 import { VERDICT_LABEL, verdictPoints } from '../domain/verdict.ts';
 import type { Exchange, Session, Verdict } from '../domain/types.ts';
 import '../styles/screens/progress.css';
@@ -38,17 +38,6 @@ export function hoursPractised(sessions: Session[]): string {
   const sec = sessions.reduce((n, s) => (s.endedAt ? n + Math.max(0, (Date.parse(s.endedAt) - Date.parse(s.startedAt)) / 1000) : n), 0);
   const m = Math.round(sec / 60);
   return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0');
-}
-
-/**
- * Weakest LPs: lowest readiness first, never-tested as 0.35 (readiness.ts), stalest first on a
- * tie. Local copy of selectors.weakestLps(), whose comparator has an operator-precedence bug
- * (`a - b || x === 0 ? 0 : …` parses as `(a - b || x === 0) ? 0 : …`, so every pair with
- * different readiness compares equal and the list comes back in LP order). Reported in sharedChanges.
- */
-export function weakestRows(rows: LpRow[], n = 3): LpRow[] {
-  const key = (r: LpRow) => r.readiness ?? 0.35;
-  return rows.slice().sort((a, b) => key(a) - key(b) || (a.lastAt ?? '').localeCompare(b.lastAt ?? '') || a.order - b.order).slice(0, n);
 }
 
 const WORDS = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight'];
@@ -96,7 +85,7 @@ export default function Progress() {
   const cnt = useMemo(() => verdictCounts(lpRows), [lpRows]);
   const total = Math.max(1, lpRows.length);
   const pct = (n: number) => (n / total) * 100;
-  const weakest = useMemo(() => weakestRows(lpRows, 3), [lpRows]);
+  const weakest = useMemo(() => weakestLps(lpRows, 3), [lpRows]);
   const heatByLp = useMemo(() => new Map(heat.rows.map((r) => [r.lp.id, r])), [heat]);
   const dots = useMemo(() => trendDots(trend), [trend]);
   const note = useMemo(() => trendNote(trend), [trend]);
