@@ -12,6 +12,7 @@ import { newId } from '../db/repo.ts';
 import { NEW_QUESTION_TOOL, type LiveTransport, type ToolCall, type TransportEvent } from './transport.ts';
 import type { Analyzer } from './analyzer.ts';
 import { LocalReporter, reportInput, type Reporter } from './reporter.ts';
+import type { ToolHandler } from './context-tools.ts';
 
 export interface StartOptions {
   mode: Mode;
@@ -30,6 +31,8 @@ export interface StartOptions {
   voice: string;
   /** A fixed first question (the "ask me this live" path). */
   questionText?: string | null;
+  /** Extra tools next to new_question (the library lookups in context-tools.ts). */
+  tools?: ToolHandler[];
 }
 
 export type Listener = (s: SessionState, meta: ControllerMeta) => void;
@@ -103,7 +106,7 @@ export class SessionController {
     this.dispatch({ type: 'CONNECT', now: this.now() });
     this.off = this.transport.on((e) => this.onTransport(e));
     try {
-      await this.transport.connect({ model: opts.model, voice: opts.voice, systemInstruction: opts.systemInstruction, tools: [NEW_QUESTION_TOOL], silenceDurationMs: opts.pauseMs, resumptionHandle: null, seed: opts.seed });
+      await this.transport.connect({ model: opts.model, voice: opts.voice, systemInstruction: opts.systemInstruction, tools: [NEW_QUESTION_TOOL, ...(opts.tools ?? []).map((t) => t.declaration)], silenceDurationMs: opts.pauseMs, resumptionHandle: null, seed: opts.seed });
     } catch (err) {
       this.dispatch({ type: 'ERROR', now: this.now(), message: (err as Error).message || 'Could not connect' });
       await this.end('');
@@ -230,7 +233,11 @@ export class SessionController {
         this.emit();
         responses.push({ id: c.id, name: c.name, response: { ok: true, scheduling: 'SILENT' } });
       } else {
-        responses.push({ id: c.id, name: c.name, response: { ok: false, error: 'unknown tool' } });
+        const tool = this.opts?.tools?.find((t) => t.declaration.name === c.name);
+        let response: Record<string, unknown>;
+        try { response = tool ? await tool.handle(c.args ?? {}) : { ok: false, error: 'unknown tool' }; }
+        catch (err) { response = { ok: false, error: (err as Error).message || 'lookup failed' }; }
+        responses.push({ id: c.id, name: c.name, response });
       }
     }
     this.transport.sendToolResponse(responses);

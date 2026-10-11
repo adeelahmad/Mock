@@ -17,6 +17,9 @@ import { buildContext, confirmTokens, prioritiseQuestions } from '../live/contex
 import { GeminiLiveTransport } from '../live/gemini.ts';
 import { BrowserAudio } from '../live/audio.ts';
 import { countTokens } from '../live/gemini-rest.ts';
+import { contextTools } from '../live/context-tools.ts';
+import { meet } from '../meet/meet.ts';
+import { MeetAudio } from '../meet/meet-audio.ts';
 import { readPrefs, writePrefs } from './prefs.ts';
 import { applyTheme } from './theme.ts';
 import { go as routerGo, back as routerBack, useRoute, type Route } from './router.ts';
@@ -92,6 +95,7 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
   const [liveState, setLiveState] = useState<SessionState | null>(null);
   const [liveMeta, setLiveMeta] = useState<ControllerMeta | null>(null);
   const controller = useRef<SessionController | null>(null);
+  const inMeetRef = useRef(false);
   const [lastStart, setLastStart] = useState<LiveStart | null>(null);
   const [sheet, setSheet] = useState<AppStore['sheet']>({ setup: false, answer: null, addQuestion: false, addStory: false });
   const route = useRoute();
@@ -150,15 +154,19 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     // With a key the session runs on Gemini Live; without one, the scripted demo. The audio
     // engine is created before the first await so iOS sees the Start tap as its gesture.
     const demo = !gemini.hasKey;
+    // With Mock in a Google Meet call, the session runs there: meeting audio in, the bot's
+    // microphone out (docs/meet.md). The local engine stays silent and only records.
+    const inMeet = !demo && meet.inCall();
+    inMeetRef.current = inMeet;
     const transport = demo
       ? new SimulatedTransport(DEMO_SCRIPT)
-      : new GeminiLiveTransport({ auth: { kind: 'key', key: gemini.key }, audio: new BrowserAudio() });
+      : new GeminiLiveTransport({ auth: { kind: 'key', key: gemini.key }, audio: inMeet ? new MeetAudio(meet.client, new BrowserAudio({ mic: false, speakers: false })) : new BrowserAudio() });
     // With a key the cards and the report come from Flash, falling back to the offline card /
     // local report; the demo replays the script's cards.
     const { analyzer, reporter } = analysisPipeline({ key: demo ? null : gemini.key || null, textModel: s.textModel, lps: data.lps, stories: data.stories, script: demo ? DEMO_SCRIPT : null, onFallback: (what, err) => toast((what === 'analysis' ? 'Flash card failed' : 'Flash report failed') + ' — used the offline one (' + err.message + ')') });
     const c = new SessionController(transport, analyzer, repo, () => Date.now(), demo, { reporter });
     controller.current = c;
-    c.subscribe((st, meta) => { setLiveState(st); setLiveMeta(meta); });
+    c.subscribe((st, meta) => { setLiveState(st); setLiveMeta(meta); if (inMeet) meet.mirror(st); });
     const focusLp = o.mode === 'lp' && o.focus ? data.lps.find((l) => l.id === o.focus) : null;
     const weak = data.lpRows.slice().sort((a, b) => (a.readiness ?? 0.35) - (b.readiness ?? 0.35)).map((l) => l.id);
     const questions = prioritiseQuestions(data.questions, { mode: o.mode, focusLpId: focusLp?.id ?? null, weakLpIds: weak.slice(0, 5) });
@@ -169,8 +177,17 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     // Show the connecting screen while the mic is granted and the connection opens.
     setSheet({ setup: false, answer: null, addQuestion: false, addStory: false });
     routerGo('/live');
-    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: s.liveModel, voice: s.voice, questionText: o.questionText ?? null });
+    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: s.liveModel, voice: s.voice, questionText: o.questionText ?? null, tools: demo ? [] : contextTools(repo) });
   }, [data, gemini.hasKey, gemini.key, repo, exitLive, toast]);
+
+  // Mock dropped out of the Meet call mid-session (removed, call ended, bridge stopped): wrap up.
+  useEffect(() => meet.subscribe(() => {
+    const c = controller.current;
+    if (!inMeetRef.current || !c || meet.inCall() || c.state.phase === 'ended') return;
+    inMeetRef.current = false;
+    toast('Mock left the Meet call' + (meet.state.message ? ' · ' + meet.state.message : '') + ' · session saved');
+    void c.end();
+  }), [toast]);
 
   // Refresh the library when a live session writes.
   useEffect(() => {

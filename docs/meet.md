@@ -1,130 +1,110 @@
-# Mock in Google Meet — design (M6, after the MVP)
+# Mock in Google Meet (M6)
 
-Status: design only. Build starts after M2 (storage) and M3 (Gemini Live) land, so this
-reuses their transport, controller and context builder instead of duplicating them.
+Run a real mock interview inside a Google Meet call. The candidate signs in with Google in the
+app, creates or picks a meeting, and invites Mock. An AI interviewer joins the call as a
+participant, speaks with Gemini Live, uses tools to read the candidate's library, and coaches as
+usual. A human mock interviewer can sit in the same call. The session lands in History like any
+other.
 
-## Goal
+## Shape
 
-Run a real mock interview inside a Google Meet call. The candidate signs in with Google in
-the Mock app, creates or picks a meeting, and invites Mock. An AI interviewer joins the call
-as a participant, speaks with Gemini Live, uses tools, and pulls its context (LPs, stories,
-questions, files, previous reports) from the app. A human mock interviewer can sit in the
-same call. Results land back in the app's History like any other session.
+```
+ Mock app (browser tab)                     Meet bridge (Node, same computer)        Google Meet
+ ─────────────────────────                  ──────────────────────────────────       ───────────
+ SessionController ── GeminiLiveTransport   ws://127.0.0.1:8787                      Chromium (Playwright)
+        │                 │  AudioIO = MeetAudio ◄─ pcm 16 kHz ── server.ts ◄── bot.ts ◄── inpage.ts: RTCPeerConnection hook
+        │                 │                      ── play 24 kHz ─►          ──►       ──► inpage.ts: getUserMedia = Mock's voice
+   repo / History    Gemini Live (key stays here)  ── tile ───────►                    ──► canvas camera tile
+```
+
+The design kept the session in the app: the Gemini connection, controller, state machine, context
+builder, tools, Flash cards, report, recording and History are unchanged. Only the audio endpoints
+move. M3's `GeminiLiveTransport` already took an `AudioIO`, so the Meet path is a new `AudioIO`
+(`src/meet/meet-audio.ts`) and a bridge that carries audio to and from the call. There is no
+second Gemini client and no session logic in Node.
 
 ## Flow
 
-1. **Sign in.** The app uses Google Identity Services (token client, no backend secret) with
-   the scope `https://www.googleapis.com/auth/meetings.space.created`.
-2. **Meeting.** "Create meeting" calls Meet REST `POST https://meet.googleapis.com/v2/spaces`
-   with `config.accessType = OPEN` so the bot can join without being admitted. "Use a link"
-   accepts an existing `meet.google.com/xxx-xxxx-xxx` URL (then the host admits the bot).
-3. **Invite.** The app builds the session context with `buildContext()` and posts an invite
-   to the Mock bridge: `{ meetingUri, botName, options (mode, focus, coaching, pause),
-   systemInstruction, snapshot }`, where `snapshot` is the LPs, stories, questions, included
-   files and recent reports the context tools answer from.
-4. **Join.** The bridge launches Chromium (Playwright), opens the meeting, sets the display
-   name and asks to join.
-5. **Interview.** Meeting audio → Gemini Live; Gemini audio → the bot's microphone in the
-   call. The session controller drives the state machine exactly as in the app.
-6. **Results.** The bridge streams controller state, transcript, exchanges and analyses back
-   to the app over SSE; the app writes them through the repo, mirrors the Live screen, and
-   files the session in History when the call ends.
+1. **Bridge.** `npm run meet-bridge` on the candidate's computer prints a pairing code. In
+   Practice → *Interview in Google Meet* the app connects to `ws://127.0.0.1:8787` with that code.
+2. **Meeting.** Paste a Meet link or code, or *Sign in with Google · create a meeting*: Google
+   Identity Services' token client (scope `meetings.space.created`, token kept in memory), then
+   `POST https://meet.googleapis.com/v2/spaces` with `config.accessType = OPEN`.
+3. **Invite.** The bridge launches Chromium, opens the meeting, types "Mock · Interviewer", and
+   presses *Ask to join* / *Join now*. The sheet shows launching → joining → waiting to be let
+   in → in the call.
+4. **Interview.** *Start drill in Meet* (or *Full loop*) starts a normal session. The store sees
+   Mock in the call and gives the transport a `MeetAudio`. Meeting audio goes to Gemini and
+   Gemini's audio goes out through the bot's microphone. The live screen in the app keeps the
+   controls (pause, redo, hint, end) and the cards.
+5. **Results.** These are the same as an in-app session. The recording mixes the meeting audio
+   and the interviewer. If Mock drops out of the call mid-session (removed, the call ended, or
+   the bridge stopped), the app ends the session and keeps what was said.
 
-## Components
+## Pieces
 
-| Piece | Where | Notes |
+| Piece | File | Notes |
 |---|---|---|
-| `meet/oauth.ts` | app | GIS token client, token kept in memory only |
-| `meet/spaces.ts` | app | create space, parse/validate meeting links |
-| `MeetSheet` | app | Sign in → Create or paste link → Invite Mock → live status / Leave |
-| `meet/invite.ts` | app | POST invite, subscribe to `GET /sessions/:id/events` (SSE) |
-| `context-tools.ts` | shared | tool declarations + handlers over the snapshot (below) |
-| `meet-bridge/server.ts` | Node | `POST /invite`, `GET /sessions/:id/events`, `POST /sessions/:id/leave` |
-| `meet-bridge/bot.ts` | Node | Playwright join, page ↔ Node audio via `exposeBinding` / `evaluate` |
-| `meet-bridge/inpage.ts` | Meet page | `getUserMedia` override (AI voice + camera tile), `RTCPeerConnection` hook |
-| `MeetAudioIO` | Node | the audio adapter M3's Gemini transport takes in place of the mic/speaker |
+| Wire protocol | `src/meet/protocol.ts` | JSON messages + validation, Meet link parser; erasable TS so Node runs it |
+| Bridge client | `src/meet/bridge-client.ts` | pairing handshake, bot status, audio in/out, tile |
+| Meet audio | `src/meet/meet-audio.ts` | `AudioIO` over the bridge; a silent `BrowserAudio` records and keeps timing |
+| Meet link state | `src/meet/meet.ts` | the app's one bridge connection, saved address/code, tile mirroring |
+| Google | `src/meet/google.ts` | GIS token client, create space |
+| Sheet | `src/screens/MeetSheet.tsx` | bridge → meeting → Mock in the call → start |
+| Context tools | `src/live/context-tools.ts` | `get_story`, `find_questions`, `lp_history`, answered from the repo |
+| Server | `meet-bridge/server.ts` | 127.0.0.1 only, origin allow-list, pairing code, one app tab, one bot |
+| Bot | `meet-bridge/bot.ts` | Playwright launch, join loop, in-call monitor, page calls in order |
+| Meet's page | `meet-bridge/meet-page.ts` | every selector and Meet string in one file (role + name, not classes) |
+| In-page | `meet-bridge/inpage.ts` | `getUserMedia` override, `RTCPeerConnection` hook, AudioWorklet tap, tile |
 
 ### Audio in the call
 
-- **Out (AI → call).** `inpage.ts` replaces `navigator.mediaDevices.getUserMedia` before
-  Meet loads. The audio track comes from an `AudioContext` destination fed by a 24 kHz PCM
-  playback scheduler; `flush()` on barge-in and pause.
-- **Camera tile.** The video track is a canvas `captureStream()` showing the interviewer
-  monogram, phase (interviewer / answering / coaching) and the current question.
-- **In (call → AI).** Wrap `RTCPeerConnection` to catch remote audio tracks (Meet sends the
-  loudest few as separate tracks), mix them, downsample in an AudioWorklet to 16 kHz PCM16 and
-  hand 100 ms chunks to Node. The bot's own voice never comes back in remote tracks.
-- **Mic level** for the controller's VAD hysteresis comes from the same worklet (RMS).
+- **Out (Mock → call).** `getUserMedia` returns a clone of a `MediaStreamAudioDestination` track,
+  fed by a scheduler for Gemini's 24 kHz PCM. `flush` stops it on barge-in and pause.
+- **Camera.** A 960×540 canvas `captureStream` shows the monogram, name, role, phase, LP and the
+  pinned question. While Mock speaks, a ring pulses around the monogram. Coaching shows "Mock · Coach".
+- **In (call → Mock).** A subclass of `RTCPeerConnection` catches every remote audio track. Each
+  track also goes to a muted `<audio>` element, because Chrome only feeds remote WebRTC audio
+  into Web Audio while an element plays it. The tracks are mixed and tapped by an AudioWorklet,
+  then resampled to 16 kHz PCM16 and passed to Node with `exposeBinding`. The bot never hears
+  its own voice because it is not a remote track.
+- **Levels** for the controller's speech hysteresis come from the RMS of the incoming frames.
 
-### Reusing M3
+### Tools
 
-M3's `GeminiLiveTransport` owns the WebSocket protocol (setup, VAD config, transcription,
-barge-in, `new_question`, resumption, compression, GoAway). The Meet bridge only swaps the
-audio endpoints: it passes a `MeetAudioIO` (`onPcm`, `play`, `flush`, `setMuted`,
-`onLevel`) instead of the browser mic and speaker. If M3's transport hard-wires the
-AudioWorklet mic, M6 starts by extracting that seam; no second Gemini client.
+`new_question` is unchanged. The controller now takes extra tool handlers (`StartOptions.tools`).
+The store passes the three lookups for every Gemini session, in the app or in Meet. They are
+BLOCKING, so the model waits for the answer. They read the repository live, so an edit made a
+minute ago is what the interviewer sees.
 
-The `SessionController`, `session-machine`, `buildContext()` and analyzer run unchanged in
-Node, with a `MemoryRepo` seeded from the snapshot.
+## Security
 
-### Tools and app context
+- The bridge binds 127.0.0.1. It accepts only the app's origins (localhost dev/preview and
+  GitHub Pages by default; `MOCK_BRIDGE_ORIGINS` to change), and only after the pairing code
+  (random per start, or `MOCK_BRIDGE_CODE`). One app tab at a time. When that tab disconnects,
+  the bot leaves.
+- `join` takes only `meet.google.com` links (`--any-url` exists for the tests' fake Meet page).
+- The Gemini key and the Google token never reach the bridge.
 
-`new_question` stays as is. The controller gains pluggable tool handlers
-(`StartOptions.tools`) so the bridge can add read-only context tools answered from the
-snapshot, keeping the system prompt short:
+## Limits and risks
 
-- `get_story(title_or_id)` → STAR, numbers, LP links
-- `find_questions(lp, not_asked?)` → next questions for an LP, priority order
-- `lp_history(lp)` → last verdicts and fixes for that LP from previous reports
-- `get_file(name)` → an included prep file (or its summary)
-
-Replies are immediate with `scheduling: SILENT`, matching the `NON_BLOCKING` default.
-
-### Controls in the call
-
-Voice commands work as in the app (the coach prompt's sentinels). Meet chat commands
-`/pause`, `/resume`, `/next`, `/redo`, `/hint`, `/end` are read best-effort from the chat
-panel; the app's MeetSheet has the same buttons, sent to the bridge.
-
-## Where the bridge runs
-
-- **Local first.** `npm run meet-bridge` on the candidate's machine, app talks to
-  `http://localhost:8787`. Simplest, keeps the Gemini key local.
-- **Hosted later.** Same server in a container (Cloud Run with Chromium). Then the app mints
-  a Gemini ephemeral token per session instead of sending the key, and the bridge requires
-  the Google ID token from step 1.
-
-## Auth and keys
-
-- Google OAuth token never leaves the app; the bridge does not need it to join an OPEN space.
-- Gemini: the bridge uses `GEMINI_API_KEY` from its env, or an ephemeral token from the
-  invite. The raw key is never put in the invite.
-- The bot joins as a guest. Workspace domains that block external guests need the host to
-  allow it, or the bridge runs with a signed-in bot profile (`--profile` dir).
-
-## Risks
-
-| Risk | Mitigation |
+| Risk | Handling |
 |---|---|
-| Meet DOM changes break the join flow | selectors in one module, by role/aria-label; e2e smoke against a test meeting |
-| Guest join blocked or needs admission | OPEN spaces from step 2; clear "waiting to be admitted" status in the sheet |
-| Google bot policies / ToS for automated participants | personal, user-invited use only; document it; revisit Meet Media API when it supports sending audio |
-| Meet Media API (official WebRTC access) is receive-only and in developer preview | not used for v1; could replace the `RTCPeerConnection` hook for input later |
-| Echo / double talk with a human interviewer present | mixed remote audio is fine for Gemini VAD; human interviewer can `/pause` the AI |
-| Latency page ↔ Node ↔ Gemini | 100 ms chunks, binary over `exposeBinding`, playback scheduled ahead |
+| Meet changes its join screen | selectors by role and accessible name in `meet-page.ts`; the bot reports "Nobody let Mock in" / the denial text instead of hanging |
+| Headless Chromium turned away | user agent without "HeadlessChrome"; `--headed` and `--chrome` options |
+| Guest needs admitting, or the domain blocks guests | OPEN spaces from the app; the sheet says "admit Mock"; `--profile DIR` for a signed-in bot |
+| Automated participants and Google's terms | personal, user-invited use only. The Meet Media API (official WebRTC access) is receive-only and in developer preview, so it can't speak yet; it could replace the input hook later |
+| The app tab must stay open | the session lives there by design; the live screen is the control panel |
+| Echo or double talk with a human interviewer | Meet's echo cancellation on their side; pause Mock from the live screen |
 
-## Milestone M6 (after M3)
+## Tests
 
-1. Extract the audio seam from M3's transport; `MeetAudioIO` + fake for tests.
-2. `context-tools.ts` with unit tests; controller tool handlers.
-3. Bridge server + Playwright bot + in-page bridge; join a real meeting from the CLI.
-4. App: OAuth, create space, MeetSheet, SSE results into the repo and History.
-5. Tests: unit (tools, invite schema, SSE mapping), Playwright with a fake Meet page that
-   exercises the `getUserMedia` / `RTCPeerConnection` hooks, one manual run in a real call.
-
-## Open questions (defaults in brackets)
-
-1. Local bridge first, hosted later? [yes]
-2. Create OPEN meetings from the app, or only join links you paste? [both; create is default]
-3. Bot display name? ["Mock · Interviewer"]
-4. Allow a human interviewer to take over questions mid-session? [yes, via `/pause`]
+- Unit: protocol validation, Meet links, space creation, `MeetAudio` routing and muting, camera
+  tile, context tools, controller tool dispatch, and the bridge server with a fake bot over a real
+  socket (pairing, origin, link checks, one tab, leave on disconnect).
+- Playwright: the real bot joins a fake Meet page (`tests/fixtures/fake-meet.html`): it types its
+  name, knocks, and is let in. It hears a 440 Hz participant through the `RTCPeerConnection`
+  hook. Its microphone stays silent until it speaks, then a 1 kHz tone comes back through a real
+  peer connection. A second test drives the sheet: pair, invite, in the call, remove.
+- Not covered automatically: a real Google Meet call (needs a Google account and a second
+  participant). Do that by hand before relying on it.

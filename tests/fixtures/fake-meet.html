@@ -1,0 +1,47 @@
+<!doctype html>
+<!-- A stand-in for Google Meet's join screen and call, for the Meet bridge test. It knocks,
+     gets let in, asks for a mic and camera, then plays one "participant" (a 440 Hz tone) and
+     loops Mock's own microphone back as a second remote track, both over real RTCPeerConnections. -->
+<html><head><meta charset="utf-8"><title>Fake Meet</title></head>
+<body>
+  <div id="join">
+    <input aria-label="Your name" id="name">
+    <button id="ask">Ask to join</button>
+  </div>
+  <div id="call" hidden><p>In the call</p><button id="leave">Leave call</button></div>
+  <p id="msg"></p>
+<script>
+const $ = (id) => document.getElementById(id);
+window.__fakeMeet = { name: '', gum: [] };
+async function link(track) {
+  const a = new RTCPeerConnection(), b = new RTCPeerConnection();
+  a.onicecandidate = (e) => e.candidate && b.addIceCandidate(e.candidate);
+  b.onicecandidate = (e) => e.candidate && a.addIceCandidate(e.candidate);
+  b.ontrack = () => {};
+  a.addTrack(track, new MediaStream([track]));
+  await a.setLocalDescription(await a.createOffer());
+  await b.setRemoteDescription(a.localDescription);
+  await b.setLocalDescription(await b.createAnswer());
+  await a.setRemoteDescription(b.localDescription);
+}
+$('ask').onclick = () => {
+  window.__fakeMeet.name = $('name').value;
+  $('join').hidden = true;
+  $('msg').textContent = 'Asking to be let in…';
+  setTimeout(async () => {
+    $('msg').textContent = '';
+    $('call').hidden = false;
+    const mine = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+    window.__fakeMeet.gum = mine.getTracks().map((t) => t.kind);
+    const ac = new AudioContext();
+    const osc = ac.createOscillator(); osc.frequency.value = 440;
+    const g = ac.createGain(); g.gain.value = 0.2;
+    const dst = ac.createMediaStreamDestination();
+    osc.connect(g); g.connect(dst); osc.start();
+    await link(dst.stream.getAudioTracks()[0]);
+    await link(mine.getAudioTracks()[0]);
+  }, 400);
+};
+$('leave').onclick = () => { $('call').hidden = true; $('msg').textContent = 'You left the meeting.'; };
+</script>
+</body></html>

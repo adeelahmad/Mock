@@ -3,7 +3,7 @@
 // weakest answer is one tap to redo, readiness is a strip. Below it, the "Today · N min" queue
 // from 3a/3c: tap any row to start there.
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useApp, type AppData } from '../app/store.tsx';
 import { paths } from '../app/router.ts';
 import { Icon, VerdictChip, v } from '../components/ui.tsx';
@@ -13,6 +13,8 @@ import { daysUntil, latestSessionNumber, type LpRow } from '../domain/selectors.
 import { practiceQueue, type LpReadiness, type QueueItem } from '../domain/readiness.ts';
 import { VERDICT_LABEL } from '../domain/verdict.ts';
 import type { Lp, Session } from '../domain/types.ts';
+import { MeetSheet } from './MeetSheet.tsx';
+import { useMeet } from '../meet/meet.ts';
 import '../styles/screens/home.css';
 
 export interface QueueRow extends QueueItem { lp: LpRow }
@@ -70,6 +72,10 @@ export default function Home() {
   const startLoop = () => { void live.start({ mode: 'loop' }); };
   const startWeak = () => { if (weakest) void live.start({ mode: 'question_set', focus: weakest.questionId ?? null, questionText: weakest.questionText, focusLabel: weakLp?.name ?? 'Weakest answer' }); };
   const startLp = (lp: LpRow) => { void live.start({ mode: 'lp', focus: lp.id, focusLabel: lp.name }); };
+  const [meetOpen, setMeetOpen] = useState(false);
+  const meetState = useMeet();
+  const inMeet = meetState.connected && meetState.status === 'in_call';
+  const startInMeet = (kind: 'drill' | 'loop') => { setMeetOpen(false); if (kind === 'loop') startLoop(); else if (focus) startFocus(); else startLoop(); };
 
   return (
     <div className="screen">
@@ -114,6 +120,16 @@ export default function Home() {
                 <button className="btn" onClick={startWeak} disabled={blocked}><Icon.Redo size={16} />Redo{weakLp ? ' · ' + weakLp.name : ' this answer'}</button>
               </div>
             )}
+
+            {/* Google Meet: run the interview in a call */}
+            <div className="card stack g10" style={{ padding: '14px 16px' }}>
+              <div className="hstack between">
+                <span className="label">Google Meet</span>
+                {inMeet && <span className="pill-warm">Mock is in the call</span>}
+              </div>
+              <span className="sub pretty" style={{ fontSize: 13 }}>{inMeet ? 'Start runs the session in the call. A friend can sit in as a second interviewer.' : 'Run the interview in a Meet call: Mock joins as the interviewer, with your library behind it.'}</span>
+              <button className="btn" onClick={() => setMeetOpen(true)}>{inMeet ? 'Meet settings' : 'Interview in Google Meet'}</button>
+            </div>
           </div>
 
           <div className="home-col">
@@ -150,6 +166,7 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <MeetSheet open={meetOpen} onClose={() => setMeetOpen(false)} onStart={startInMeet} />
     </div>
   );
 }
