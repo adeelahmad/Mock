@@ -84,6 +84,10 @@ func signalRoutes(mux *http.ServeMux, o Options, a *auth.Auth, hub *signal.Hub) 
 		if u := a.User(r); u != nil {
 			b, _ := json.Marshal(map[string]any{"type": "mock-signal", "url": publicBase(a, r), "token": a.SignalToken(u.ID), "user": u.Name})
 			data["Payload"] = template.JS(b)
+		} else if mode == SignalOpen {
+			// An open relay needs no sign-in: hand back the address alone.
+			b, _ := json.Marshal(map[string]any{"type": "mock-signal", "url": publicBase(a, r), "token": ""})
+			data["Payload"] = template.JS(b)
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Header().Set("Cache-Control", "no-store")

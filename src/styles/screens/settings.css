@@ -143,3 +143,8 @@ input[type="range"].pause:focus-visible::-moz-range-thumb { box-shadow: var(--ri
   .ob-personas { margin: 0; padding: 0; overflow: visible; flex-wrap: wrap; }
   .ob-foot { padding-bottom: 32px; }
 }
+
+/* Sync → Pair a device */
+.vault-qr { width: 196px; max-width: 70vw; padding: 10px; border-radius: 12px; background: #fff; }
+.vault-qr svg { display: block; width: 100%; height: auto; }
+.vault-code { font: 700 26px/1.2 var(--font-mono); letter-spacing: .02em; }
