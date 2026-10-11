@@ -7,6 +7,8 @@ import React, { useMemo } from 'react';
 import { useApp, type AppData } from '../app/store.tsx';
 import { paths } from '../app/router.ts';
 import { Icon, VerdictChip, v } from '../components/ui.tsx';
+import Notices from '../components/Notices.tsx';
+import { useOnline } from '../app/install.ts';
 import { daysUntil, latestSessionNumber, type LpRow } from '../domain/selectors.ts';
 import { practiceQueue, type LpReadiness, type QueueItem } from '../domain/readiness.ts';
 import { VERDICT_LABEL } from '../domain/verdict.ts';
@@ -57,6 +59,9 @@ export default function Home() {
   const totalMin = queue.reduce((n, q) => n + q.minutes, 0);
   const gaps = lpRows.length - covered.size;
   const coachingText = settings.coaching === 'recap_only' ? 'recap at the end' : 'coaching after each';
+  // Live needs the network; the demo transport doesn't (plan: offline banner, Start disabled).
+  const online = useOnline();
+  const blocked = gemini.hasKey && !online;
   const liveHint = gemini.hasKey ? 'Live · ' + gemini.voice + ' · mic granted at setup' : 'Demo until you add a Gemini key in Settings';
 
   const startFocus = () => { if (focus) void live.start({ mode: 'lp', focus: focus.id, focusLabel: focus.name }); };
@@ -76,6 +81,7 @@ export default function Home() {
       <div className="screen-body" style={{ paddingTop: 18, gap: 14 }}>
         <div className="home-cols">
           <div className="home-col">
+            <Notices online={online} />
             {/* Session N · chosen for you */}
             <div className="card warm pad-lg stack g14">
               <span className="label warm">Session {nextN} · chosen for you</span>
@@ -86,11 +92,11 @@ export default function Home() {
                   {second ? ' Then one ' + second.lp.name + ' question — ' + lc(second.reason) + '.' : ''}
                 </span>
               </div>
-              <button className="btn xl primary" style={{ gap: 12 }} onClick={startFocus} disabled={!focus}><Icon.Mic size={22} style={{ strokeWidth: 2.2 }} />Start</button>
+              <button className="btn xl primary" style={{ gap: 12 }} onClick={startFocus} disabled={!focus || blocked}><Icon.Mic size={22} style={{ strokeWidth: 2.2 }} />Start</button>
               <div className="hstack" style={{ justifyContent: 'center', gap: 16, font: '700 13px/1 var(--font-sans)', color: 'var(--m-fg2)' }}>
                 <button className="text-btn" onClick={() => openSheet('setup')}>Change</button>
                 <span style={{ color: 'var(--m-line2)' }}>·</span>
-                <button className="text-btn" onClick={startLoop}>Full loop · {settings.loopSize * 10} min</button>
+                <button className="text-btn" onClick={startLoop} disabled={blocked}>Full loop · {settings.loopSize * 10} min</button>
               </div>
               <span className="muted" style={{ textAlign: 'center', font: '400 11px/1.3 var(--font-sans)' }}>{liveHint}</span>
             </div>
@@ -103,7 +109,7 @@ export default function Home() {
                   <VerdictChip code={weakest.verdict} />
                 </div>
                 <span className="pretty" style={{ font: '600 14px/1.35 var(--font-sans)' }}>{weakest.questionText}</span>
-                <button className="btn" onClick={startWeak}><Icon.Redo size={16} />Redo{weakLp ? ' · ' + weakLp.name : ' this answer'}</button>
+                <button className="btn" onClick={startWeak} disabled={blocked}><Icon.Redo size={16} />Redo{weakLp ? ' · ' + weakLp.name : ' this answer'}</button>
               </div>
             )}
           </div>
@@ -129,7 +135,7 @@ export default function Home() {
                 <span className="label">Today · {totalMin} min · tap any row to start there</span>
                 <div className="list">
                   {queue.map((q) => { const d = v(q.lp.verdict); return (
-                    <button key={q.lpId} className="row queue-row" onClick={() => startLp(q.lp)} aria-label={'Start ' + q.lp.name + ' · ' + q.minutes + ' min'}>
+                    <button key={q.lpId} className="row queue-row" onClick={() => startLp(q.lp)} disabled={blocked} aria-label={'Start ' + q.lp.name + ' · ' + q.minutes + ' min'}>
                       <span className="queue-tile" style={{ background: d.vFill, color: d.vOnFill }} aria-hidden="true">{d.vGlyph}</span>
                       <div className="stack g2 grow"><span style={{ font: '700 14px/1.2 var(--font-sans)' }}>{q.lp.name}</span><span className="sub" style={{ fontSize: 12, lineHeight: 1.2 }}>{q.reason}</span></div>
                       <span className="queue-mins">{q.minutes} min</span>

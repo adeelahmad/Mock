@@ -5,6 +5,7 @@
 import React from 'react';
 import { useApp } from './store.tsx';
 import { paths } from './router.ts';
+import { useDeepLinks } from './deeplinks.ts';
 import { Icon } from '../components/ui.tsx';
 import { daysUntil } from '../domain/selectors.ts';
 import Home from '../screens/Home.tsx';
@@ -78,6 +79,7 @@ function Screen() {
 
 export default function App() {
   const { ready, status, toastText, live, route, sheet, closeSheets, data } = useApp();
+  useDeepLinks();
   const inLive = route.path === paths.live && live.state;
   const firstRun = !data.settings.onboarded || route.path === paths.onboarding;
   const showTabs = !inLive && ['practice', 'library', 'history', 'progress'].includes(route.tab) && route.parts.length <= 2 && route.path !== paths.settings && route.path !== paths.onboarding;

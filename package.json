@@ -14,7 +14,8 @@
     "e2e": "playwright test",
     "check": "npm run typecheck && npm run test && npm run build",
     "refs": "node scripts/design-refs.mjs",
-    "shots": "node scripts/app-shots.mjs"
+    "shots": "node scripts/app-shots.mjs",
+    "icons": "node scripts/icons.mjs"
   },
   "dependencies": {
     "react": "^19.1.0",

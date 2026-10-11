@@ -95,6 +95,7 @@ button.row:hover { background: var(--m-elev); }
 .back-btn:hover { background: var(--m-elev); }
 .text-btn { border: none; background: transparent; color: inherit; font: inherit; cursor: pointer; padding: 0; }
 .text-btn:hover { text-decoration: underline; }
+.text-btn:disabled, button.row:disabled { opacity: .5; cursor: not-allowed; text-decoration: none; }
 svg.ic { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
 /* ---------- Chips ---------- */
@@ -226,3 +227,16 @@ input[type="number"].seed { width: 84px; background: var(--m-card); font-family:
 .bubble-row.me > .bubble { background: var(--m-elev); }
 .avatar { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--m-elev); display: grid; place-items: center; font: 800 10px/1 var(--font-sans); }
 .avatar.lg { width: 28px; height: 28px; }
+
+/* ---------- Mobile pass (M5) ---------- */
+/* No grey flash on tap, no double-tap zoom delay, no text-size bump on rotate. */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+button, a, [role="button"], input, select, textarea, label { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+/* iOS Safari zooms into any field under 16 px; touch screens get 16 px fields. */
+@media (pointer: coarse) {
+  .input, .textarea, .select-wrap > select, input[type="date"], input[type="number"], input[type="search"], input[type="text"], textarea { font-size: 16px; }
+}
+/* Installed (standalone) on a notched phone in landscape: keep content off the notch. */
+@media (display-mode: standalone) and (orientation: landscape) {
+  .app { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+}
