@@ -51,6 +51,7 @@ second Gemini client and no session logic in the bridge.
 | Meet audio | `src/meet/meet-audio.ts` | `AudioIO` over the bridge; a silent `BrowserAudio` records and keeps timing |
 | Meet link state | `src/meet/meet.ts` | the app's one bridge connection, saved address/code, tile mirroring |
 | Google | `src/meet/google.ts` | GIS token client, create space |
+| Media API | `src/meet/media-api.ts` | optional receive-only listener: offer, data channels, CSRC speaker filter, stats upload |
 | Sheet | `src/screens/MeetSheet.tsx` | bridge → meeting → Mock in the call → start |
 | Context tools | `src/live/context-tools.ts` | `get_story`, `find_questions`, `lp_history`, answered from the repo |
 | Bridge | `internal/meet/bridge.go` | 127.0.0.1 only, origin allow-list, pairing code, one app tab, one bot |
@@ -70,6 +71,30 @@ second Gemini client and no session logic in the bridge.
   then resampled to 16 kHz PCM16 and passed to Go through a DevTools binding (`Runtime.addBinding`). The bot never hears
   its own voice because it is not a remote track.
 - **Levels** for the controller's speech hysteresis come from the RMS of the incoming frames.
+
+### Hearing the call through the Meet Media API (optional)
+
+The sheet's *Hear the call through* switch picks **The bot** (default, above) or **Meet Media
+API**. The Media API is Google's official WebRTC access to a conference. It is receive-only and in
+Developer Preview (the Cloud project, the OAuth principal and the participants must be enrolled),
+so the bot still joins and speaks; only hearing moves.
+
+- **Sign-in.** GIS token client with `meetings.conference.media.audio.readonly` and
+  `meetings.space.readonly`, held in memory (about an hour).
+- **Connect** (`src/meet/media-api.ts`), when a session starts: `GET v2/spaces/{code}` for the
+  space name (falls back to `spaces/{code}`), an offer with exactly three `recvonly` audio
+  m-lines then the `session-control`, `media-stats`, `media-entries` and `participants` data
+  channels, `POST v2beta/{space}:connectActiveConference`, then wait for `STATE_JOINED` (the
+  app may need admitting).
+- **Audio.** The three virtual streams (loudest speakers) are mixed into one `MediaStream`, which
+  the session's `BrowserAudio` captures like a mic (`setInput`): resampling, levels, recording and
+  clips are unchanged.
+- **Not hearing itself.** Each RTP packet's CSRC names the speaker. Participants and media
+  entries map CSRCs to display names; a stream is silenced while its speaker is the bot's name.
+- **Stats.** `media-stats` sends a config; the allow-listed `getStats()` fields are uploaded on
+  its interval, as Meet requires.
+- **Fallback.** No token, a refused or failed connect, or a later `STATE_DISCONNECTED`: a toast,
+  and hearing switches to the bot's audio for the rest of the session. Closing sends `leave`.
 
 ### Tools
 
@@ -94,7 +119,7 @@ minute ago is what the interviewer sees.
 | Meet changes its join screen | selectors by role and accessible name in `page.js`; the bot reports "Nobody let Mock in" / the denial text instead of hanging |
 | Headless Chromium turned away | user agent without "HeadlessChrome"; `--headed`; `MOCK_BRIDGE_CHROMIUM` for installed Chrome |
 | Guest needs admitting, or the domain blocks guests | OPEN spaces from the app; the sheet says "admit Mock"; `--profile DIR` for a signed-in bot |
-| Automated participants and Google's terms | personal, user-invited use only. The Meet Media API (official WebRTC access) is receive-only and in developer preview, so it can't speak yet; it could replace the input hook later |
+| Automated participants and Google's terms | personal, user-invited use only. The Meet Media API (official WebRTC access) is receive-only and in developer preview: it can replace the input hook (*Hear the call through · Meet Media API*), but the bot still speaks |
 | The app tab must stay open | the session lives there by design; the live screen is the control panel |
 | Echo or double talk with a human interviewer | Meet's echo cancellation on their side; pause Mock from the live screen |
 
@@ -108,5 +133,10 @@ minute ago is what the interviewer sees.
   name, knocks, and is let in. It hears a 440 Hz participant through the `RTCPeerConnection`
   hook. Its microphone stays silent until it speaks, then a 1 kHz tone comes back through a real
   peer connection. A second test drives the sheet: pair, invite, in the call, remove.
+- Playwright, Media API: the listener against a fake Meet in the same page (a second
+  `RTCPeerConnection`): three audio m-lines first, the four data channels, admitted on
+  `session-control`, a tone heard in the mixed stream, stats uploaded, `leave` on close. Unit:
+  CSRC → bot mapping, stats filtering, space resolution, refusals, and `MeetAudio` falling back
+  to the bot when the Media API fails or drops.
 - Not covered automatically: a real Google Meet call (needs a Google account and a second
   participant). Do that by hand before relying on it.

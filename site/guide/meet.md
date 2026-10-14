@@ -26,6 +26,14 @@ History; the call is only where the audio goes.
 If Mock drops out of the call mid-session (removed, the call ended, the bridge stopped), the
 app ends the session and keeps what was said.
 
+## Hear the call through the Meet Media API
+
+If your Google Cloud project is in the Meet Media API Developer Preview, set **Hear the call
+through** to **Meet Media API** in the sheet and sign in with Google. Mock then hears the call
+over Google's official WebRTC connection instead of the bot's browser, and keeps its own voice
+out by speaker. The Media API can't send audio, so the bot still joins to speak. If the
+connection is refused or drops, Mock says so and hears the call through the bot.
+
 ## How it works
 
 The Gemini connection, session logic, tools, cards, report and recording all stay in the app

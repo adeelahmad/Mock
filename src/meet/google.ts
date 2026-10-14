@@ -28,14 +28,14 @@ function loadGis(): Promise<Gis> {
   return gis;
 }
 
-/** Opens Google's consent popup; resolves with an access token for the Meet scope. Call from a click. */
-export async function signInWithGoogle(clientId: string): Promise<string> {
+/** Opens Google's consent popup; resolves with an access token for the Meet scope (plus any extra scopes). Call from a click. */
+export async function signInWithGoogle(clientId: string, extraScopes: string[] = []): Promise<string> {
   if (!clientId.trim()) throw new Error('Add a Google OAuth client id first');
   const g = await loadGis();
   return new Promise<string>((resolve, reject) => {
     const client = g.accounts.oauth2.initTokenClient({
       client_id: clientId.trim(),
-      scope: MEET_SCOPE,
+      scope: [MEET_SCOPE, ...extraScopes].join(' '),
       callback: (r) => (r.access_token ? resolve(r.access_token) : reject(new Error(r.error_description || r.error || 'Google sign-in failed'))),
       error_callback: (e) => reject(new Error(e.type === 'popup_closed' ? 'Sign-in window closed' : e.message || 'Google sign-in failed')),
     });

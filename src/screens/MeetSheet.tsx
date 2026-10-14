@@ -5,8 +5,9 @@
 import React, { useEffect, useState } from 'react';
 import { useApp } from '../app/store.tsx';
 import { Input } from '../components/ui.tsx';
-import { Sheet } from '../components/ui.tsx';
-import { meet, useMeet } from '../meet/meet.ts';
+import { Seg, Sheet } from '../components/ui.tsx';
+import { meet, useMeet, type Listen } from '../meet/meet.ts';
+import { MEDIA_SCOPES } from '../meet/media-api.ts';
 import { parseMeetLink, type BotStatus } from '../meet/protocol.ts';
 import { buildClientId, createMeetSpace, signInWithGoogle } from '../meet/google.ts';
 
@@ -27,7 +28,9 @@ export function MeetSheet({ open, onClose, onStart }: { open: boolean; onClose: 
   const [code, setCode] = useState(meet.saved.code);
   const [clientId, setClientId] = useState(meet.saved.clientId || buildClientId());
   const [link, setLink] = useState(bridge.meetingUrl);
-  const [busy, setBusy] = useState<'' | 'connect' | 'create'>('');
+  const [busy, setBusy] = useState<'' | 'connect' | 'create' | 'media'>('');
+  const [listen, setListen] = useState<Listen>(meet.saved.listen);
+  const [signedIn, setSignedIn] = useState(meet.hasMediaToken());
   const [error, setError] = useState('');
 
   useEffect(() => { if (open) { setError(''); if (bridge.meetingUrl) setLink(bridge.meetingUrl); } }, [open]);
@@ -45,7 +48,8 @@ export function MeetSheet({ open, onClose, onStart }: { open: boolean; onClose: 
     setBusy('create'); setError('');
     try {
       meet.setClientId(clientId);
-      const token = await signInWithGoogle(clientId);
+      const token = await signInWithGoogle(clientId, listen === 'media' ? MEDIA_SCOPES : []);
+      if (listen === 'media') { meet.setMediaToken(token); setSignedIn(true); }
       const space = await createMeetSpace(token);
       setLink(space.meetingUri);
       toast('Meeting created · ' + space.meetingCode + ' · join it from Meet, then invite Mock');
@@ -54,6 +58,12 @@ export function MeetSheet({ open, onClose, onStart }: { open: boolean; onClose: 
     setBusy('');
   };
   const invite = () => { if (meeting) meet.invite(meeting); };
+  const pickListen = (v: Listen) => { setListen(v); meet.setListen(v); };
+  const mediaSignIn = async () => {
+    setBusy('media'); setError('');
+    try { meet.setClientId(clientId); meet.setMediaToken(await signInWithGoogle(clientId, MEDIA_SCOPES)); setSignedIn(true); } catch (err) { setError((err as Error).message); }
+    setBusy('');
+  };
 
   const foot = inCall ? (
     <div className="stack g10">
@@ -97,6 +107,22 @@ export function MeetSheet({ open, onClose, onStart }: { open: boolean; onClose: 
               {!buildClientId() && <Input label="Google OAuth client id (to create meetings)" mono value={clientId} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setClientId(e.target.value)} placeholder="….apps.googleusercontent.com" />}
               <button type="button" className="btn" disabled={!clientId.trim() || busy === 'create'} onClick={() => void create()}>{busy === 'create' ? 'Creating…' : 'Sign in with Google · create a meeting'}</button>
             </div>
+          )}
+        </div>
+
+        <div className="stack g8" data-testid="meet-listen">
+          <span className="label">Hear the call through</span>
+          <Seg<Listen> value={listen} onChange={pickListen} options={[['bot', 'The bot'], ['media', 'Meet Media API']]} />
+          {listen === 'media' && (
+            <>
+              <span className="sub pretty">Mock opens its own receive-only connection to the call (Developer Preview projects only) and the bot just speaks. If it can’t connect, Mock hears the call through the bot.</span>
+              {signedIn ? <span className="sub">Signed in for the Media API</span> : (
+                <>
+                  {!buildClientId() && <Input label="Google OAuth client id" mono value={clientId} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setClientId(e.target.value)} placeholder="….apps.googleusercontent.com" />}
+                  <button type="button" className="btn" disabled={!clientId.trim() || busy === 'media'} onClick={() => void mediaSignIn()}>{busy === 'media' ? 'Signing in…' : 'Sign in with Google for the Media API'}</button>
+                </>
+              )}
+            </>
           )}
         </div>
 
