@@ -95,6 +95,15 @@ describe('a video everyone watches', () => {
     expect(videoSource('https://example.com/page')).toBeNull();
     expect(videoSource('javascript:alert(1)')).toBeNull();
     expect(videoSource('https://youtu.be/<bad>')).toBeNull();
+    expect(videoSource('https://cdn.example.com/live/index.m3u8?token=1')).toEqual({ kind: 'hls', url: 'https://cdn.example.com/live/index.m3u8?token=1' });
+    expect(videoSource('https://cam.example.com/mjpeg')?.kind).toBe('mjpeg');
+    expect(videoSource('https://cam.example.com/axis-cgi/mjpg/video.cgi')?.kind).toBe('mjpeg');
+    expect(videoSource('https://cam.example.com/?action=stream')?.kind).toBe('mjpeg');
+    expect(videoSource('http://cam.example.com/live.m3u8')).toBeNull();
+    expect(videoSource('rtsp://cam.local/stream')).toBeNull();
+    const { videoProblem } = await import('./board.ts');
+    expect(videoProblem('rtsp://cam.local/stream')).toMatch(/RTSP.*HLS/);
+    expect(videoProblem('http://cam.local/live.m3u8')).toMatch(/https/);
   });
 
   it('plays and pauses for everyone from a shared position', async () => {

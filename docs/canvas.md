@@ -59,8 +59,11 @@ follows their zoom and scroll on the board ("Following the host") until they scr
 press Stop following, and can Follow again. Meet gives add-ons no participant names, so the
 leader shows as "the host" (the driver) or "a participant".
 
-**A video everyone watches:** Video on the board takes a YouTube link or a video file link
-(https, .mp4/.webm). Play, pause and seeking, in the player or with Play/Pause for everyone,
+**A video everyone watches:** Video on the board takes a YouTube link, a video file link
+(https, .mp4/.webm), an HLS stream (.m3u8, live or not; native HLS where the browser has it,
+hls.js otherwise) or an MJPEG camera stream. Live streams have no shared position: everyone
+watches the live edge. RTSP can't play in a browser; relay it as HLS (MediaMTX, ffmpeg) and
+paste that link. Streams must be https, since the canvas is. Play, pause and seeking, in the player or with Play/Pause for everyone,
 go out with the board and every participant's player follows (Sync me jumps back). Each
 browser streams the video itself; Meet's add-on state carries no media, so a live camera or
 screen can't be shared this way (present it with Meet).

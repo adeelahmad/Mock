@@ -137,9 +137,11 @@ test('main stage: a video everyone watches together', async ({ page }) => {
   await openAddon(page, 'stage', 'START_ACTIVITY');
   await expect(page.getByText('Question 1')).toBeVisible();
   await page.getByRole('button', { name: 'Video' }).click();
-  const link = page.getByLabel(/YouTube link or a video file/);
+  const link = page.getByLabel(/^A YouTube link/);
   await link.fill('https://example.com/page');
-  await expect(page.getByText('That link can’t play here.').or(page.getByText("That link can't play here."))).toBeVisible();
+  await expect(page.getByText(/Use a YouTube link, a video file/)).toBeVisible();
+  await link.fill('rtsp://cam.local/stream');
+  await expect(page.getByText(/Browsers can’t play RTSP/)).toBeVisible();
   await link.fill('https://youtu.be/dQw4w9WgXcQ');
   await page.getByRole('button', { name: 'Show the video' }).click();
   const frame = page.getByTitle('Shared video');
@@ -154,4 +156,18 @@ test('main stage: a video everyone watches together', async ({ page }) => {
   }).toEqual(['https://youtu.be/dQw4w9WgXcQ', true]);
   await page.getByRole('button', { name: 'Remove' }).click();
   await expect(frame).toHaveCount(0);
+
+  // A live HLS stream plays in a video element; an MJPEG camera is an image.
+  await page.route('https://streams.example.com/**', (r) => r.fulfill({ status: 404, body: '' }));
+  await page.getByRole('button', { name: 'Video' }).click();
+  await link.fill('https://streams.example.com/live/index.m3u8');
+  await page.getByRole('button', { name: 'Show the video' }).click();
+  await expect(page.locator('.wb-video-frame video')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Remove' }).click();
+  await page.getByRole('button', { name: 'Video' }).click();
+  await link.fill('https://streams.example.com/cam/mjpeg');
+  await page.getByRole('button', { name: 'Show the video' }).click();
+  await expect(page.getByRole('img', { name: 'Live camera stream' })).toBeVisible();
+  await expect(page.getByText('Live for everyone')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Play for everyone' })).toHaveCount(0);
 });

@@ -91,6 +91,8 @@
 
 .wb-video { display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--m-line); border-radius: 12px; padding: 8px; background: var(--m-card); }
 .wb-video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 60vh; border-radius: 8px; overflow: hidden; background: #000; display: grid; place-items: center; }
+.wb-video-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.wb-video-err { position: absolute; left: 8px; bottom: 8px; padding: 4px 8px; border-radius: 6px; background: rgba(0,0,0,.7); color: #fff; font: 600 12px/1.3 var(--font-sans); }
 .wb-video-frame iframe, .wb-video-frame video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .wb-video-frame > .sub { color: #ddd; padding: 16px; text-align: center; }
 .wb-video-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
