@@ -5,9 +5,10 @@
 // data and the rules (and how two people's edits merge) live in domain/board.ts.
 
 import React, { useEffect, useRef, useState } from 'react';
+import VideoPanel from './VideoPanel.tsx';
 import {
   BOARD_H, BOARD_W, NOTE_W, TEMPLATES, addNote, addShape, addStroke, addTemplate, boardOf, clearBoard, colorNote, editNote, hitAt, isEmpty,
-  NO_LEAD, lead as leadView, moveNote, moveShape, remove, restore, setTimer, stopLead, voteNote, type Board, type BoardNote, type Ink, type NoteColor, type Shape, type ShapeKind,
+  NO_LEAD, NO_VIDEO, lead as leadView, setVideo, videoSource, moveNote, moveShape, remove, restore, setTimer, stopLead, voteNote, type Board, type BoardNote, type Ink, type NoteColor, type Shape, type ShapeKind,
 } from '../domain/board.ts';
 
 export interface WhiteboardProps {
@@ -77,7 +78,8 @@ export default function Whiteboard({ board, readOnly, onChange, onSave, me }: Wh
   const [noteColor, setNoteColor] = useState<NoteColor>('yellow');
   const [zoom, setZoom] = useState(1);
   const [selected, setSelected] = useState<string | null>(null);
-  const [menu, setMenu] = useState<'templates' | 'timer' | null>(null);
+  const [menu, setMenu] = useState<'templates' | 'timer' | 'video' | null>(null);
+  const [link, setLink] = useState('');
   const [draft, setDraft] = useState<number[] | null>(null);
   const [shapeDraft, setShapeDraft] = useState<Shape | null>(null);
   const erasing = useRef(false);
@@ -261,6 +263,17 @@ export default function Whiteboard({ board, readOnly, onChange, onSave, me }: Wh
               <button type="button" className="wb-z mono" aria-label="Fit the board" title="Fit" onClick={() => setZoom(1)}>{Math.round(zoom * 100)}%</button>
               <button type="button" className="wb-tool" aria-label="Zoom in" disabled={zoom >= ZOOMS[ZOOMS.length - 1]} onClick={() => zoomBy(1)}>+</button>
             </span>
+            <div className="wb-pop">
+              <button type="button" className={'cv-tool' + (board.video?.url ? ' on' : '')} aria-expanded={menu === 'video'} onClick={() => setMenu(menu === 'video' ? null : 'video')}>Video</button>
+              {menu === 'video' && (
+                <form className="wb-menu wb-video-form" onSubmit={(e) => { e.preventDefault(); const l = link.trim(); if (!videoSource(l)) return; change((b) => setVideo(b, l)); setLink(''); setMenu(null); }}>
+                  <label className="sub" htmlFor="wb-video-link">A YouTube link or a video file (.mp4, .webm) everyone watches together</label>
+                  <input id="wb-video-link" className="input" type="url" placeholder="https://youtu.be/…" value={link} onChange={(e) => setLink(e.target.value)} autoFocus />
+                  {link.trim() && !videoSource(link) && <span className="sub">That link can't play here.</span>}
+                  <button type="submit" className="btn sm primary" disabled={!videoSource(link)}>Show the video</button>
+                </form>
+              )}
+            </div>
             {me && (leading
               ? <button type="button" className="cv-tool on" onClick={endLead}>Stop leading</button>
               : <button type="button" className="cv-tool" onClick={startLead}>Bring everyone here</button>)}
@@ -275,6 +288,7 @@ export default function Whiteboard({ board, readOnly, onChange, onSave, me }: Wh
           </div>
         </div>
       )}
+      <VideoPanel video={board.video ?? NO_VIDEO} onChange={onChange} readOnly={readOnly} />
       {me && ld.who && !leading && (
         <div className={'wb-follow' + (following ? ' on' : '')} role="status">
           {following

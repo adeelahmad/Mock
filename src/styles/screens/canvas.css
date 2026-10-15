@@ -89,6 +89,13 @@
 .wb-swatch.n-yellow { background: var(--wb-yellow); } .wb-swatch.n-green { background: var(--wb-green); } .wb-swatch.n-pink { background: var(--wb-pink); }
 .wb-swatch.n-blue { background: var(--wb-blue); } .wb-swatch.n-purple { background: var(--wb-purple); } .wb-swatch.n-white { background: var(--wb-white); }
 
+.wb-video { display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--m-line); border-radius: 12px; padding: 8px; background: var(--m-card); }
+.wb-video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 60vh; border-radius: 8px; overflow: hidden; background: #000; display: grid; place-items: center; }
+.wb-video-frame iframe, .wb-video-frame video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.wb-video-frame > .sub { color: #ddd; padding: 16px; text-align: center; }
+.wb-video-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.wb-video-form { min-width: 280px; gap: 8px; padding: 10px; }
+.wb-video-form .input { height: 34px; }
 .wb-viewport { overflow: auto; border-radius: 12px; max-height: 80vh; }
 .wb-viewport.following { box-shadow: 0 0 0 3px var(--m-cool-fill); }
 .wb-follow { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 10px; background: var(--m-elev); color: var(--m-fg2); font: 600 13px/1.3 var(--font-sans); }

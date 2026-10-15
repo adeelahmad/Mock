@@ -84,3 +84,28 @@ describe('following on the board', () => {
     expect(hasMore(stopped, led)).toBe(true);
   });
 });
+
+describe('a video everyone watches', () => {
+  it('reads YouTube and video file links', async () => {
+    const { videoSource } = await import('./board.ts');
+    for (const l of ['https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=10', 'https://youtu.be/dQw4w9WgXcQ', 'https://youtube.com/shorts/dQw4w9WgXcQ', 'https://m.youtube.com/watch?v=dQw4w9WgXcQ'])
+      expect(videoSource(l)).toEqual({ kind: 'youtube', id: 'dQw4w9WgXcQ', embed: 'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1&playsinline=1&rel=0' });
+    expect(videoSource('https://cdn.example.com/talk.mp4')).toEqual({ kind: 'file', url: 'https://cdn.example.com/talk.mp4' });
+    expect(videoSource('http://cdn.example.com/talk.mp4')).toBeNull();
+    expect(videoSource('https://example.com/page')).toBeNull();
+    expect(videoSource('javascript:alert(1)')).toBeNull();
+    expect(videoSource('https://youtu.be/<bad>')).toBeNull();
+  });
+
+  it('plays and pauses for everyone from a shared position', async () => {
+    const { setVideo, playVideo, videoPosition } = await import('./board.ts');
+    const b = setVideo(emptyBoard(), 'https://youtu.be/dQw4w9WgXcQ', 1000);
+    const playing = playVideo(b, true, 30, 2000);
+    expect(videoPosition(playing.video, 12_000)).toBe(40);
+    const paused = playVideo(playing, false, 41, 13_000);
+    expect(videoPosition(paused.video, 99_000)).toBe(41);
+    expect(mergeBoards(playing, paused).video.playing).toBe(false);
+    expect(playVideo(emptyBoard(), true, 5)).toEqual(emptyBoard());
+    expect(setVideo(paused, null, 14_000).video.url).toBe('');
+  });
+});

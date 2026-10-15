@@ -28,6 +28,11 @@ export interface Timer { end: number | null; t: number }
  * fraction of the scrollable range. `who` is empty when nobody leads.
  */
 export interface Lead { who: string; name: string; zoom: number; x: number; y: number; t: number }
+/**
+ * A video everyone watches together: a YouTube link or a video file link. Playing from `at`
+ * seconds since `t` (ms since epoch); paused at `at`. `url` is empty when there is none.
+ */
+export interface SharedVideo { url: string; playing: boolean; at: number; t: number }
 
 export interface Board {
   notes: BoardNote[];
@@ -37,6 +42,7 @@ export interface Board {
   gone: string[];
   timer: Timer;
   lead: Lead;
+  video: SharedVideo;
 }
 
 export const BOARD_W = 1000;
@@ -51,8 +57,9 @@ const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.m
 const now = (): number => Date.now();
 
 export const NO_LEAD: Lead = { who: '', name: '', zoom: 1, x: 0, y: 0, t: 0 };
-export const emptyBoard = (): Board => ({ notes: [], strokes: [], shapes: [], gone: [], timer: { end: null, t: 0 }, lead: NO_LEAD });
-export const boardOf = <B extends Board>(s: B): Board => ({ notes: s.notes, strokes: s.strokes, shapes: s.shapes, gone: s.gone, timer: s.timer, lead: s.lead ?? NO_LEAD });
+export const NO_VIDEO: SharedVideo = { url: '', playing: false, at: 0, t: 0 };
+export const emptyBoard = (): Board => ({ notes: [], strokes: [], shapes: [], gone: [], timer: { end: null, t: 0 }, lead: NO_LEAD, video: NO_VIDEO });
+export const boardOf = <B extends Board>(s: B): Board => ({ notes: s.notes, strokes: s.strokes, shapes: s.shapes, gone: s.gone, timer: s.timer, lead: s.lead ?? NO_LEAD, video: s.video ?? NO_VIDEO });
 export const isEmpty = (b: Board): boolean => !b.notes.length && !b.strokes.length && !b.shapes.length;
 
 const goneWith = (gone: string[], ids: string[]): string[] => { const g = [...gone, ...ids.filter((id) => !gone.includes(id))]; return g.length > GONE_MAX ? g.slice(g.length - GONE_MAX) : g; };
@@ -127,6 +134,31 @@ export function undoStroke<B extends Board>(b: B): B {
 
 export const setTimer = <B extends Board>(b: B, ms: number | null, at = now()): B => ({ ...b, timer: { end: ms == null ? null : at + ms, t: at } });
 
+// ---------- Watching a video together ----------
+
+export type VideoSource = { kind: 'youtube'; id: string; embed: string } | { kind: 'file'; url: string };
+
+/** What a pasted link plays: YouTube (watch, youtu.be, shorts, embed, live) or a video file over https. */
+export function videoSource(link: string): VideoSource | null {
+  let u: URL;
+  try { u = new URL(link.trim()); } catch { return null; }
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') return null;
+  const host = u.hostname.replace(/^(www|m|music)\./, '');
+  let id = '';
+  if (host === 'youtu.be') id = u.pathname.slice(1).split('/')[0];
+  else if (host === 'youtube.com' || host === 'youtube-nocookie.com') id = u.searchParams.get('v') ?? (u.pathname.match(/^\/(?:shorts|embed|live)\/([^/?#]+)/)?.[1] ?? '');
+  if (id) return /^[\w-]{6,20}$/.test(id) ? { kind: 'youtube', id, embed: 'https://www.youtube-nocookie.com/embed/' + id + '?enablejsapi=1&playsinline=1&rel=0' } : null;
+  if (u.protocol === 'https:' && /\.(mp4|webm|ogv|ogg|mov|m4v)$/i.test(u.pathname)) return { kind: 'file', url: u.toString() };
+  return null;
+}
+
+/** Puts a video up for everyone (paused at the start), or takes it down. */
+export const setVideo = <B extends Board>(b: B, url: string | null, at = now()): B => ({ ...b, video: url ? { url, playing: false, at: 0, t: at } : { ...NO_VIDEO, t: at } });
+/** Play or pause for everyone, from `pos` seconds. */
+export const playVideo = <B extends Board>(b: B, playing: boolean, pos: number, at = now()): B => ((b.video ?? NO_VIDEO).url ? { ...b, video: { ...b.video, playing, at: Math.max(0, pos), t: at } } : b);
+/** Where the shared video is now, in seconds. */
+export const videoPosition = (v: SharedVideo, at = now()): number => v.at + (v.playing ? Math.max(0, at - v.t) / 1000 : 0);
+
 // ---------- Following ----------
 
 /** Starts leading, or moves the leader's view (zoom, scroll fractions 0…1). */
@@ -178,6 +210,7 @@ export function mergeBoards<B extends Board>(mine: B, theirs: Board): B {
     gone,
     timer: (theirs.timer?.t ?? 0) > (mine.timer?.t ?? 0) ? theirs.timer : mine.timer,
     lead: (theirs.lead?.t ?? 0) > (mine.lead?.t ?? 0) ? theirs.lead : (mine.lead ?? NO_LEAD),
+    video: (theirs.video?.t ?? 0) > (mine.video?.t ?? 0) ? theirs.video : (mine.video ?? NO_VIDEO),
   };
 }
 
@@ -187,7 +220,7 @@ export function hasMore(a: Board, b: Board): boolean {
   const have = new Set([...b.notes, ...b.strokes, ...b.shapes].map(key));
   if ([...a.notes, ...a.strokes, ...a.shapes].some((x) => !have.has(key(x)))) return true;
   const g = new Set(b.gone);
-  return a.gone.some((id) => !g.has(id)) || a.timer.t > b.timer.t || (a.lead?.t ?? 0) > (b.lead?.t ?? 0);
+  return a.gone.some((id) => !g.has(id)) || a.timer.t > b.timer.t || (a.lead?.t ?? 0) > (b.lead?.t ?? 0) || (a.video?.t ?? 0) > (b.video?.t ?? 0);
 }
 
 // ---------- Templates ----------
