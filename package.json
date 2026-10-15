@@ -3,7 +3,7 @@
   "private": true,
   "license": "MIT",
   "version": "0.1.0",
-  "description": "Mock \u2014 a voice app for rehearsing an AWS interview loop. A live interviewer asks Leadership Principle questions; between answers a coach tells you what to fix, judged against your own prep.",
+  "description": "Mock — a voice app for rehearsing an AWS interview loop. A live interviewer asks Leadership Principle questions; between answers a coach tells you what to fix, judged against your own prep.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -32,6 +32,7 @@
     "@noble/hashes": "2.4.0",
     "fflate": "0.8.3",
     "fzstd": "0.1.1",
+    "hls.js": "1.7.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "uqr": "0.1.3",

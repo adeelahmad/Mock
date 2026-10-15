@@ -136,9 +136,23 @@ export const setTimer = <B extends Board>(b: B, ms: number | null, at = now()): 
 
 // ---------- Watching a video together ----------
 
-export type VideoSource = { kind: 'youtube'; id: string; embed: string } | { kind: 'file'; url: string };
+export type VideoSource =
+  | { kind: 'youtube'; id: string; embed: string }
+  | { kind: 'file'; url: string }
+  /** An HLS stream (.m3u8), live or not. */
+  | { kind: 'hls'; url: string }
+  /** A motion-JPEG camera stream: always live, no pause. */
+  | { kind: 'mjpeg'; url: string };
 
-/** What a pasted link plays: YouTube (watch, youtu.be, shorts, embed, live) or a video file over https. */
+/** Why a link can't play, for the person pasting it. */
+export function videoProblem(link: string): string {
+  const l = link.trim();
+  if (/^rtsps?:\/\//i.test(l)) return 'Browsers can’t play RTSP. Relay it as HLS (for example with MediaMTX or ffmpeg) and paste the .m3u8 link.';
+  if (/^http:\/\//i.test(l) && !/youtu/i.test(l)) return 'The canvas runs on https, so the stream must be https too.';
+  return 'Use a YouTube link, a video file (.mp4, .webm), an HLS stream (.m3u8) or an MJPEG camera stream.';
+}
+
+/** What a pasted link plays: YouTube (watch, youtu.be, shorts, embed, live), or over https a video file, an HLS stream or an MJPEG stream. */
 export function videoSource(link: string): VideoSource | null {
   let u: URL;
   try { u = new URL(link.trim()); } catch { return null; }
@@ -148,7 +162,10 @@ export function videoSource(link: string): VideoSource | null {
   if (host === 'youtu.be') id = u.pathname.slice(1).split('/')[0];
   else if (host === 'youtube.com' || host === 'youtube-nocookie.com') id = u.searchParams.get('v') ?? (u.pathname.match(/^\/(?:shorts|embed|live)\/([^/?#]+)/)?.[1] ?? '');
   if (id) return /^[\w-]{6,20}$/.test(id) ? { kind: 'youtube', id, embed: 'https://www.youtube-nocookie.com/embed/' + id + '?enablejsapi=1&playsinline=1&rel=0' } : null;
-  if (u.protocol === 'https:' && /\.(mp4|webm|ogv|ogg|mov|m4v)$/i.test(u.pathname)) return { kind: 'file', url: u.toString() };
+  if (u.protocol !== 'https:') return null;
+  if (/\.(mp4|webm|ogv|ogg|mov|m4v)$/i.test(u.pathname)) return { kind: 'file', url: u.toString() };
+  if (/\.m3u8$/i.test(u.pathname)) return { kind: 'hls', url: u.toString() };
+  if (/(\.mjpe?g|\/mjpe?g\/?|\/video\.cgi)$/i.test(u.pathname) || u.searchParams.get('action') === 'stream') return { kind: 'mjpeg', url: u.toString() };
   return null;
 }
 

@@ -8,7 +8,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import VideoPanel from './VideoPanel.tsx';
 import {
   BOARD_H, BOARD_W, NOTE_W, TEMPLATES, addNote, addShape, addStroke, addTemplate, boardOf, clearBoard, colorNote, editNote, hitAt, isEmpty,
-  NO_LEAD, NO_VIDEO, lead as leadView, setVideo, videoSource, moveNote, moveShape, remove, restore, setTimer, stopLead, voteNote, type Board, type BoardNote, type Ink, type NoteColor, type Shape, type ShapeKind,
+  NO_LEAD, NO_VIDEO, lead as leadView, setVideo, videoProblem, videoSource, moveNote, moveShape, remove, restore, setTimer, stopLead, voteNote, type Board, type BoardNote, type Ink, type NoteColor, type Shape, type ShapeKind,
 } from '../domain/board.ts';
 
 export interface WhiteboardProps {
@@ -267,9 +267,9 @@ export default function Whiteboard({ board, readOnly, onChange, onSave, me }: Wh
               <button type="button" className={'cv-tool' + (board.video?.url ? ' on' : '')} aria-expanded={menu === 'video'} onClick={() => setMenu(menu === 'video' ? null : 'video')}>Video</button>
               {menu === 'video' && (
                 <form className="wb-menu wb-video-form" onSubmit={(e) => { e.preventDefault(); const l = link.trim(); if (!videoSource(l)) return; change((b) => setVideo(b, l)); setLink(''); setMenu(null); }}>
-                  <label className="sub" htmlFor="wb-video-link">A YouTube link or a video file (.mp4, .webm) everyone watches together</label>
+                  <label className="sub" htmlFor="wb-video-link">A YouTube link, a video file, an HLS stream (.m3u8) or an MJPEG camera everyone watches together</label>
                   <input id="wb-video-link" className="input" type="url" placeholder="https://youtu.be/…" value={link} onChange={(e) => setLink(e.target.value)} autoFocus />
-                  {link.trim() && !videoSource(link) && <span className="sub">That link can't play here.</span>}
+                  {link.trim() && !videoSource(link) && <span className="sub">{videoProblem(link)}</span>}
                   <button type="submit" className="btn sm primary" disabled={!videoSource(link)}>Show the video</button>
                 </form>
               )}
