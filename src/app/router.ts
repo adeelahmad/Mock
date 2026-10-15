@@ -54,4 +54,5 @@ export const paths = {
   progress: '/progress',
   live: '/live',
   game: '/game',
+  canvas: '/canvas',
 };

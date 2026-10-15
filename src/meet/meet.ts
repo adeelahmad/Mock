@@ -67,6 +67,13 @@ export class MeetLink {
     if (!this.hasMediaToken(now)) throw new Error('Sign in with Google again for the Meet Media API');
     return new MeetMediaListener({ token: this.mediaToken!.token, meetingUrl: this.client.state.meetingUrl, botName: this.botName });
   }
+  /** A Media API listener for any call (the canvas): `botName` '' when no bot is in it. Null without a fresh token. */
+  mediaListenerFor(meetingUrl: string, botName = '', now = Date.now()): MeetMediaListener | null {
+    if (!this.hasMediaToken(now)) return null;
+    return new MeetMediaListener({ token: this.mediaToken!.token, meetingUrl, botName });
+  }
+  /** The call Mock's bot is in, if any. */
+  get meetingUrl(): string { return this.client.state.meetingUrl; }
   leave(): void { this.client.leave(); }
   disconnect(): void { this.client.close(); }
 

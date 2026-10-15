@@ -1,0 +1,17 @@
+{
+  "addOns": {
+    "common": {
+      "name": "Mock",
+      "logoUrl": "https://adeelahmad.github.io/Mock/app/icons/icon-192.png"
+    },
+    "meet": {
+      "web": {
+        "sidePanelUrl": "https://adeelahmad.github.io/Mock/app/?addon=side&project=PROJECT_NUMBER",
+        "addOnOrigins": ["https://adeelahmad.github.io"],
+        "supportsScreenSharing": true,
+        "logoUrl": "https://adeelahmad.github.io/Mock/app/icons/icon-192.png",
+        "darkModeLogoUrl": "https://adeelahmad.github.io/Mock/app/icons/icon-192.png"
+      }
+    }
+  }
+}

@@ -131,6 +131,13 @@ export default function Home() {
               <span className="sub pretty" style={{ fontSize: 13 }}>{inMeet ? 'Start runs the session in the call. A friend can sit in as a second interviewer.' : 'Run the interview in a Meet call: Mock joins as the interviewer, with your library behind it.'}</span>
               <button className="btn" onClick={() => setMeetOpen(true)}>{inMeet ? 'Meet settings' : 'Interview in Google Meet'}</button>
             </div>
+
+            {/* Canvas: pick the area, answer out loud, see every phrase marked */}
+            <div className="card stack g10" style={{ padding: '14px 16px' }}>
+              <span className="label">Prep canvas</span>
+              <span className="sub pretty" style={{ fontSize: 13 }}>Pick the area a question tests, then answer out loud: each phrase turns green, gold or red as the AI hears it. Whiteboard and AI chat included; works as a Meet add-on too.</span>
+              <button className="btn" onClick={() => go(paths.canvas)}><Icon.Target size={16} />Open the canvas</button>
+            </div>
           </div>
 
           <div className="home-col">
