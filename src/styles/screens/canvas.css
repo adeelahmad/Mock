@@ -3,6 +3,8 @@
    the AI chat at the side (below on a phone). Tokens only; shared vocabulary lives in app.css. */
 
 .canvas { min-height: 0; }
+.canvas .text-btn { font: 600 13px/1.2 var(--font-sans); color: var(--m-fg2); white-space: nowrap; }
+.canvas .text-btn:hover:not(:disabled) { color: var(--m-fg); }
 .cv-head { flex-wrap: wrap; padding-bottom: 10px; border-bottom: 1px solid var(--m-line); }
 .cv-ear { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .cv-level { width: 6px; height: 22px; border-radius: 3px; background: var(--m-elev); overflow: hidden; display: flex; align-items: flex-end; }
