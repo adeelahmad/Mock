@@ -11,9 +11,10 @@ import { paths } from '../app/router.ts';
 import { Icon, Input, Seg, download } from '../components/ui.tsx';
 import Whiteboard from '../components/Whiteboard.tsx';
 import {
-  addChat, addNote, addPhrases, addStroke, canvasQuestions, clearBoard, editNote, emptyCanvas, markPhrase, moveNote, nextQuestion,
-  pickArea, referenceFor, removeNote, splitPhrases, summarize, undoStroke, withQuestion, type CanvasState, type Phrase,
+  addChat, addNote, addPhrases, canvasQuestions, emptyCanvas, markPhrase, nextQuestion,
+  pickArea, receiveShared, referenceFor, splitPhrases, summarize, withQuestion, type CanvasState, type Phrase,
 } from '../domain/canvas.ts';
+import { boardOf, emptyBoard, hasMore, mergeBoards, type Board } from '../domain/board.ts';
 import { stackOf, browserStt } from '../domain/providers.ts';
 import { chatModel } from '../live/make-pipeline.ts';
 import { chatReply, judgePhrase, type CoachContext } from '../canvas/coach.ts';
@@ -32,6 +33,8 @@ import '../styles/screens/canvas.css';
 
 /** A stretch of speech ends after this much quiet: short, so marks land while the candidate talks. */
 const PAUSE_MS = 900;
+/** Where the board is kept between sittings. */
+const BOARD_KEY = 'canvas:board';
 const REVIEW_ASK = 'I finished my answer. How was it? One line on what worked, one on what to fix first.';
 
 type Hearing = 'mic' | 'meet';
@@ -245,14 +248,43 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
         if (!alive) return;
         setMeetCode(info.meetingCode);
         if (reason === 'JOIN_ACTIVITY') setDriver(false);
-        sc.onState = (st) => { if (!driverRef.current) { sRef.current = st; setS(st); } };
+        // Everyone edits the board; the question, answer and chat follow whoever drives.
+        sc.onState = (st, fromDriver) => {
+          const next = receiveShared(sRef.current, st, fromDriver, driverRef.current);
+          // Send back only what they lack (or, driving, the answer they may not have).
+          quiet.current = !(hasMore(next, st) || (driverRef.current && !fromDriver));
+          sRef.current = next; setS(next);
+        };
         await sc.connect(ADDON.project);
         if (alive) shared.current = sc;
       } catch (err) { toast('Meet add-on: ' + ((err as Error).message || 'could not connect')); }
     })();
     return () => { alive = false; sc.close(); shared.current = null; };
   }, [addon, toast]);
-  useEffect(() => { if (driver) shared.current?.share(s); }, [s, driver]);
+  const quiet = useRef(false);
+  useEffect(() => {
+    if (quiet.current) { quiet.current = false; return; }
+    shared.current?.share(s, Date.now(), driver);
+  }, [s, driver]);
+
+  // The board stays between sittings (like a saved board), in this browser's library.
+  const boardLoaded = useRef(false);
+  useEffect(() => {
+    if (addon === 'stage' && !driver) return;
+    let alive = true;
+    void repo.getBlob(BOARD_KEY).then(async (b) => {
+      if (!alive || !b) return;
+      try { const saved = JSON.parse(await b.text()) as Board; update((x) => mergeBoards(x, { ...emptyBoard(), ...saved, timer: { end: null, t: 0 } })); } catch { /* unreadable: start empty */ }
+    }).finally(() => { boardLoaded.current = true; });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [repo]);
+  const boardJson = JSON.stringify([s.notes, s.strokes, s.shapes]);
+  useEffect(() => {
+    if (!boardLoaded.current) return;
+    const t = setTimeout(() => { void repo.putBlob(BOARD_KEY, new Blob([JSON.stringify(boardOf(sRef.current))], { type: 'application/json' })); }, 800);
+    return () => clearTimeout(t);
+  }, [boardJson, repo]);
 
   // ---------- Actions ----------
   const pick = (areaId: string) => {
@@ -320,7 +352,7 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
   const recording = !!log.current;
 
   const saveBoard = async () => {
-    try { download('mock-board-' + new Date().toISOString().slice(0, 10) + '.png', await boardPng(s.notes, s.strokes)); }
+    try { download('mock-board-' + new Date().toISOString().slice(0, 10) + '.png', await boardPng(s.notes, s.strokes, s.shapes)); }
     catch (err) { toast((err as Error).message); }
   };
   const downloadRecording = () => { if (saved?.recording) download('mock-session-' + saved.session.number + '.' + extOf(saved.session.recordingMime), saved.recording); };
@@ -445,17 +477,7 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
 
           <section className="stack g8" aria-label="Whiteboard">
             <span className="label">Whiteboard</span>
-            <Whiteboard
-              notes={s.notes} strokes={s.strokes} readOnly={readOnly}
-              onStroke={(p) => update((x) => addStroke(x, p, 'me'))}
-              onAddNote={(t) => update((x) => addNote(x, t, 'me'))}
-              onMoveNote={(id, x, y) => update((st) => moveNote(st, id, x, y))}
-              onEditNote={(id, t) => update((x) => editNote(x, id, t))}
-              onRemoveNote={(id) => update((x) => removeNote(x, id))}
-              onClear={() => update(clearBoard)}
-              onUndo={() => update(undoStroke)}
-              onSave={() => void saveBoard()}
-            />
+            <Whiteboard board={s} onChange={(f) => update((x) => ({ ...x, ...f(x) }))} onSave={() => void saveBoard()} />
           </section>
           {!readOnly && <p className="cv-keys sub" aria-hidden="true"><kbd>L</kbd> listen · <kbd>F</kbd> finish · <kbd>R</kbd> redo · <kbd>N</kbd> next{recording ? ' · recording to History' : ' · Listen records the sitting to History'}</p>}
         </main>

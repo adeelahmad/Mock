@@ -79,4 +79,24 @@ test('main stage: someone who joins watches the shared canvas', async ({ page })
   await expect(page.getByText('Shared from the driver')).toBeVisible();
   await expect(page.locator('[data-mark="match"]')).toHaveText(/I owned it\./);
   await expect(page.getByRole('textbox', { name: 'Message the AI' })).toHaveCount(0);
+
+  // Like Miro: everyone edits the board. A viewer's sticky note goes out to the call, marked as not the driver's.
+  await page.getByRole('button', { name: 'Sticky note' }).click();
+  const board = page.getByRole('img', { name: 'Whiteboard drawing' });
+  await board.scrollIntoViewIfNeeded();
+  const box = (await board.boundingBox())!;
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await expect(page.getByTestId('wb-note')).toHaveCount(1);
+  await expect.poll(async () => {
+    const all: string[] = await page.evaluate(() => (window as any).__meet.broadcasts);
+    const last = all.length ? JSON.parse(all[all.length - 1]) : null;
+    return last ? [last.d, last.s.notes.length, last.s.questionText] : null;
+  }).toEqual([false, 1, 'Shared from the driver']);
+  // The driver's next state keeps the viewer's note.
+  await page.evaluate(() => {
+    const s = { questionId: 'x', questionText: 'Next from the driver', phase: 'pick', misses: [], areaId: null, role: null, phrases: [], partial: '', notes: [], strokes: [[]].slice(1), shapes: [], gone: [], timer: { end: null, t: 0 }, chat: [], done: 1 };
+    (window as any).__meet.delegate.onCoDoingStateChanged({ bytes: new TextEncoder().encode(JSON.stringify({ v: 1, d: true, s })) });
+  });
+  await expect(page.getByText('Next from the driver')).toBeVisible();
+  await expect(page.getByTestId('wb-note')).toHaveCount(1);
 });

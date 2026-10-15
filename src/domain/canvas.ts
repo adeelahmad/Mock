@@ -8,18 +8,22 @@
 
 import { roleOf, type AreaRole } from './game.ts';
 import type { Lp, Question, Story } from './types.ts';
+import { emptyBoard, mergeBoards, newId, type Board, type Who } from './board.ts';
+
+export {
+  BOARD_H, BOARD_W, addNote, addShape, addStroke, addTemplate, clearBoard, colorNote, editNote, moveNote, moveShape, removeNote, setTimer, undoStroke, voteNote,
+  type BoardNote, type Shape, type Stroke, type Who,
+} from './board.ts';
+export { newId };
 
 export type Mark = 'match' | 'drift' | 'redo';
 export type Phase = 'pick' | 'answer' | 'done';
-export type Who = 'me' | 'ai';
 
 export interface Phrase { id: string; text: string; mark: Mark | 'pending'; note: string; by: 'ai' | 'local' | '' }
-export interface BoardNote { id: string; x: number; y: number; text: string; by: Who }
-/** A pen stroke: flat [x0, y0, x1, y1, …] in board units (0…1000 × 0…600). */
-export interface Stroke { id: string; points: number[]; by: Who }
 export interface ChatMsg { id: string; who: Who; text: string; voice?: boolean }
 
-export interface CanvasState {
+/** The canvas: the question and answer, the chat, and the whiteboard (domain/board.ts). */
+export interface CanvasState extends Board {
   questionId: string;
   questionText: string;
   phase: Phase;
@@ -31,21 +35,13 @@ export interface CanvasState {
   phrases: Phrase[];
   /** Words heard but not yet cut into a phrase. */
   partial: string;
-  notes: BoardNote[];
-  strokes: Stroke[];
   chat: ChatMsg[];
   /** Questions done this sitting. */
   done: number;
 }
 
-export const BOARD_W = 1000;
-export const BOARD_H = 600;
-
-let seq = 0;
-export const newId = (p: string): string => p + '_' + Date.now().toString(36) + (++seq).toString(36) + Math.random().toString(36).slice(2, 5);
-
 export function emptyCanvas(): CanvasState {
-  return { questionId: '', questionText: '', phase: 'pick', misses: [], areaId: null, role: null, phrases: [], partial: '', notes: [], strokes: [], chat: [], done: 0 };
+  return { questionId: '', questionText: '', phase: 'pick', misses: [], areaId: null, role: null, phrases: [], partial: '', chat: [], done: 0, ...emptyBoard() };
 }
 
 /** Starts a question: keeps the board and the chat, clears the answer. */
@@ -167,54 +163,46 @@ export function summarize(phrases: Phrase[]): AnswerSummary {
   return { ...n, overall, line };
 }
 
-// ---------- Board ----------
-
-export function addNote(s: CanvasState, text: string, by: Who, at?: { x: number; y: number }): CanvasState {
-  const n = s.notes.length;
-  const x = at?.x ?? 40 + (n % 4) * 230;
-  const y = at?.y ?? 40 + (Math.floor(n / 4) % 3) * 180;
-  return { ...s, notes: [...s.notes, { id: newId('n'), x: clamp(x, 0, BOARD_W - 200), y: clamp(y, 0, BOARD_H - 120), text: text.trim(), by }] };
-}
-export const moveNote = (s: CanvasState, id: string, x: number, y: number): CanvasState =>
-  ({ ...s, notes: s.notes.map((n) => (n.id === id ? { ...n, x: clamp(x, 0, BOARD_W - 200), y: clamp(y, 0, BOARD_H - 120) } : n)) });
-export const removeNote = (s: CanvasState, id: string): CanvasState => ({ ...s, notes: s.notes.filter((n) => n.id !== id) });
-export const addStroke = (s: CanvasState, points: number[], by: Who): CanvasState =>
-  (points.length >= 4 ? { ...s, strokes: [...s.strokes, { id: newId('s'), points: points.map((v) => Math.round(v)), by }] } : s);
-/** Takes back the candidate's last pen stroke. */
-export function undoStroke(s: CanvasState): CanvasState {
-  for (let i = s.strokes.length - 1; i >= 0; i--) if (s.strokes[i].by === 'me') return { ...s, strokes: [...s.strokes.slice(0, i), ...s.strokes.slice(i + 1)] };
-  return s;
-}
-export const clearBoard = (s: CanvasState): CanvasState => ({ ...s, notes: [], strokes: [] });
-
 export const addChat = (s: CanvasState, who: Who, text: string, voice = false): CanvasState =>
   ({ ...s, chat: [...s.chat, { id: newId('c'), who, text: text.trim(), ...(voice ? { voice } : {}) }] });
 
-const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, v));
 
 // ---------- Sharing (Meet co-doing) ----------
 
 /** Co-doing state has to stay small: older strokes and chat go first. */
 export const SHARE_LIMIT_BYTES = 60_000;
 
-export function encodeCanvas(s: CanvasState, limit = SHARE_LIMIT_BYTES): Uint8Array {
+/** `driver`: sent by the person running the canvas (their question, answer and chat count); everyone's board edits count. */
+export function encodeCanvas(s: CanvasState, limit = SHARE_LIMIT_BYTES, driver = true): Uint8Array {
   const enc = new TextEncoder();
   let cur = s;
-  let bytes = enc.encode(JSON.stringify({ v: 1, s: cur }));
+  const pack = () => enc.encode(JSON.stringify({ v: 1, d: driver, s: cur }));
+  let bytes = pack();
   while (bytes.length > limit && (cur.strokes.length || cur.chat.length > 4 || cur.phrases.length > 4)) {
     cur = cur.strokes.length ? { ...cur, strokes: cur.strokes.slice(Math.ceil(cur.strokes.length / 4)) }
       : cur.chat.length > 4 ? { ...cur, chat: cur.chat.slice(Math.ceil(cur.chat.length / 4)) }
         : { ...cur, phrases: cur.phrases.slice(Math.ceil(cur.phrases.length / 4)) };
-    bytes = enc.encode(JSON.stringify({ v: 1, s: cur }));
+    bytes = pack();
   }
   return bytes;
 }
 
-export function decodeCanvas(bytes: Uint8Array): CanvasState | null {
+export function decodeCanvas(bytes: Uint8Array): CanvasState | null { return decodeShared(bytes)?.state ?? null; }
+
+/** A shared canvas and whether its sender runs the canvas (older senders always did). */
+export function decodeShared(bytes: Uint8Array): { state: CanvasState; driver: boolean } | null {
   try {
-    const m = JSON.parse(new TextDecoder().decode(bytes)) as { v?: number; s?: CanvasState };
+    const m = JSON.parse(new TextDecoder().decode(bytes)) as { v?: number; d?: boolean; s?: CanvasState };
     if (m.v !== 1 || !m.s || typeof m.s.phase !== 'string' || !Array.isArray(m.s.phrases)) return null;
-    return { ...emptyCanvas(), ...m.s };
+    return { state: { ...emptyCanvas(), ...m.s }, driver: m.d !== false };
   } catch { return null; }
 }
-export const editNote = (s: CanvasState, id: string, text: string): CanvasState => ({ ...s, notes: s.notes.map((n) => (n.id === id ? { ...n, text } : n)) });
+
+/**
+ * What someone receiving a shared canvas shows: the board is merged with their own (everyone
+ * edits it); the question, answer and chat come from the driver only, unless they drive.
+ */
+export function receiveShared(mine: CanvasState, theirs: CanvasState, fromDriver: boolean, iDrive: boolean): CanvasState {
+  const base = fromDriver && !iDrive ? { ...theirs, notes: mine.notes, strokes: mine.strokes, shapes: mine.shapes, gone: mine.gone, timer: mine.timer } : mine;
+  return mergeBoards(base, theirs);
+}

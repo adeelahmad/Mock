@@ -40,6 +40,25 @@ it, so History plays it back. After saving, the bar offers the recording and a M
 transcript as downloads (inside Meet the add-on's storage is its own, so download them there).
 A sitting where nothing was said is not kept.
 
+## The whiteboard
+
+Built to match the whiteboards people use in Meet (Miro and the like), in `src/domain/board.ts`
+and `src/components/Whiteboard.tsx`: sticky notes in six colours, text, pen and highlighter in
+six colours, an eraser, rectangles, ellipses, lines and arrows, templates (STAR answer, pros and
+cons, timeline, story map), dot votes on notes, a timer everyone in the call sees, zoom
+(50–200%), undo/redo (⌘Z, ⇧⌘Z), Delete for the selected item, and Save image (PNG). The board
+stays between sittings in this browser's library.
+
+In a Meet call **everyone edits the board**. Each item carries when it last changed and removed
+items are remembered, so two people's boards merge item by item (newest change wins, removed
+stays removed); a participant who has something the shared state lacks sends it again. The
+question, answer and chat still follow whoever drives (Take over).
+
+Not matched, and why: live cursors and names (the Add-ons SDK gives no participant identity and
+shared state is meant for occasional updates, not pointer streams), images and files (shared
+state is limited to about 60 KB), comments, connectors that stick to shapes, and boards that
+outlive the call for everyone (the board is kept per browser; there is no server board).
+
 Small things: a REC clock in the header (paused while muted), an answer clock (gold past two
 minutes, red past three), keys **L** listen/mute, **F** finish, **R** redo, **N** next, and on
 the whiteboard **Undo** (your last stroke) and **Save image** (PNG).

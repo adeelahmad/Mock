@@ -7,7 +7,7 @@
 // Setup (Cloud project, deployment with the side panel and main stage URLs): docs/canvas.md.
 
 import type { AddonSession, CoDoingClient, FrameType, MeetAddon, MeetMainStageClient, MeetSidePanelClient } from '@googleworkspace/meet-addons';
-import { decodeCanvas, encodeCanvas, type CanvasState } from '../domain/canvas.ts';
+import { decodeShared, encodeCanvas, type CanvasState } from '../domain/canvas.ts';
 
 /** Meet adds `meet_sdk` to an add-on frame's URL; the deployment adds `addon=side|stage` and `project`. */
 export interface AddonParams { inMeet: boolean; frame: 'side' | 'stage' | null; project: string }
@@ -61,11 +61,13 @@ export async function sidePanel(project: string): Promise<MeetSidePanelClient> {
 export async function mainStage(project: string): Promise<MeetMainStageClient> { return (await addonSession(project)).createMainStageClient(); }
 
 /**
- * The shared canvas: `share(state)` sends it to everyone (throttled), `onState` receives theirs.
- * The SDK resolves conflicts as last writer wins, which suits one driver and several viewers.
+ * The shared canvas: `share(state, driver)` sends it to everyone (throttled), `onState` receives
+ * theirs with whether the sender drives. The SDK keeps the last state sent; receivers merge the
+ * board (domain/canvas.ts receiveShared), so everyone's whiteboard edits survive.
  */
 export class SharedCanvas {
-  onState: ((s: CanvasState) => void) | null = null;
+  onState: ((s: CanvasState, fromDriver: boolean) => void) | null = null;
+  private driver = true;
   private client: CoDoingClient | null = null;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private pending: CanvasState | null = null;
@@ -77,16 +79,17 @@ export class SharedCanvas {
     const s = await open(project);
     this.client = await s.createCoDoingClient({
       activityTitle: 'Mock canvas',
-      onCoDoingStateChanged: (st) => { const c = decodeCanvas(st.bytes); if (c) this.onState?.(c); },
+      onCoDoingStateChanged: (st) => { const c = decodeShared(st.bytes); if (c) this.onState?.(c.state, c.driver); },
     });
   }
 
   /** For tests: a client stand-in. */
   attach(client: CoDoingClient): void { this.client = client; }
 
-  share(s: CanvasState, now = Date.now()): void {
+  share(s: CanvasState, now = Date.now(), driver = true): void {
     if (!this.client) return;
     this.pending = s;
+    this.driver = driver;
     const wait = this.lastSent + this.minGapMs - now;
     if (wait <= 0) { this.flush(now); return; }
     this.timer ??= setTimeout(() => { this.timer = null; this.flush(); }, wait);
@@ -96,7 +99,7 @@ export class SharedCanvas {
     const s = this.pending; this.pending = null;
     if (!s || !this.client) return;
     this.lastSent = now;
-    try { this.client.broadcastStateUpdate({ bytes: encodeCanvas(s) }); } catch { /* the next change tries again */ }
+    try { this.client.broadcastStateUpdate({ bytes: encodeCanvas(s, undefined, this.driver) }); } catch { /* the next change tries again */ }
   }
 
   close(): void { if (this.timer) clearTimeout(this.timer); this.timer = null; this.client = null; this.onState = null; }

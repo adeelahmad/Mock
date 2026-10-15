@@ -80,20 +80,35 @@ test.describe('prep canvas', () => {
     await page.getByRole('button', { name: 'Send' }).click();
     await expect(page.locator('.cv-msg.me').last()).toHaveText('What next?');
 
-    // Whiteboard: a note and a pen stroke.
-    await page.getByRole('button', { name: '+ Note' }).click();
-    await expect(page.getByTestId('wb-note')).toHaveCount(1);
+    // Whiteboard: a sticky note, a pen stroke, a template and a timer.
     const board = page.getByRole('img', { name: 'Whiteboard drawing' });
     await board.scrollIntoViewIfNeeded();
-    const box = (await board.boundingBox())!;
+    await page.getByRole('button', { name: 'Sticky note' }).click();
+    let box = (await board.boundingBox())!;
+    await page.mouse.click(box.x + 120, box.y + 80);
+    await expect(page.getByTestId('wb-note')).toHaveCount(1);
+    await page.getByRole('textbox', { name: 'Note' }).fill('Lead with the number');
+    await page.getByRole('button', { name: 'Pen', exact: true }).click();
+    box = (await board.boundingBox())!;
     await page.mouse.move(box.x + 300, box.y + box.height - 40);
     await page.mouse.down();
     await page.mouse.move(box.x + 360, box.y + box.height - 60, { steps: 6 });
     await page.mouse.move(box.x + 420, box.y + box.height - 30, { steps: 6 });
     await page.mouse.up();
-    await expect(board.locator('path')).toHaveCount(1);
-    await page.getByRole('button', { name: 'Undo' }).click();
-    await expect(board.locator('path')).toHaveCount(0);
+    await expect(board.locator('path.wb-ink')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Undo board change' }).click();
+    await expect(board.locator('path.wb-ink')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Redo board change' }).click();
+    await expect(board.locator('path.wb-ink')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Undo board change' }).click();
+    await page.getByRole('button', { name: 'Templates' }).click();
+    await page.getByRole('menuitem', { name: 'STAR answer' }).click();
+    await expect(board.locator('rect.wb-shape')).toHaveCount(4);
+    await page.getByRole('button', { name: 'Undo board change' }).click();
+    await expect(board.locator('rect.wb-shape')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Timer' }).click();
+    await page.getByRole('menuitem', { name: '2 min for everyone' }).click();
+    await expect(page.getByRole('timer')).toHaveText(/^[12]:\d\d$/);
 
     // N: the next question, from the keyboard.
     await page.keyboard.press('n');
