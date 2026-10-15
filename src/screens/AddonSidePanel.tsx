@@ -1,17 +1,19 @@
-// Mock — the Google Meet add-on's side panel: one button that opens the prep canvas on the
-// main stage for everyone in the call (Meet asks the others to join it), and a short how-to.
-// Opened from Meet's Activities menu; the main stage is screens/Canvas.tsx with `addon`.
+// Mock — the Google Meet add-on's side panel, opened from Meet's Add-ons (Meeting tools). It is
+// the canvas itself, sized for the panel: practise on your own right there. **Show everyone**
+// moves it to the main stage for the whole call (Meet asks the others to join), the way
+// whiteboard add-ons do; the main stage is screens/Canvas.tsx with `addon="stage"`.
 
 import { useEffect, useState } from 'react';
 import type { MeetSidePanelClient } from '@googleworkspace/meet-addons';
 import { ADDON, sidePanel, stageUrl } from '../canvas/addon.ts';
-import { Wordmark } from '../components/Wordmark.tsx';
 import { Icon } from '../components/ui.tsx';
+import Canvas from './Canvas.tsx';
 
 export default function AddonSidePanel() {
   const [client, setClient] = useState<MeetSidePanelClient | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [onStage, setOnStage] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -22,22 +24,32 @@ export default function AddonSidePanel() {
   const start = async () => {
     if (!client) return;
     setBusy(true); setError('');
-    try { await client.startActivity({ mainStageUrl: stageUrl(location, ADDON.project) }); }
-    catch (err) { setError((err as Error).message || 'Could not open the canvas'); }
+    try { await client.startActivity({ mainStageUrl: stageUrl(location, ADDON.project) }); setOnStage(true); }
+    catch (err) { setError((err as Error).message || 'Could not open the canvas on the main stage'); }
     setBusy(false);
   };
+  const end = async () => {
+    try { await client?.endActivity(); } catch { /* already ended */ }
+    setOnStage(false);
+  };
 
-  return (
-    <div className="screen addon-side">
-      <div className="screen-head"><Wordmark /></div>
-      <div className="screen-body">
-        <span className="h3">Prep canvas</span>
-        <span className="sub pretty">A question, the area it tests, and your spoken answer marked phrase by phrase: green on track, gold drifting, red redo. A whiteboard and the AI chat sit beside it.</span>
-        <button className="btn primary" disabled={!client || busy} onClick={() => void start()}><Icon.Play size={18} />{busy ? 'Opening…' : 'Open the canvas for everyone'}</button>
-        {!client && !error && <span className="sub">Connecting to Meet…</span>}
-        {error && <span className="sub" role="alert" style={{ color: 'var(--m-red)' }}>{error}</span>}
-        <span className="sub pretty">Whoever opens it drives: their browser hears the call and runs the AI. Everyone else sees the same canvas live.</span>
+  if (onStage) {
+    return (
+      <div className="screen addon-side">
+        <div className="screen-body">
+          <span className="h3">The canvas is on the main stage</span>
+          <span className="sub pretty">You drive it there: your browser hears the call and runs the AI. Everyone who joins sees the same canvas live.</span>
+          <button className="btn" onClick={() => void end()}>End it for everyone</button>
+        </div>
       </div>
+    );
+  }
+
+  const bar = (
+    <div className="cv-addon-bar">
+      <button className="btn sm primary" disabled={!client || busy} onClick={() => void start()}><Icon.Play size={14} />{busy ? 'Opening…' : 'Show everyone'}</button>
+      <span className="sub">{error || (client ? 'Opens it on the main stage for the whole call' : 'Connecting to Meet…')}</span>
     </div>
   );
+  return <Canvas addon="side" extra={bar} />;
 }

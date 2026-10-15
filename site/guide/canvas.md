@@ -38,8 +38,9 @@ simple rules (first-person actions and numbers are on track, hedges and filler a
 
 ## In a Google Meet call
 
-The canvas runs as a **Meet add-on** on the main stage, so everyone in the call sees it. Open
-**Activities → Mock** in Meet, then **Open the canvas for everyone**. Whoever opens it drives:
+The canvas is a **Meet add-on**, like Miro: open **Meeting tools → Add-ons → Mock** and it runs
+in Meet's side panel, just for you. **Show everyone** puts it on the main stage for the whole
+call. Whoever opens it drives:
 their browser hears the call and runs the AI, and the others see the same canvas live (they
 can **Take over**). Inside Meet the canvas hears the call through the
 [Meet Media API](/guide/meet#hear-the-call-through-the-meet-media-api): press **Sign in with

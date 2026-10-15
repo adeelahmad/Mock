@@ -111,7 +111,7 @@ export default function App() {
   if (ADDON.frame) {
     return (
       <div className="app addon">
-        <div className="shell" style={{ position: 'relative' }}>{ready && (ADDON.frame === 'side' ? <AddonSidePanel /> : <Canvas addon />)}</div>
+        <div className="shell" style={{ position: 'relative' }}>{ready && (ADDON.frame === 'side' ? <AddonSidePanel /> : <Canvas addon="stage" />)}</div>
         {toastText && <div className="toast" role="status">{toastText}</div>}
         {!ready && <div className="splash"><Wordmark big /><span className="spinner" style={{ width: 18, height: 18 }} /><span className="sub">{status}</span></div>}
       </div>

@@ -18,7 +18,7 @@ import { stackOf, browserStt } from '../domain/providers.ts';
 import { chatModel } from '../live/make-pipeline.ts';
 import { chatReply, judgePhrase, type CoachContext } from '../canvas/coach.ts';
 import { LiveEar, SpeechEar, earAudio, type Ear } from '../canvas/ear.ts';
-import { ADDON, SharedCanvas, mainStage, meetingLink } from '../canvas/addon.ts';
+import { ADDON, SharedCanvas, mainStage, meetingLink, sidePanel } from '../canvas/addon.ts';
 import { BrowserStt, SegmentedStt, elevenLabsTranscriber, geminiTranscriber } from '../speech/stt.ts';
 import { meet } from '../meet/meet.ts';
 import { MEDIA_SCOPES, type MeetMediaListener } from '../meet/media-api.ts';
@@ -35,7 +35,8 @@ type EarState = 'off' | 'starting' | 'on' | 'muted';
 
 const MARK_LABEL: Record<Phrase['mark'], string> = { match: 'on track', drift: 'drifting', redo: 'redo', pending: 'judging…' };
 
-export default function Canvas({ addon = false }: { addon?: boolean }) {
+/** `addon`: inside Meet, in the add-on's side panel (just this person) or on the main stage (the whole call). `extra`: shown under the header. */
+export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; extra?: React.ReactNode }) {
   const { data, repo, refresh, gemini, setGemini, providers, toast, go } = useApp();
   const { lps, stories, questions, settings } = data;
   const [s, setS] = useState<CanvasState>(emptyCanvas);
@@ -182,6 +183,11 @@ export default function Canvas({ addon = false }: { addon?: boolean }) {
   useEffect(() => {
     if (!addon) return;
     let alive = true;
+    if (addon === 'side') {
+      // The side panel is this person's own canvas: only the meeting code is needed (to hear the call).
+      sidePanel(ADDON.project).then((c) => c.getMeetingInfo()).then((info) => { if (alive) setMeetCode(info.meetingCode); }, (err) => toast('Meet add-on: ' + ((err as Error).message || 'could not connect')));
+      return () => { alive = false; };
+    }
     const sc = new SharedCanvas();
     void (async () => {
       try {
@@ -243,7 +249,7 @@ export default function Canvas({ addon = false }: { addon?: boolean }) {
     const loadPreset = async () => { await repo.loadSample(); await refresh(); toast('AWS interview defaults loaded'); };
     return (
       <div className="screen canvas">
-        <CanvasHead addon={addon} onBack={() => go(paths.practice)} />
+        <CanvasHead addon={!!addon} onBack={() => go(paths.practice)} />
         <div className="screen-body">
           <div className="card pad-lg stack g10 cv-empty">
             <span className="h3">No tagged questions yet</span>
@@ -260,7 +266,7 @@ export default function Canvas({ addon = false }: { addon?: boolean }) {
 
   return (
     <div className="screen canvas" data-phase={s.phase} data-ear={earState}>
-      <CanvasHead addon={addon} onBack={() => go(paths.practice)}>
+      <CanvasHead addon={!!addon} onBack={() => go(paths.practice)}>
         {readOnly ? (
           <span className="hstack"><span className="sub">Watching the canvas</span><button className="btn sm" onClick={() => setDriver(true)}>Take over</button></span>
         ) : (
@@ -279,6 +285,7 @@ export default function Canvas({ addon = false }: { addon?: boolean }) {
           </div>
         )}
       </CanvasHead>
+      {extra}
       {addon && !gemini.hasKey && prov.llm === 'gemini' && (
         <div className="cv-key">
           <Input label="Gemini API key (kept in this browser)" mono type="password" placeholder="AIza…" onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') void setGemini({ key: e.currentTarget.value.trim() }); }} />

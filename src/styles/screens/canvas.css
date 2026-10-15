@@ -100,3 +100,8 @@ textarea.wb-note-text { border: none; background: transparent; resize: vertical;
   .cv-q-text { font-size: 17px; }
   .wb-note { min-width: 96px; }
 }
+
+/* Inside Meet's side panel: the "Show everyone" bar under the header. */
+.cv-addon-bar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--m-line); background: var(--m-warm-tint); }
+.cv-addon-bar .sub { font-size: 12px; }
+.cv-ear .seg button { white-space: nowrap; }

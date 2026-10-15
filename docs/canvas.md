@@ -36,8 +36,8 @@ The SDK is Google's hosted script (`https://www.gstatic.com/meetjs/addons/1.1.0/
 loaded only inside Meet; its licence is Google's terms of service, so it is not bundled. The npm
 package `@googleworkspace/meet-addons` is a dev dependency for its types only.
 
-- **Side panel** (`?addon=side`): one button, *Open the canvas for everyone*, which calls
-  `startActivity({ mainStageUrl })`.
+- **Side panel** (`?addon=side`): the canvas itself, sized for the panel, for practising alone.
+  **Show everyone** calls `startActivity({ mainStageUrl })`; the panel then offers to end it.
 - **Main stage** (`?addon=stage`, `#/canvas`): the canvas without the app's chrome. The frame
   opened by `START_ACTIVITY` or `OPEN_ADDON` drives; frames opened by `JOIN_ACTIVITY` watch and
   can take over. The driver broadcasts the whole `CanvasState` through the co-doing client,
@@ -50,35 +50,28 @@ Meet partitions the iframe's storage, so the add-on has its own library, keys an
 
 ### Deploying the add-on
 
-1. A Google Cloud project with the **Google Workspace Add-ons API** and **Google Workspace
-   Marketplace SDK** enabled (and the Meet REST API, plus Media API Developer Preview enrolment,
-   for hearing the call). Note its **project number**.
-2. Host the app over HTTPS: GitHub Pages (`/app/`) or your own `mock` binary.
-3. Create a deployment file, replacing `HOST` and `NUMBER`:
+It works like any Marketplace add-on (Miro, for example): it appears in Meet under **Meeting
+tools → Add-ons**, opens in the side panel, and **Show everyone** asks Meet to start an
+activity on the main stage. `supportsScreenSharing` lets people without the add-on follow the
+main stage as a shared tab.
 
-   ```json
-   {
-     "addOns": {
-       "common": { "name": "Mock", "logoUrl": "https://HOST/app/icons/icon-192.png" },
-       "meet": {
-         "web": {
-           "sidePanelUri": "https://HOST/app/?addon=side&project=NUMBER",
-           "addOnOrigins": ["https://HOST"],
-           "supportsCollaboration": true,
-           "supportsScreenSharing": false
-         }
-       }
-     }
-   }
-   ```
+1. A Google Cloud project. The script enables the **Google Workspace add-ons API**, the
+   **Google Workspace Marketplace SDK** and the Meet REST API. The Meet Media API Developer
+   Preview is needed only to hear the call.
+2. Host the app over HTTPS: GitHub Pages (`https://adeelahmad.github.io/Mock/app/`, the
+   default) or your own `mock` binary.
+3. `scripts/meet-addon.sh PROJECT_ID [APP_URL]` fills in `addon/deployment.json` (side panel
+   URL with the project number, origins, logos), then creates or replaces the `mock`
+   deployment and installs it for the account gcloud is signed in as. The same can be done in
+   the Cloud console: Marketplace SDK → **HTTP deployments** → **Create new deployment** →
+   paste the JSON → **Install**.
+4. In a call: **Meeting tools → Add-ons → Mock**.
 
-4. `gcloud workspace-add-ons deployments create mock --deployment-file=deployment.json`, then
-   `gcloud workspace-add-ons deployments install mock` to test it in your own account.
-5. In a call: **Activities → Mock → Open the canvas for everyone**.
+A Workspace whose admin blocks Marketplace apps blocks this one too: Admin console → Apps →
+Google Workspace Marketplace apps → Settings, or allowlist the app. To list it for everyone,
+publish it through the Marketplace SDK's **Store listing** (Google reviews it).
 
 The project number can also be built in with `VITE_MEET_CLOUD_PROJECT` instead of the URL.
-Field names follow Google's add-on deployment docs as of October 2026; check them there if a
-deployment is rejected.
 
 ## Testing
 
