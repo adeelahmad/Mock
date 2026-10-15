@@ -23,6 +23,11 @@ export interface Stroke { id: string; points: number[]; by: Who; color?: Ink; /*
 export interface Shape { id: string; kind: ShapeKind; x1: number; y1: number; x2: number; y2: number; color: Ink; by: Who; t?: number }
 /** A countdown everyone sees: ends at `end` (ms since epoch), set at `t`. */
 export interface Timer { end: number | null; t: number }
+/**
+ * Who everyone follows ("Bring everyone here"): their view of the board, zoom and scroll as a
+ * fraction of the scrollable range. `who` is empty when nobody leads.
+ */
+export interface Lead { who: string; name: string; zoom: number; x: number; y: number; t: number }
 
 export interface Board {
   notes: BoardNote[];
@@ -31,6 +36,7 @@ export interface Board {
   /** Ids of removed items, newest last. */
   gone: string[];
   timer: Timer;
+  lead: Lead;
 }
 
 export const BOARD_W = 1000;
@@ -44,8 +50,9 @@ export const newId = (p: string): string => p + '_' + Date.now().toString(36) + 
 const clamp = (v: number, lo: number, hi: number): number => Math.max(lo, Math.min(hi, v));
 const now = (): number => Date.now();
 
-export const emptyBoard = (): Board => ({ notes: [], strokes: [], shapes: [], gone: [], timer: { end: null, t: 0 } });
-export const boardOf = <B extends Board>(s: B): Board => ({ notes: s.notes, strokes: s.strokes, shapes: s.shapes, gone: s.gone, timer: s.timer });
+export const NO_LEAD: Lead = { who: '', name: '', zoom: 1, x: 0, y: 0, t: 0 };
+export const emptyBoard = (): Board => ({ notes: [], strokes: [], shapes: [], gone: [], timer: { end: null, t: 0 }, lead: NO_LEAD });
+export const boardOf = <B extends Board>(s: B): Board => ({ notes: s.notes, strokes: s.strokes, shapes: s.shapes, gone: s.gone, timer: s.timer, lead: s.lead ?? NO_LEAD });
 export const isEmpty = (b: Board): boolean => !b.notes.length && !b.strokes.length && !b.shapes.length;
 
 const goneWith = (gone: string[], ids: string[]): string[] => { const g = [...gone, ...ids.filter((id) => !gone.includes(id))]; return g.length > GONE_MAX ? g.slice(g.length - GONE_MAX) : g; };
@@ -120,6 +127,14 @@ export function undoStroke<B extends Board>(b: B): B {
 
 export const setTimer = <B extends Board>(b: B, ms: number | null, at = now()): B => ({ ...b, timer: { end: ms == null ? null : at + ms, t: at } });
 
+// ---------- Following ----------
+
+/** Starts leading, or moves the leader's view (zoom, scroll fractions 0…1). */
+export const lead = <B extends Board>(b: B, who: string, name: string, view: { zoom: number; x: number; y: number }, at = now()): B =>
+  ({ ...b, lead: { who, name, zoom: view.zoom, x: Math.max(0, Math.min(1, view.x)), y: Math.max(0, Math.min(1, view.y)), t: at } });
+/** Stops leading (only the leader's own stop counts). */
+export const stopLead = <B extends Board>(b: B, who: string, at = now()): B => ((b.lead ?? NO_LEAD).who === who ? { ...b, lead: { ...NO_LEAD, t: at } } : b);
+
 // ---------- Undo history ----------
 
 /**
@@ -162,6 +177,7 @@ export function mergeBoards<B extends Board>(mine: B, theirs: Board): B {
     shapes: mergeItems(mine.shapes ?? [], theirs.shapes ?? [], g),
     gone,
     timer: (theirs.timer?.t ?? 0) > (mine.timer?.t ?? 0) ? theirs.timer : mine.timer,
+    lead: (theirs.lead?.t ?? 0) > (mine.lead?.t ?? 0) ? theirs.lead : (mine.lead ?? NO_LEAD),
   };
 }
 
@@ -171,7 +187,7 @@ export function hasMore(a: Board, b: Board): boolean {
   const have = new Set([...b.notes, ...b.strokes, ...b.shapes].map(key));
   if ([...a.notes, ...a.strokes, ...a.shapes].some((x) => !have.has(key(x)))) return true;
   const g = new Set(b.gone);
-  return a.gone.some((id) => !g.has(id)) || a.timer.t > b.timer.t;
+  return a.gone.some((id) => !g.has(id)) || a.timer.t > b.timer.t || (a.lead?.t ?? 0) > (b.lead?.t ?? 0);
 }
 
 // ---------- Templates ----------

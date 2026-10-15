@@ -99,4 +99,34 @@ test('main stage: someone who joins watches the shared canvas', async ({ page })
   });
   await expect(page.getByText('Next from the driver')).toBeVisible();
   await expect(page.getByTestId('wb-note')).toHaveCount(1);
+
+  // Following: the host brings everyone to their view; the viewer follows until they stop.
+  await page.evaluate(() => {
+    const s = { questionId: 'x', questionText: 'Next from the driver', phase: 'pick', misses: [], areaId: null, role: null, phrases: [], partial: '', notes: [], strokes: [], shapes: [], gone: [], timer: { end: null, t: 0 }, lead: { who: 'host1', name: 'the host', zoom: 1.5, x: 0.5, y: 0.5, t: Date.now() }, chat: [], done: 1 };
+    (window as any).__meet.delegate.onCoDoingStateChanged({ bytes: new TextEncoder().encode(JSON.stringify({ v: 1, d: true, s })) });
+  });
+  await expect(page.getByText('Following the host')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Fit the board' })).toHaveText('150%');
+  await page.getByRole('button', { name: 'Stop following' }).click();
+  await expect(page.getByText('The host is leading')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Follow', exact: true })).toBeVisible();
+});
+
+test('main stage: Bring everyone here leads the call', async ({ page }) => {
+  await openAddon(page, 'stage', 'START_ACTIVITY');
+  await expect(page.getByText('Question 1')).toBeVisible();
+  await page.getByRole('button', { name: 'Bring everyone here' }).click();
+  await expect(page.getByText('Everyone is following you')).toBeVisible();
+  await expect.poll(async () => {
+    const all: string[] = await page.evaluate(() => (window as any).__meet.broadcasts);
+    const last = all.length ? JSON.parse(all[all.length - 1]) : null;
+    return last ? [last.s.lead.name, last.s.lead.zoom] : null;
+  }).toEqual(['the host', 1]);
+  await page.getByRole('button', { name: 'Zoom in' }).click();
+  await expect.poll(async () => {
+    const all: string[] = await page.evaluate(() => (window as any).__meet.broadcasts);
+    return all.length ? JSON.parse(all[all.length - 1]).s.lead.zoom : null;
+  }).toBe(1.25);
+  await page.getByRole('button', { name: 'Stop leading' }).click();
+  await expect(page.getByText('Everyone is following you')).toHaveCount(0);
 });

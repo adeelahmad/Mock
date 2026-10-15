@@ -90,6 +90,9 @@
 .wb-swatch.n-blue { background: var(--wb-blue); } .wb-swatch.n-purple { background: var(--wb-purple); } .wb-swatch.n-white { background: var(--wb-white); }
 
 .wb-viewport { overflow: auto; border-radius: 12px; max-height: 80vh; }
+.wb-viewport.following { box-shadow: 0 0 0 3px var(--m-cool-fill); }
+.wb-follow { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 10px; background: var(--m-elev); color: var(--m-fg2); font: 600 13px/1.3 var(--font-sans); }
+.wb-follow.on, .wb-follow.lead { background: var(--m-cool-tint); color: var(--m-cool); }
 .wb-board { position: relative; min-width: 100%; border: 1px solid var(--m-line); border-radius: 12px; background: var(--m-card); overflow: hidden;
   background-image: radial-gradient(var(--m-line) 1px, transparent 1px); background-size: calc(20px * var(--wb-z, 1)) calc(20px * var(--wb-z, 1)); }
 .wb-board > svg { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
