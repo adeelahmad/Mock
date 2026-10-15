@@ -14,7 +14,7 @@ import {
   addChat, addNote, addPhrases, canvasQuestions, emptyCanvas, markPhrase, nextQuestion,
   pickArea, receiveShared, referenceFor, splitPhrases, summarize, withQuestion, type CanvasState, type Phrase,
 } from '../domain/canvas.ts';
-import { NO_LEAD, boardOf, emptyBoard, hasMore, mergeBoards, type Board } from '../domain/board.ts';
+import { NO_LEAD, NO_VIDEO, boardOf, emptyBoard, hasMore, mergeBoards, type Board } from '../domain/board.ts';
 import { stackOf, browserStt } from '../domain/providers.ts';
 import { chatModel } from '../live/make-pipeline.ts';
 import { chatReply, judgePhrase, type CoachContext } from '../canvas/coach.ts';
@@ -276,7 +276,7 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
     let alive = true;
     void repo.getBlob(BOARD_KEY).then(async (b) => {
       if (!alive || !b) return;
-      try { const saved = JSON.parse(await b.text()) as Board; update((x) => mergeBoards(x, { ...emptyBoard(), ...saved, timer: { end: null, t: 0 }, lead: NO_LEAD })); } catch { /* unreadable: start empty */ }
+      try { const saved = JSON.parse(await b.text()) as Board; update((x) => mergeBoards(x, { ...emptyBoard(), ...saved, timer: { end: null, t: 0 }, lead: NO_LEAD, video: NO_VIDEO })); } catch { /* unreadable: start empty */ }
     }).finally(() => { boardLoaded.current = true; });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -59,6 +59,12 @@ follows their zoom and scroll on the board ("Following the host") until they scr
 press Stop following, and can Follow again. Meet gives add-ons no participant names, so the
 leader shows as "the host" (the driver) or "a participant".
 
+**A video everyone watches:** Video on the board takes a YouTube link or a video file link
+(https, .mp4/.webm). Play, pause and seeking, in the player or with Play/Pause for everyone,
+go out with the board and every participant's player follows (Sync me jumps back). Each
+browser streams the video itself; Meet's add-on state carries no media, so a live camera or
+screen can't be shared this way (present it with Meet).
+
 Not matched, and why: live cursors and participant names (the Add-ons SDK gives no participant identity and
 shared state is meant for occasional updates, not pointer streams), images and files (shared
 state is limited to about 60 KB), comments, connectors that stick to shapes, and boards that

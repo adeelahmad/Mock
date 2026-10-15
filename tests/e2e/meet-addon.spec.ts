@@ -130,3 +130,28 @@ test('main stage: Bring everyone here leads the call', async ({ page }) => {
   await page.getByRole('button', { name: 'Stop leading' }).click();
   await expect(page.getByText('Everyone is following you')).toHaveCount(0);
 });
+
+test('main stage: a video everyone watches together', async ({ page }) => {
+  // YouTube stands in: a blank page at the embed address.
+  await page.route('https://www.youtube-nocookie.com/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>player</title>' }));
+  await openAddon(page, 'stage', 'START_ACTIVITY');
+  await expect(page.getByText('Question 1')).toBeVisible();
+  await page.getByRole('button', { name: 'Video' }).click();
+  const link = page.getByLabel(/YouTube link or a video file/);
+  await link.fill('https://example.com/page');
+  await expect(page.getByText('That link can’t play here.').or(page.getByText("That link can't play here."))).toBeVisible();
+  await link.fill('https://youtu.be/dQw4w9WgXcQ');
+  await page.getByRole('button', { name: 'Show the video' }).click();
+  const frame = page.getByTitle('Shared video');
+  await expect(frame).toHaveAttribute('src', /youtube-nocookie\.com\/embed\/dQw4w9WgXcQ/);
+  await expect(page.getByText('Paused for everyone')).toBeVisible();
+  await page.getByRole('button', { name: 'Play for everyone' }).click();
+  await expect(page.getByText('Playing for everyone')).toBeVisible();
+  await expect.poll(async () => {
+    const all: string[] = await page.evaluate(() => (window as any).__meet.broadcasts);
+    const v = all.length ? JSON.parse(all[all.length - 1]).s.video : null;
+    return v ? [v.url, v.playing] : null;
+  }).toEqual(['https://youtu.be/dQw4w9WgXcQ', true]);
+  await page.getByRole('button', { name: 'Remove' }).click();
+  await expect(frame).toHaveCount(0);
+});
