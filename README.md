@@ -59,6 +59,9 @@ feedback you need is specific: *you said "significant" when your notes say $1.2M
 - **Sync with a passphrase, no account.** Your devices sync directly over WebRTC, end-to-end
   encrypted, even from GitHub Pages. Pair a phone with a short code or a QR code.
 - **Interview in a real Google Meet call**, with a friend sitting in as a second interviewer.
+- **A prep canvas.** Pick the area a question tests, then answer out loud while every phrase
+  turns green, gold or red as the AI hears it. Whiteboard and AI chat beside it; runs as a
+  Google Meet add-on too.
 - **Know what it costs.** Every token is counted and priced, per area.
 
 <table>

@@ -1,0 +1,378 @@
+// Mock — the prep canvas. A question; the candidate picks the area it tests; once the pick is
+// right they answer out loud and the AI marks every phrase as it is heard (green on track,
+// amber drifting, red redo), live captions included. A whiteboard sits under the answer and the
+// AI chat is always at the side: type to it, or just talk while no answer is running. In a Meet
+// call it runs as the add-on's main stage (canvas/addon.ts) and can hear the call through the
+// Meet Media API; outside Meet it hears the mic. State and rules: domain/canvas.ts.
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useApp } from '../app/store.tsx';
+import { paths } from '../app/router.ts';
+import { Icon, Input, Seg } from '../components/ui.tsx';
+import Whiteboard from '../components/Whiteboard.tsx';
+import {
+  addChat, addNote, addPhrases, addStroke, canvasQuestions, clearBoard, editNote, emptyCanvas, markPhrase, moveNote, nextQuestion,
+  pickArea, referenceFor, removeNote, splitPhrases, summarize, withQuestion, type CanvasState, type Phrase,
+} from '../domain/canvas.ts';
+import { stackOf, browserStt } from '../domain/providers.ts';
+import { chatModel } from '../live/make-pipeline.ts';
+import { chatReply, judgePhrase, type CoachContext } from '../canvas/coach.ts';
+import { LiveEar, SpeechEar, earAudio, type Ear } from '../canvas/ear.ts';
+import { ADDON, SharedCanvas, mainStage, meetingLink } from '../canvas/addon.ts';
+import { BrowserStt, SegmentedStt, elevenLabsTranscriber, geminiTranscriber } from '../speech/stt.ts';
+import { meet } from '../meet/meet.ts';
+import { MEDIA_SCOPES, type MeetMediaListener } from '../meet/media-api.ts';
+import { buildClientId, signInWithGoogle } from '../meet/google.ts';
+import { DEFAULT_BOT_NAME } from '../meet/protocol.ts';
+import '../styles/screens/canvas.css';
+
+/** A stretch of speech ends after this much quiet: short, so marks land while the candidate talks. */
+const PAUSE_MS = 900;
+const REVIEW_ASK = 'I finished my answer. How was it? One line on what worked, one on what to fix first.';
+
+type Hearing = 'mic' | 'meet';
+type EarState = 'off' | 'starting' | 'on' | 'muted';
+
+const MARK_LABEL: Record<Phrase['mark'], string> = { match: 'on track', drift: 'drifting', redo: 'redo', pending: 'judging…' };
+
+export default function Canvas({ addon = false }: { addon?: boolean }) {
+  const { data, repo, refresh, gemini, setGemini, providers, toast, go } = useApp();
+  const { lps, stories, questions, settings } = data;
+  const [s, setS] = useState<CanvasState>(emptyCanvas);
+  const sRef = useRef(s);
+  const update = useCallback((f: (x: CanvasState) => CanvasState) => { const next = f(sRef.current); sRef.current = next; setS(next); }, []);
+
+  const areaIds = useMemo(() => new Set(lps.map((l) => l.id)), [lps]);
+  const pool = useMemo(() => canvasQuestions(questions, areaIds), [questions, areaIds]);
+  const seen = useRef(new Set<string>());
+  const question = questions.find((q) => q.id === s.questionId) ?? null;
+
+  const deal = useCallback((countDone: boolean) => {
+    const q = nextQuestion(pool, seen.current);
+    if (!q) return;
+    seen.current.add(q.id);
+    update((x) => withQuestion({ ...x, done: x.done + (countDone ? 1 : 0) }, q));
+  }, [pool, update]);
+  useEffect(() => { if (!sRef.current.questionId && pool.length) deal(false); }, [pool, deal]);
+
+  // ---------- The AI ----------
+  const prov = providers.settings;
+  const model = useMemo(() => {
+    const stack = stackOf(prov);
+    if (stack.llm === 'openai') return prov.openai.baseUrl.trim() ? chatModel(stack, prov, providers.keys, gemini.key, settings.textModel) : null;
+    return gemini.key ? chatModel(stack, prov, providers.keys, gemini.key, settings.textModel) : null;
+  }, [prov, providers.keys, gemini.key, settings.textModel]);
+  const ctx: CoachContext = useMemo(() => {
+    const r = referenceFor(s.areaId, lps, stories, s.questionText);
+    return { question: s.questionText, area: r.area, story: r.story, words: r.words };
+  }, [s.areaId, s.questionText, lps, stories]);
+  const live = useRef({ model, ctx }); live.current = { model, ctx };
+  const warned = useRef(false);
+  const judging = useRef<Promise<void>>(Promise.resolve());
+  const chatting = useRef<Promise<void>>(Promise.resolve());
+  const [thinking, setThinking] = useState(false);
+
+  const judge = useCallback((added: Phrase[]) => {
+    for (const ph of added) {
+      judging.current = judging.current.then(async () => {
+        if (!sRef.current.phrases.some((p) => p.id === ph.id)) return; // redone or moved on
+        const before = sRef.current.phrases.filter((p) => p.id !== ph.id && p.mark !== 'pending').map((p) => p.text);
+        const r = await judgePhrase({ model: live.current.model, ctx: live.current.ctx, before, phrase: ph.text }).catch(() => null);
+        if (!r) return;
+        if (r.error && !warned.current) { warned.current = true; toast('The AI could not mark that (' + r.error + ') · marking offline'); }
+        update((x) => markPhrase(x, ph.id, r.mark, r.note, r.by));
+      });
+    }
+  }, [toast, update]);
+
+  const askAi = useCallback((ask?: string) => {
+    chatting.current = chatting.current.then(async () => {
+      setThinking(true);
+      try {
+        const r = await chatReply({ model: live.current.model, state: sRef.current, ctx: live.current.ctx, ask });
+        if (r.error && !warned.current) { warned.current = true; toast('The AI is unavailable (' + r.error + ') · answering offline'); }
+        update((x) => addChat(r.notes.reduce((y, n) => addNote(y, n, 'ai'), x), 'ai', r.text));
+      } finally { setThinking(false); }
+    });
+  }, [toast, update]);
+
+  // ---------- Hearing ----------
+  const [hearing, setHearing] = useState<Hearing>(addon ? 'meet' : 'mic');
+  const [earState, setEarState] = useState<EarState>('off');
+  const [level, setLevel] = useState(0);
+  const [meetCode, setMeetCode] = useState('');
+  const ear = useRef<Ear | null>(null);
+  const listener = useRef<MeetMediaListener | null>(null);
+  const callUrl = meetCode ? meetingLink(meetCode) : meet.meetingUrl;
+
+  const heard = useCallback((text: string) => {
+    const cur = sRef.current;
+    if (cur.phase === 'answer') {
+      const { state, added } = addPhrases(cur, splitPhrases(text));
+      sRef.current = state; setS(state);
+      judge(added);
+    } else {
+      update((x) => addChat({ ...x, partial: '' }, 'me', text, true));
+      askAi();
+    }
+  }, [judge, askAi, update]);
+
+  const stopEar = useCallback(() => {
+    ear.current?.close(); ear.current = null;
+    listener.current?.close(); listener.current = null;
+    setEarState('off'); setLevel(0);
+  }, []);
+  useEffect(() => stopEar, [stopEar]);
+
+  const makeEar = (input: MediaStream | null): Ear => {
+    const keys = providers.keys;
+    if (prov.stt === 'elevenlabs' && keys.elevenlabs) return new SpeechEar(new SegmentedStt({ pauseMs: PAUSE_MS, transcribe: elevenLabsTranscriber({ key: keys.elevenlabs, model: prov.elevenlabs.sttModel }) }), earAudio(input));
+    if (prov.stt === 'gemini' && gemini.key) return new LiveEar({ key: gemini.key, model: settings.liveModel, voice: settings.voice, pauseMs: PAUSE_MS, audio: earAudio(input) });
+    // Chrome's recogniser only hears the mic.
+    if (!input && browserStt()) return new SpeechEar(new BrowserStt({ pauseMs: PAUSE_MS, lang: prov.browser.lang }), null);
+    if (gemini.key) return new SpeechEar(new SegmentedStt({ pauseMs: PAUSE_MS, transcribe: geminiTranscriber({ key: gemini.key, model: settings.textModel }) }), earAudio(input));
+    throw new Error(input ? 'Hearing a call needs a Gemini or ElevenLabs key' : 'Add a Gemini key, or pick Chrome speech in Settings · Voice & model');
+  };
+
+  const listen = async () => {
+    setEarState('starting');
+    try {
+      let input: MediaStream | null = null;
+      if (hearing === 'meet') {
+        if (!callUrl) throw new Error('No Meet call: open the canvas from the Meet add-on, or invite Mock to a call first');
+        const l = meet.mediaListenerFor(callUrl, meet.inCall() ? DEFAULT_BOT_NAME : '');
+        if (!l) throw new Error('Sign in with Google to hear the call');
+        listener.current = l;
+        l.onEnd = (why) => { toast('The call stopped sending audio (' + why + ')'); stopEar(); };
+        input = await l.connect();
+      }
+      const e = makeEar(input);
+      e.onPartial = (t) => update((x) => (x.partial === t ? x : { ...x, partial: t }));
+      e.onFinal = heard;
+      e.onLevel = setLevel;
+      e.onError = (m) => toast(m);
+      ear.current = e;
+      await e.start();
+      e.setListening(true);
+      setEarState('on');
+    } catch (err) {
+      stopEar();
+      toast((err as Error).message || 'Could not start listening');
+    }
+  };
+  const toggleMute = () => {
+    const on = earState !== 'on';
+    ear.current?.setListening(on);
+    setEarState(on ? 'on' : 'muted');
+    if (!on) setLevel(0);
+  };
+
+  const [signingIn, setSigningIn] = useState(false);
+  const googleSignIn = async () => {
+    setSigningIn(true);
+    try { const id = meet.saved.clientId || buildClientId(); meet.setMediaToken(await signInWithGoogle(id, MEDIA_SCOPES)); toast('Signed in · the canvas can hear the call'); }
+    catch (err) { toast((err as Error).message); }
+    setSigningIn(false);
+  };
+
+  // ---------- Meet add-on: share the canvas with the call ----------
+  const [driver, setDriver] = useState(true);
+  const driverRef = useRef(true); driverRef.current = driver;
+  const shared = useRef<SharedCanvas | null>(null);
+  useEffect(() => {
+    if (!addon) return;
+    let alive = true;
+    const sc = new SharedCanvas();
+    void (async () => {
+      try {
+        const client = await mainStage(ADDON.project);
+        const [reason, info] = await Promise.all([client.getFrameOpenReason(), client.getMeetingInfo()]);
+        if (!alive) return;
+        setMeetCode(info.meetingCode);
+        if (reason === 'JOIN_ACTIVITY') setDriver(false);
+        sc.onState = (st) => { if (!driverRef.current) { sRef.current = st; setS(st); } };
+        await sc.connect(ADDON.project);
+        if (alive) shared.current = sc;
+      } catch (err) { toast('Meet add-on: ' + ((err as Error).message || 'could not connect')); }
+    })();
+    return () => { alive = false; sc.close(); shared.current = null; };
+  }, [addon, toast]);
+  useEffect(() => { if (driver) shared.current?.share(s); }, [s, driver]);
+
+  // ---------- Actions ----------
+  const pick = (areaId: string) => {
+    if (!question || !driver) return;
+    const area = lps.find((l) => l.id === areaId);
+    const r = pickArea(sRef.current, question, areaId);
+    if (r.ok) {
+      const primary = lps.find((l) => l.id === question.lpIds[0]);
+      const line = r.role === 'secondary' && primary
+        ? `Yes, ${area?.name} fits as a secondary area; the main one is ${primary.name}. Answer out loud when you are ready.`
+        : `Yes, ${area?.name}. Answer out loud when you are ready; I mark each phrase as you go.`;
+      update(() => addChat(r.state, 'ai', line));
+    } else {
+      // One hint, then one nudge to "Show me"; further misses only show on the buttons.
+      const n = r.state.misses.length;
+      const hint = n === 1 ? `Not ${area?.name ?? 'that one'}. What would the interviewer write at the top of their notes for this question?`
+        : n === 2 ? 'Still not it. Think about the behaviour the question asks for, or tap Show me.' : '';
+      update(() => (hint && n > sRef.current.misses.length ? addChat(r.state, 'ai', hint) : r.state));
+    }
+  };
+  const reveal = () => { if (question) pick(question.lpIds.find((id) => areaIds.has(id)) ?? question.lpIds[0]); };
+  const finish = () => { update((x) => ({ ...x, phase: 'done', partial: '' })); askAi(REVIEW_ASK); };
+  const redo = () => update((x) => ({ ...x, phase: 'answer', phrases: [], partial: '' }));
+  const [typed, setTyped] = useState('');
+  const send = (e: React.FormEvent) => {
+    e.preventDefault();
+    const t = typed.trim(); if (!t) return;
+    setTyped('');
+    update((x) => addChat(x, 'me', t));
+    askAi();
+  };
+
+  // Only the message list scrolls to the newest message (scrolling the page would pull the phone layout away from the answer).
+  const msgs = useRef<HTMLDivElement>(null);
+  useEffect(() => { const el = msgs.current; if (el) el.scrollTop = el.scrollHeight; }, [s.chat.length, thinking, s.partial]);
+
+  const sum = summarize(s.phrases);
+  const latest = [...s.phrases].reverse().find((p) => p.mark !== 'pending' && p.note);
+  const readOnly = !driver;
+  const noAi = !model;
+
+  if (!pool.length) {
+    const loadPreset = async () => { await repo.loadSample(); await refresh(); toast('AWS interview defaults loaded'); };
+    return (
+      <div className="screen canvas">
+        <CanvasHead addon={addon} onBack={() => go(paths.practice)} />
+        <div className="screen-body">
+          <div className="card pad-lg stack g10 cv-empty">
+            <span className="h3">No tagged questions yet</span>
+            <span className="sub pretty">The canvas asks questions tagged with an area, so it can tell whether your pick is right. Tag questions in the Library, or load the AWS preset.</span>
+            <div className="hstack">
+              <button className="btn primary" onClick={() => void loadPreset()}>Load the AWS preset</button>
+              {!addon && <button className="btn" onClick={() => go(paths.library('questions'))}>Open the Library</button>}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="screen canvas" data-phase={s.phase} data-ear={earState}>
+      <CanvasHead addon={addon} onBack={() => go(paths.practice)}>
+        {readOnly ? (
+          <span className="hstack"><span className="sub">Watching the canvas</span><button className="btn sm" onClick={() => setDriver(true)}>Take over</button></span>
+        ) : (
+          <div className="cv-ear">
+            {(addon || meet.inCall()) && earState === 'off' && <Seg<Hearing> value={hearing} onChange={setHearing} options={[['mic', 'Mic'], ['meet', 'Meet call']]} />}
+            {hearing === 'meet' && earState === 'off' && !meet.hasMediaToken() && <button className="btn sm" disabled={signingIn} onClick={() => void googleSignIn()}>{signingIn ? 'Signing in…' : 'Sign in with Google'}</button>}
+            {earState === 'off' || earState === 'starting'
+              ? <button className="btn sm cool" disabled={earState === 'starting'} onClick={() => void listen()}><Icon.Mic size={16} />{earState === 'starting' ? 'Starting…' : 'Listen'}</button>
+              : (
+                <>
+                  <span className="cv-level" aria-hidden="true"><i style={{ transform: `scaleY(${0.15 + Math.min(1, level * 2.5) * 0.85})` }} /></span>
+                  <button className="btn sm" aria-pressed={earState === 'on'} onClick={toggleMute}>{earState === 'on' ? <><Icon.Mic size={16} />Listening</> : <><Icon.MicOff size={16} />Muted</>}</button>
+                  <button className="text-btn" onClick={stopEar}>Stop</button>
+                </>
+              )}
+          </div>
+        )}
+      </CanvasHead>
+      {addon && !gemini.hasKey && prov.llm === 'gemini' && (
+        <div className="cv-key">
+          <Input label="Gemini API key (kept in this browser)" mono type="password" placeholder="AIza…" onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') void setGemini({ key: e.currentTarget.value.trim() }); }} />
+        </div>
+      )}
+
+      <div className="cv-body">
+        <main className="cv-stage">
+          <section className="card pad-lg cv-q" aria-label="Question">
+            <div className="hstack between">
+              <span className="label">Question {s.done + 1}</span>
+              {!readOnly && <button className="text-btn" onClick={() => deal(false)}>Skip</button>}
+            </div>
+            <p className="cv-q-text">{s.questionText}</p>
+          </section>
+
+          {s.phase === 'pick' ? (
+            <section className="stack g8" aria-label="Pick the area">
+              <div className="hstack between"><span className="label">Which area does it test?</span>{s.misses.length >= 2 && !readOnly && <button className="text-btn" onClick={reveal}>Show me</button>}</div>
+              <div className="cv-areas" role="group" aria-label="Areas">
+                {lps.map((l) => (
+                  <button key={l.id} type="button" className={'cv-area' + (s.misses.includes(l.id) ? ' wrong' : '')} disabled={readOnly || s.misses.includes(l.id)} onClick={() => pick(l.id)}>{l.name}</button>
+                ))}
+              </div>
+            </section>
+          ) : (
+            <section className={'card pad-lg cv-answer' + (sum.overall ? ' ' + sum.overall : '')} aria-label="Your answer">
+              <div className="hstack between wrap">
+                <span className="hstack"><span className="label">Your answer</span><span className="cv-area-pill">{ctx.area?.name}{s.role === 'secondary' ? ' · secondary' : ''}</span></span>
+                <span className="cv-legend" aria-label="Colours"><span className="match">on track {sum.match}</span><span className="drift">drifting {sum.drift}</span><span className="redo">redo {sum.redo}</span></span>
+              </div>
+              <p className="cv-words" aria-live="polite" data-testid="cv-words">
+                {s.phrases.map((p) => <span key={p.id} className={'cv-ph ' + p.mark} title={MARK_LABEL[p.mark] + (p.note ? ' · ' + p.note : '')} data-mark={p.mark}>{p.text} </span>)}
+                {s.phase === 'answer' && s.partial && <span className="cv-ph live">{s.partial}</span>}
+                {!s.phrases.length && !s.partial && <span className="cv-hint">{earState === 'on' ? 'Listening… start with the situation.' : 'Press Listen, then answer out loud.'}</span>}
+              </p>
+              <div className={'cv-sum ' + (sum.overall ?? 'none')} role="status">
+                <span>{sum.line}</span>
+                {latest && <span className="cv-note">{latest.note}{latest.by === 'local' ? ' · offline' : ''}</span>}
+              </div>
+              {!readOnly && (
+                <div className="hstack wrap">
+                  {s.phase === 'answer'
+                    ? <button className="btn sm primary" disabled={!s.phrases.length} onClick={finish}><Icon.Check size={16} />Finish answer</button>
+                    : <button className="btn sm primary" onClick={() => deal(true)}><Icon.Next size={16} />Next question</button>}
+                  <button className={'btn sm' + (sum.overall === 'redo' ? ' danger' : '')} onClick={redo} disabled={!s.phrases.length}><Icon.Redo size={16} />Redo</button>
+                  {s.phase === 'answer' && <button className="text-btn" onClick={() => deal(true)}>Next question</button>}
+                </div>
+              )}
+            </section>
+          )}
+
+          <section className="stack g8" aria-label="Whiteboard">
+            <span className="label">Whiteboard</span>
+            <Whiteboard
+              notes={s.notes} strokes={s.strokes} readOnly={readOnly}
+              onStroke={(p) => update((x) => addStroke(x, p, 'me'))}
+              onAddNote={(t) => update((x) => addNote(x, t, 'me'))}
+              onMoveNote={(id, x, y) => update((st) => moveNote(st, id, x, y))}
+              onEditNote={(id, t) => update((x) => editNote(x, id, t))}
+              onRemoveNote={(id) => update((x) => removeNote(x, id))}
+              onClear={() => update(clearBoard)}
+            />
+          </section>
+        </main>
+
+        <aside className="cv-chat" aria-label="Chat with the AI">
+          <div className="cv-chat-head"><span className="label">AI</span><span className="sub">{noAi ? 'offline · add a key in Settings' : 'hears you · type or talk'}</span></div>
+          <div className="cv-msgs" role="log" aria-live="polite" ref={msgs}>
+            {!s.chat.length && <span className="sub cv-hint">Ask for an outline, a better opening, or what the interviewer wants to hear.</span>}
+            {s.chat.map((m) => <div key={m.id} className={'cv-msg ' + m.who}>{m.voice && <Icon.Mic size={12} className="cv-said" />}{m.text}</div>)}
+            {s.phase !== 'answer' && s.partial && <div className="cv-msg me live">{s.partial}</div>}
+            {thinking && <div className="cv-msg ai typing" aria-label="The AI is writing">…</div>}
+          </div>
+          {!readOnly && (
+            <form className="cv-send" onSubmit={send}>
+              <input className="input" aria-label="Message the AI" placeholder="Message the AI…" value={typed} onChange={(e) => setTyped(e.target.value)} />
+              <button className="btn sm cool" type="submit" disabled={!typed.trim()}>Send</button>
+            </form>
+          )}
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function CanvasHead({ addon, onBack, children }: { addon: boolean; onBack: () => void; children?: React.ReactNode }) {
+  return (
+    <div className="screen-head cv-head">
+      <span className="hstack">
+        {!addon && <button className="back-btn" onClick={onBack}><Icon.Back size={18} />Practice</button>}
+        <span className="h2">Canvas</span>
+      </span>
+      {children}
+    </div>
+  );
+}

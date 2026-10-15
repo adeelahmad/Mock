@@ -24,6 +24,9 @@ import Onboarding from '../screens/Onboarding.tsx';
 import Live from '../screens/Live.tsx';
 import { ServerSetup, SignIn } from '../screens/Account.tsx';
 import Game from '../screens/Game.tsx';
+import Canvas from '../screens/Canvas.tsx';
+import AddonSidePanel from '../screens/AddonSidePanel.tsx';
+import { ADDON } from '../canvas/addon.ts';
 import { SetupSheet, AnswerSheet, AddQuestionSheet, AddStorySheet } from '../screens/Sheets.tsx';
 
 function Sidebar() {
@@ -93,6 +96,7 @@ function Screen() {
   if (a === 'history') return b ? <SessionDetail id={b} /> : <History />;
   if (a === 'progress') return <Progress />;
   if (a === 'game') return <Game />;
+  if (a === 'canvas') return <Canvas />;
   if (!data.settings.onboarded) return <Onboarding />;
   return <Home />;
 }
@@ -103,7 +107,17 @@ export default function App() {
   const pwa = usePwa();
   const inLive = route.path === paths.live && live.state;
   const firstRun = !data.settings.onboarded || route.path === paths.onboarding || route.path === paths.serverSetup || route.path === paths.signIn || !!accountGate(account);
-  const showTabs = !inLive && ['practice', 'library', 'history', 'progress', 'game'].includes(route.tab) && route.parts.length <= 2 && route.path !== paths.settings && route.path !== paths.onboarding && !firstRun;
+  // Inside Google Meet (the add-on's iframes): only the side panel or the canvas, no app chrome.
+  if (ADDON.frame) {
+    return (
+      <div className="app addon">
+        <div className="shell" style={{ position: 'relative' }}>{ready && (ADDON.frame === 'side' ? <AddonSidePanel /> : <Canvas addon />)}</div>
+        {toastText && <div className="toast" role="status">{toastText}</div>}
+        {!ready && <div className="splash"><Wordmark big /><span className="spinner" style={{ width: 18, height: 18 }} /><span className="sub">{status}</span></div>}
+      </div>
+    );
+  }
+  const showTabs = !inLive && ['practice', 'library', 'history', 'progress', 'game'].includes(route.tab) && route.parts.length <= 2 && route.path !== paths.settings && route.path !== paths.onboarding && route.path !== paths.canvas && !firstRun;
   return (
     <div className="app">
       {!inLive && !firstRun && <Sidebar />}
