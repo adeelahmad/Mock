@@ -69,3 +69,18 @@ describe('the shared whiteboard', () => {
     expect(mergeBoards(emptyBoard(), timed).timer.end).toBe(121_000);
   });
 });
+
+describe('following on the board', () => {
+  it('shares who leads and their view; only the leader stops it', async () => {
+    const { lead, stopLead, NO_LEAD } = await import('./board.ts');
+    const led = lead(emptyBoard(), 'p1', 'the host', { zoom: 1.5, x: 0.4, y: 2 }, 50);
+    expect(led.lead).toEqual({ who: 'p1', name: 'the host', zoom: 1.5, x: 0.4, y: 1, t: 50 });
+    const theirs = mergeBoards(emptyBoard(), led);
+    expect(theirs.lead.who).toBe('p1');
+    expect(stopLead(theirs, 'p2')).toBe(theirs);
+    const stopped = stopLead(theirs, 'p1', 60);
+    expect(stopped.lead).toEqual({ ...NO_LEAD, t: 60 });
+    expect(mergeBoards(led, stopped).lead.who).toBe('');
+    expect(hasMore(stopped, led)).toBe(true);
+  });
+});

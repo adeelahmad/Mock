@@ -203,6 +203,6 @@ export function decodeShared(bytes: Uint8Array): { state: CanvasState; driver: b
  * edits it); the question, answer and chat come from the driver only, unless they drive.
  */
 export function receiveShared(mine: CanvasState, theirs: CanvasState, fromDriver: boolean, iDrive: boolean): CanvasState {
-  const base = fromDriver && !iDrive ? { ...theirs, notes: mine.notes, strokes: mine.strokes, shapes: mine.shapes, gone: mine.gone, timer: mine.timer } : mine;
+  const base = fromDriver && !iDrive ? { ...theirs, notes: mine.notes, strokes: mine.strokes, shapes: mine.shapes, gone: mine.gone, timer: mine.timer, lead: mine.lead } : mine;
   return mergeBoards(base, theirs);
 }

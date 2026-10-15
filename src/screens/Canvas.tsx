@@ -14,7 +14,7 @@ import {
   addChat, addNote, addPhrases, canvasQuestions, emptyCanvas, markPhrase, nextQuestion,
   pickArea, receiveShared, referenceFor, splitPhrases, summarize, withQuestion, type CanvasState, type Phrase,
 } from '../domain/canvas.ts';
-import { boardOf, emptyBoard, hasMore, mergeBoards, type Board } from '../domain/board.ts';
+import { NO_LEAD, boardOf, emptyBoard, hasMore, mergeBoards, type Board } from '../domain/board.ts';
 import { stackOf, browserStt } from '../domain/providers.ts';
 import { chatModel } from '../live/make-pipeline.ts';
 import { chatReply, judgePhrase, type CoachContext } from '../canvas/coach.ts';
@@ -262,6 +262,8 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
     return () => { alive = false; sc.close(); shared.current = null; };
   }, [addon, toast]);
   const quiet = useRef(false);
+  /** This participant, for following on the board (Meet gives add-ons no names). */
+  const [myId] = useState(() => 'p_' + Math.random().toString(36).slice(2, 9));
   useEffect(() => {
     if (quiet.current) { quiet.current = false; return; }
     shared.current?.share(s, Date.now(), driver);
@@ -274,7 +276,7 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
     let alive = true;
     void repo.getBlob(BOARD_KEY).then(async (b) => {
       if (!alive || !b) return;
-      try { const saved = JSON.parse(await b.text()) as Board; update((x) => mergeBoards(x, { ...emptyBoard(), ...saved, timer: { end: null, t: 0 } })); } catch { /* unreadable: start empty */ }
+      try { const saved = JSON.parse(await b.text()) as Board; update((x) => mergeBoards(x, { ...emptyBoard(), ...saved, timer: { end: null, t: 0 }, lead: NO_LEAD })); } catch { /* unreadable: start empty */ }
     }).finally(() => { boardLoaded.current = true; });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -477,7 +479,7 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
 
           <section className="stack g8" aria-label="Whiteboard">
             <span className="label">Whiteboard</span>
-            <Whiteboard board={s} onChange={(f) => update((x) => ({ ...x, ...f(x) }))} onSave={() => void saveBoard()} />
+            <Whiteboard board={s} onChange={(f) => update((x) => ({ ...x, ...f(x) }))} onSave={() => void saveBoard()} me={addon === 'stage' ? { id: myId, name: driver ? 'the host' : 'a participant' } : undefined} />
           </section>
           {!readOnly && <p className="cv-keys sub" aria-hidden="true"><kbd>L</kbd> listen · <kbd>F</kbd> finish · <kbd>R</kbd> redo · <kbd>N</kbd> next{recording ? ' · recording to History' : ' · Listen records the sitting to History'}</p>}
         </main>

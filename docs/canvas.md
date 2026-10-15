@@ -54,7 +54,12 @@ items are remembered, so two people's boards merge item by item (newest change w
 stays removed); a participant who has something the shared state lacks sends it again. The
 question, answer and chat still follow whoever drives (Take over).
 
-Not matched, and why: live cursors and names (the Add-ons SDK gives no participant identity and
+**Following:** anyone on the main stage can press **Bring everyone here**; everyone else then
+follows their zoom and scroll on the board ("Following the host") until they scroll, zoom or
+press Stop following, and can Follow again. Meet gives add-ons no participant names, so the
+leader shows as "the host" (the driver) or "a participant".
+
+Not matched, and why: live cursors and participant names (the Add-ons SDK gives no participant identity and
 shared state is meant for occasional updates, not pointer streams), images and files (shared
 state is limited to about 60 KB), comments, connectors that stick to shapes, and boards that
 outlive the call for everyone (the board is kept per browser; there is no server board).

@@ -7,7 +7,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   BOARD_H, BOARD_W, NOTE_W, TEMPLATES, addNote, addShape, addStroke, addTemplate, boardOf, clearBoard, colorNote, editNote, hitAt, isEmpty,
-  moveNote, moveShape, remove, restore, setTimer, voteNote, type Board, type BoardNote, type Ink, type NoteColor, type Shape, type ShapeKind,
+  NO_LEAD, lead as leadView, moveNote, moveShape, remove, restore, setTimer, stopLead, voteNote, type Board, type BoardNote, type Ink, type NoteColor, type Shape, type ShapeKind,
 } from '../domain/board.ts';
 
 export interface WhiteboardProps {
@@ -17,6 +17,8 @@ export interface WhiteboardProps {
   onChange: (f: (b: Board) => Board) => void;
   /** Saves the board as a picture. */
   onSave?: () => void;
+  /** In a Meet call: who this is, so they can bring everyone to their view or follow someone's. */
+  me?: { id: string; name: string };
 }
 
 type Tool = 'select' | 'pen' | 'hi' | 'eraser' | 'sticky' | 'text' | ShapeKind;
@@ -67,7 +69,7 @@ function ShapeView({ s, selected }: { s: Shape; selected?: boolean }) {
   return <line className={cls} x1={s.x1} y1={s.y1} x2={s.x2} y2={s.y2} markerEnd={s.kind === 'arrow' ? 'url(#wb-head-' + s.color + ')' : undefined} data-id={s.id} />;
 }
 
-export default function Whiteboard({ board, readOnly, onChange, onSave }: WhiteboardProps) {
+export default function Whiteboard({ board, readOnly, onChange, onSave, me }: WhiteboardProps) {
   const { notes, strokes, shapes, timer } = board;
   const box = useRef<HTMLDivElement>(null);
   const [tool, setTool] = useState<Tool>('pen');
@@ -183,9 +185,40 @@ export default function Whiteboard({ board, readOnly, onChange, onSave }: Whiteb
     setDragPos(null);
   };
 
+  // ---------- Following (Bring everyone here) ----------
+  const view = useRef<HTMLDivElement>(null);
+  const ld = board.lead ?? NO_LEAD;
+  const leading = !!me && ld.who === me.id;
+  const [optedOut, setOptedOut] = useState('');
+  const following = !!me && !!ld.who && !leading && optedOut !== ld.who;
+  const viewOf = () => { const v = view.current; const fx = v && v.scrollWidth > v.clientWidth ? v.scrollLeft / (v.scrollWidth - v.clientWidth) : 0; const fy = v && v.scrollHeight > v.clientHeight ? v.scrollTop / (v.scrollHeight - v.clientHeight) : 0; return { zoom, x: fx, y: fy }; };
+  const sendView = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pushView = () => {
+    if (!leading || sendView.current) return;
+    sendView.current = setTimeout(() => { sendView.current = null; if (me) onChange((b) => leadView(b, me.id, me.name, viewOf())); }, 300);
+  };
+  useEffect(() => { if (leading) pushView(); }, [zoom]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => () => { if (sendView.current) clearTimeout(sendView.current); }, []);
+  const startLead = () => { if (!me) return; setOptedOut(''); onChange((b) => leadView(b, me.id, me.name, viewOf())); };
+  const endLead = () => { if (me) onChange((b) => stopLead(b, me.id)); };
+  const leaveFollow = () => { if (following) setOptedOut(ld.who); };
+  // A follower takes the leader's zoom, then their scroll once the board has its new size.
+  const firstFollow = useRef('');
+  useEffect(() => {
+    if (!following) { firstFollow.current = ''; return; }
+    setZoom(ld.zoom);
+    const id = requestAnimationFrame(() => {
+      const v = view.current; if (!v) return;
+      v.scrollLeft = ld.x * (v.scrollWidth - v.clientWidth);
+      v.scrollTop = ld.y * (v.scrollHeight - v.clientHeight);
+      if (firstFollow.current !== ld.who) { firstFollow.current = ld.who; v.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' }); }
+    });
+    return () => cancelAnimationFrame(id);
+  }, [following, ld.t, ld.zoom, ld.x, ld.y, ld.who]);
+
   const sel = notes.find((n) => n.id === selected) ?? null;
   const pickColor = (c: NoteColor) => { setNoteColor(c); if (sel && sel.kind !== 'text') change((b) => colorNote(b, sel.id, c)); };
-  const zoomBy = (dir: 1 | -1) => setZoom((z) => ZOOMS[Math.max(0, Math.min(ZOOMS.length - 1, ZOOMS.indexOf(z) + dir))] ?? 1);
+  const zoomBy = (dir: 1 | -1) => { leaveFollow(); setZoom((z) => ZOOMS[Math.max(0, Math.min(ZOOMS.length - 1, ZOOMS.indexOf(z) + dir))] ?? 1); };
   const empty = isEmpty(board);
   const showsNotes = tool === 'sticky' || (tool === 'select' && sel && sel.kind !== 'text');
 
@@ -228,6 +261,9 @@ export default function Whiteboard({ board, readOnly, onChange, onSave }: Whiteb
               <button type="button" className="wb-z mono" aria-label="Fit the board" title="Fit" onClick={() => setZoom(1)}>{Math.round(zoom * 100)}%</button>
               <button type="button" className="wb-tool" aria-label="Zoom in" disabled={zoom >= ZOOMS[ZOOMS.length - 1]} onClick={() => zoomBy(1)}>+</button>
             </span>
+            {me && (leading
+              ? <button type="button" className="cv-tool on" onClick={endLead}>Stop leading</button>
+              : <button type="button" className="cv-tool" onClick={startLead}>Bring everyone here</button>)}
             {onSave && <button type="button" className="text-btn" onClick={onSave} disabled={empty}>Save image</button>}
             <button type="button" className="text-btn" onClick={() => change(clearBoard)} disabled={empty}>Clear</button>
           </div>
@@ -239,7 +275,15 @@ export default function Whiteboard({ board, readOnly, onChange, onSave }: Whiteb
           </div>
         </div>
       )}
-      <div className="wb-viewport">
+      {me && ld.who && !leading && (
+        <div className={'wb-follow' + (following ? ' on' : '')} role="status">
+          {following
+            ? <><span className="grow">Following {ld.name}</span><button type="button" className="text-btn" onClick={() => setOptedOut(ld.who)}>Stop following</button></>
+            : <><span className="grow">{ld.name.charAt(0).toUpperCase() + ld.name.slice(1)} is leading</span><button type="button" className="text-btn" onClick={() => setOptedOut('')}>Follow</button></>}
+        </div>
+      )}
+      {leading && <div className="wb-follow lead" role="status"><span className="grow">Everyone is following you</span></div>}
+      <div className={'wb-viewport' + (following ? ' following' : '')} ref={view} onScroll={pushView} onWheel={leaveFollow} onTouchMove={leaveFollow}>
         <div className="wb-board" ref={box} style={{ aspectRatio: BOARD_W + ' / ' + BOARD_H, width: zoom * 100 + '%', ['--wb-z' as string]: String(zoom) }}>
           <svg viewBox={`0 0 ${BOARD_W} ${BOARD_H}`} aria-label="Whiteboard drawing" role="img" onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
             <defs>
