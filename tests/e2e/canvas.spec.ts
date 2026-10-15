@@ -56,6 +56,7 @@ test.describe('prep canvas', () => {
 
     await page.getByRole('button', { name: 'Listen' }).click();
     await expect(page.getByRole('button', { name: 'Listening' })).toBeVisible();
+    await expect(page.locator('.cv-rec')).toBeVisible();
     // Live captions while the words come in.
     await say(page, 'I traced the outage', false);
     await expect(page.locator('.cv-ph.live')).toHaveText('I traced the outage');
@@ -91,11 +92,23 @@ test.describe('prep canvas', () => {
     await page.mouse.move(box.x + 420, box.y + box.height - 30, { steps: 6 });
     await page.mouse.up();
     await expect(board.locator('path')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Undo' }).click();
+    await expect(board.locator('path')).toHaveCount(0);
 
-    await page.getByRole('button', { name: 'Next question' }).first().click();
+    // N: the next question, from the keyboard.
+    await page.keyboard.press('n');
     await expect(page.getByText('Question 2')).toBeVisible();
     await expect(page.getByRole('group', { name: 'Areas' })).toBeVisible();
     await expect(page.getByTestId('wb-note')).toHaveCount(1);
+
+    // Stop saves the sitting to History, with its recording.
+    await page.getByRole('button', { name: 'Stop & save' }).click();
+    const saved = page.locator('.cv-saved');
+    await expect(saved).toContainText(/Session \d+ saved · 1 answer · recording/);
+    await saved.getByRole('button', { name: 'Open in History' }).click();
+    await expect(page).toHaveURL(/#\/history\//);
+    await expect(page.getByText('Canvas').first()).toBeVisible();
+    await expect(page.getByText('I traced the outage and cut p99 by 40 percent.').first()).toBeVisible();
   });
 
   test('with a model: the AI marks phrases and writes on the whiteboard', async ({ page }) => {

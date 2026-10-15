@@ -29,6 +29,21 @@ few seconds. Phrases are judged one at a time in order, each with the answer so 
 A phrase that is still being judged shows grey; words not yet cut into a phrase show as italic
 captions.
 
+## Saved to History
+
+From **Listen** to **Stop & save** the sitting is one session (mode `canvas`, see
+`src/canvas/session.ts`). Each answered question is an exchange whose verdict comes from its
+marks (all on track: strong; mostly on track: inclined; drifting: not inclined; redo: no), a
+redo keeps the earlier attempt, and the transcript holds the question, your phrases and the
+AI's chat. The audio the canvas heard (the mic, or the Meet call) is recorded and saved with
+it, so History plays it back. After saving, the bar offers the recording and a Markdown
+transcript as downloads (inside Meet the add-on's storage is its own, so download them there).
+A sitting where nothing was said is not kept.
+
+Small things: a REC clock in the header (paused while muted), an answer clock (gold past two
+minutes, red past three), keys **L** listen/mute, **F** finish, **R** redo, **N** next, and on
+the whiteboard **Undo** (your last stroke) and **Save image** (PNG).
+
 ## The Meet add-on
 
 The add-on uses the [Meet Add-ons SDK](https://developers.google.com/meet/add-ons/guides/overview).

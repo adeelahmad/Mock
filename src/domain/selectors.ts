@@ -179,6 +179,7 @@ export function sessionModeLabel(session: Session, lps: Lp[], stories: Story[], 
     case 'replay': { const f = files.find((x) => x.id === session.focus); return 'Replay · ' + (f?.name.replace(/\.(md|txt)$/i, '') ?? session.focus ?? ''); }
     case 'deep_dive': return 'Deep dive' + (lp ? ' · ' + lp.name : '');
     case 'bar_raiser': return 'Bar raiser';
+    case 'canvas': return session.focus === 'meet' ? 'Canvas · Meet call' : 'Canvas';
   }
 }
 
