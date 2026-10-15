@@ -8,17 +8,21 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../app/store.tsx';
 import { paths } from '../app/router.ts';
-import { Icon, Input, Seg } from '../components/ui.tsx';
+import { Icon, Input, Seg, download } from '../components/ui.tsx';
 import Whiteboard from '../components/Whiteboard.tsx';
 import {
   addChat, addNote, addPhrases, addStroke, canvasQuestions, clearBoard, editNote, emptyCanvas, markPhrase, moveNote, nextQuestion,
-  pickArea, referenceFor, removeNote, splitPhrases, summarize, withQuestion, type CanvasState, type Phrase,
+  pickArea, referenceFor, removeNote, splitPhrases, summarize, undoStroke, withQuestion, type CanvasState, type Phrase,
 } from '../domain/canvas.ts';
 import { stackOf, browserStt } from '../domain/providers.ts';
 import { chatModel } from '../live/make-pipeline.ts';
 import { chatReply, judgePhrase, type CoachContext } from '../canvas/coach.ts';
 import { LiveEar, SpeechEar, earAudio, type Ear } from '../canvas/ear.ts';
 import { ADDON, SharedCanvas, mainStage, meetingLink, sidePanel } from '../canvas/addon.ts';
+import { CanvasLog } from '../canvas/session.ts';
+import { boardPng } from '../canvas/board-image.ts';
+import { sessionMarkdown } from './History.tsx';
+import type { Session } from '../domain/types.ts';
 import { BrowserStt, SegmentedStt, elevenLabsTranscriber, geminiTranscriber } from '../speech/stt.ts';
 import { meet } from '../meet/meet.ts';
 import { MEDIA_SCOPES, type MeetMediaListener } from '../meet/media-api.ts';
@@ -31,6 +35,13 @@ const PAUSE_MS = 900;
 const REVIEW_ASK = 'I finished my answer. How was it? One line on what worked, one on what to fix first.';
 
 type Hearing = 'mic' | 'meet';
+/** A sitting just saved to History. */
+interface Saved { session: Session; recording: Blob | null; answers: number }
+
+const clock = (ms: number): string => { const t = Math.max(0, Math.floor(ms / 1000)); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
+const extOf = (mime: string | null): string => (mime?.includes('ogg') ? 'ogg' : mime?.includes('mp4') ? 'm4a' : 'webm');
+/** Typing in a field never triggers the canvas keys. */
+const typing = (t: EventTarget | null): boolean => t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
 type EarState = 'off' | 'starting' | 'on' | 'muted';
 
 const MARK_LABEL: Record<Phrase['mark'], string> = { match: 'on track', drift: 'drifting', redo: 'redo', pending: 'judging…' };
@@ -42,6 +53,13 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
   const [s, setS] = useState<CanvasState>(emptyCanvas);
   const sRef = useRef(s);
   const update = useCallback((f: (x: CanvasState) => CanvasState) => { const next = f(sRef.current); sRef.current = next; setS(next); }, []);
+  // The sitting being saved to History (from Listen to Stop), and the one just saved.
+  const log = useRef<CanvasLog | null>(null);
+  const [saved, setSaved] = useState<Saved | null>(null);
+  // Clocks: the sitting and the answer. `tick` re-renders them every second.
+  const [t0, setT0] = useState(0);
+  const [answerT0, setAnswerT0] = useState(0);
+  const [, setTick] = useState(0);
 
   const areaIds = useMemo(() => new Set(lps.map((l) => l.id)), [lps]);
   const pool = useMemo(() => canvasQuestions(questions, areaIds), [questions, areaIds]);
@@ -51,6 +69,8 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
   const deal = useCallback((countDone: boolean) => {
     const q = nextQuestion(pool, seen.current);
     if (!q) return;
+    const cur = sRef.current;
+    log.current?.endAnswer(cur.phase === 'answer' ? cur.phrases : []);
     seen.current.add(q.id);
     update((x) => withQuestion({ ...x, done: x.done + (countDone ? 1 : 0) }, q));
   }, [pool, update]);
@@ -93,6 +113,7 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
         const r = await chatReply({ model: live.current.model, state: sRef.current, ctx: live.current.ctx, ask });
         if (r.error && !warned.current) { warned.current = true; toast('The AI is unavailable (' + r.error + ') · answering offline'); }
         update((x) => addChat(r.notes.reduce((y, n) => addNote(y, n, 'ai'), x), 'ai', r.text));
+        log.current?.say('coach', r.text);
       } finally { setThinking(false); }
     });
   }, [toast, update]);
@@ -108,6 +129,7 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
 
   const heard = useCallback((text: string) => {
     const cur = sRef.current;
+    log.current?.say('me', text);
     if (cur.phase === 'answer') {
       const { state, added } = addPhrases(cur, splitPhrases(text));
       sRef.current = state; setS(state);
@@ -118,12 +140,27 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
     }
   }, [judge, askAi, update]);
 
+  const micRec = useRef<MediaStream | null>(null);
+  const finishLog = useCallback(async (): Promise<Saved | null> => {
+    const l = log.current; log.current = null;
+    if (!l) return null;
+    const cur = sRef.current;
+    const r = await l.finish(cur.phase === 'answer' ? cur.phrases : []).catch(() => null);
+    micRec.current?.getTracks().forEach((t) => t.stop()); micRec.current = null;
+    return r;
+  }, []);
   const stopEar = useCallback(() => {
     ear.current?.close(); ear.current = null;
     listener.current?.close(); listener.current = null;
     setEarState('off'); setLevel(0);
   }, []);
-  useEffect(() => stopEar, [stopEar]);
+  const stop = useCallback(async () => {
+    stopEar();
+    const r = await finishLog();
+    if (r) { setSaved(r); void refresh(); toast('Session ' + r.session.number + ' saved to History'); }
+  }, [stopEar, finishLog, refresh, toast]);
+  const stopRef = useRef(stop); stopRef.current = stop;
+  useEffect(() => () => { void stopRef.current(); }, []);
 
   const makeEar = (input: MediaStream | null): Ear => {
     const keys = providers.keys;
@@ -144,7 +181,7 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
         const l = meet.mediaListenerFor(callUrl, meet.inCall() ? DEFAULT_BOT_NAME : '');
         if (!l) throw new Error('Sign in with Google to hear the call');
         listener.current = l;
-        l.onEnd = (why) => { toast('The call stopped sending audio (' + why + ')'); stopEar(); };
+        l.onEnd = (why) => { toast('The call stopped sending audio (' + why + ')'); void stop(); };
         input = await l.connect();
       }
       const e = makeEar(input);
@@ -156,14 +193,26 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
       await e.start();
       e.setListening(true);
       setEarState('on');
+      if (driverRef.current && !log.current) {
+        // Record what the canvas hears: the call, or (beside the recogniser) the mic.
+        const l = await CanvasLog.begin(repo, { meet: !!input });
+        log.current = l; setSaved(null);
+        let rec = input;
+        if (!rec) { try { rec = micRec.current = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }); } catch { rec = null; } }
+        l.record(rec);
+        const cur = sRef.current;
+        if (cur.phase === 'answer') l.startAnswer({ questionId: cur.questionId || null, questionText: cur.questionText, lpId: cur.areaId });
+        setT0(Date.now());
+      }
     } catch (err) {
-      stopEar();
+      void stop();
       toast((err as Error).message || 'Could not start listening');
     }
   };
   const toggleMute = () => {
     const on = earState !== 'on';
     ear.current?.setListening(on);
+    log.current?.pauseRecording(!on);
     setEarState(on ? 'on' : 'muted');
     if (!on) setLevel(0);
   };
@@ -216,6 +265,9 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
         ? `Yes, ${area?.name} fits as a secondary area; the main one is ${primary.name}. Answer out loud when you are ready.`
         : `Yes, ${area?.name}. Answer out loud when you are ready; I mark each phrase as you go.`;
       update(() => addChat(r.state, 'ai', line));
+      log.current?.startAnswer({ questionId: question.id, questionText: question.text, lpId: areaId });
+      log.current?.say('coach', line);
+      setAnswerT0(Date.now());
     } else {
       // One hint, then one nudge to "Show me"; further misses only show on the buttons.
       const n = r.state.misses.length;
@@ -225,15 +277,57 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
     }
   };
   const reveal = () => { if (question) pick(question.lpIds.find((id) => areaIds.has(id)) ?? question.lpIds[0]); };
-  const finish = () => { update((x) => ({ ...x, phase: 'done', partial: '' })); askAi(REVIEW_ASK); };
-  const redo = () => update((x) => ({ ...x, phase: 'answer', phrases: [], partial: '' }));
+  const finish = () => {
+    if (sRef.current.phase !== 'answer' || !sRef.current.phrases.length) return;
+    log.current?.endAnswer(sRef.current.phrases);
+    update((x) => ({ ...x, phase: 'done', partial: '' }));
+    askAi(REVIEW_ASK);
+  };
+  const redo = () => {
+    const cur = sRef.current;
+    if (!cur.phrases.length) return;
+    // The attempt stays in History; the redo is a new one.
+    log.current?.endAnswer(cur.phase === 'answer' ? cur.phrases : []);
+    log.current?.startAnswer({ questionId: cur.questionId || null, questionText: cur.questionText, lpId: cur.areaId });
+    update((x) => ({ ...x, phase: 'answer', phrases: [], partial: '' }));
+    setAnswerT0(Date.now());
+  };
   const [typed, setTyped] = useState('');
   const send = (e: React.FormEvent) => {
     e.preventDefault();
     const t = typed.trim(); if (!t) return;
     setTyped('');
     update((x) => addChat(x, 'me', t));
+    log.current?.say('me', t);
     askAi();
+  };
+
+  // Keys: L listen (then mute and unmute), F finish, R redo, N next question. Never while typing.
+  const keys = useRef<(e: KeyboardEvent) => void>(() => undefined);
+  keys.current = (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey || typing(e.target) || readOnly) return;
+    const k = e.key.toLowerCase();
+    if (k === 'l') { if (earState === 'off') void listen(); else if (earState !== 'starting') toggleMute(); }
+    else if (k === 'f' && s.phase === 'answer') finish();
+    else if (k === 'r' && s.phase !== 'pick') redo();
+    else if (k === 'n' && s.phase !== 'pick') deal(true);
+    else return;
+    e.preventDefault();
+  };
+  useEffect(() => { const on = (e: KeyboardEvent) => keys.current(e); window.addEventListener('keydown', on); return () => window.removeEventListener('keydown', on); }, []);
+  const ticking = earState !== 'off' || s.phase === 'answer';
+  useEffect(() => { if (!ticking) return; const t = setInterval(() => setTick((n) => n + 1), 1000); return () => clearInterval(t); }, [ticking]);
+  const recording = !!log.current;
+
+  const saveBoard = async () => {
+    try { download('mock-board-' + new Date().toISOString().slice(0, 10) + '.png', await boardPng(s.notes, s.strokes)); }
+    catch (err) { toast((err as Error).message); }
+  };
+  const downloadRecording = () => { if (saved?.recording) download('mock-session-' + saved.session.number + '.' + extOf(saved.session.recordingMime), saved.recording); };
+  const downloadTranscript = async () => {
+    if (!saved) return;
+    const [xs, events] = await Promise.all([repo.exchanges(saved.session.id), repo.transcript(saved.session.id)]);
+    download('mock-session-' + saved.session.number + '.md', new Blob([sessionMarkdown(saved.session, 'Canvas', xs, [], events)], { type: 'text/markdown' }));
   };
 
   // Only the message list scrolls to the newest message (scrolling the page would pull the phone layout away from the answer).
@@ -277,15 +371,26 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
               ? <button className="btn sm cool" disabled={earState === 'starting'} onClick={() => void listen()}><Icon.Mic size={16} />{earState === 'starting' ? 'Starting…' : 'Listen'}</button>
               : (
                 <>
+                  {recording && <span className={'cv-rec' + (earState === 'muted' ? ' paused' : '')} role="status" aria-label={'Recording, ' + clock(Date.now() - t0)}><i />{clock(Date.now() - t0)}</span>}
                   <span className="cv-level" aria-hidden="true"><i style={{ transform: `scaleY(${0.15 + Math.min(1, level * 2.5) * 0.85})` }} /></span>
                   <button className="btn sm" aria-pressed={earState === 'on'} onClick={toggleMute}>{earState === 'on' ? <><Icon.Mic size={16} />Listening</> : <><Icon.MicOff size={16} />Muted</>}</button>
-                  <button className="text-btn" onClick={stopEar}>Stop</button>
+                  <button className="text-btn" onClick={() => void stop()}>{recording ? 'Stop & save' : 'Stop'}</button>
                 </>
               )}
           </div>
         )}
       </CanvasHead>
       {extra}
+      {saved && (
+        <div className="cv-saved" role="status">
+          <Icon.Check size={16} />
+          <span className="grow">Session {saved.session.number} saved · {saved.answers} {saved.answers === 1 ? 'answer' : 'answers'}{saved.recording ? ' · recording' : ''}</span>
+          {saved.recording && <button className="btn sm" onClick={downloadRecording}><Icon.Download size={14} />Recording</button>}
+          <button className="btn sm" onClick={() => void downloadTranscript()}><Icon.Download size={14} />Transcript</button>
+          {!addon && <button className="btn sm" onClick={() => go(paths.session(saved.session.id))}>Open in History</button>}
+          <button className="wb-x" aria-label="Dismiss" onClick={() => setSaved(null)}>×</button>
+        </div>
+      )}
       {addon && !gemini.hasKey && prov.llm === 'gemini' && (
         <div className="cv-key">
           <Input label="Gemini API key (kept in this browser)" mono type="password" placeholder="AIza…" onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') void setGemini({ key: e.currentTarget.value.trim() }); }} />
@@ -314,7 +419,7 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
           ) : (
             <section className={'card pad-lg cv-answer' + (sum.overall ? ' ' + sum.overall : '')} aria-label="Your answer">
               <div className="hstack between wrap">
-                <span className="hstack"><span className="label">Your answer</span><span className="cv-area-pill">{ctx.area?.name}{s.role === 'secondary' ? ' · secondary' : ''}</span></span>
+                <span className="hstack"><span className="label">Your answer</span><span className="cv-area-pill">{ctx.area?.name}{s.role === 'secondary' ? ' · secondary' : ''}</span>{s.phase === 'answer' && answerT0 > 0 && <AnswerClock ms={Date.now() - answerT0} />}</span>
                 <span className="cv-legend" aria-label="Colours"><span className="match">on track {sum.match}</span><span className="drift">drifting {sum.drift}</span><span className="redo">redo {sum.redo}</span></span>
               </div>
               <p className="cv-words" aria-live="polite" data-testid="cv-words">
@@ -348,8 +453,11 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
               onEditNote={(id, t) => update((x) => editNote(x, id, t))}
               onRemoveNote={(id) => update((x) => removeNote(x, id))}
               onClear={() => update(clearBoard)}
+              onUndo={() => update(undoStroke)}
+              onSave={() => void saveBoard()}
             />
           </section>
+          {!readOnly && <p className="cv-keys sub" aria-hidden="true"><kbd>L</kbd> listen · <kbd>F</kbd> finish · <kbd>R</kbd> redo · <kbd>N</kbd> next{recording ? ' · recording to History' : ' · Listen records the sitting to History'}</p>}
         </main>
 
         <aside className="cv-chat" aria-label="Chat with the AI">
@@ -382,4 +490,10 @@ function CanvasHead({ addon, onBack, children }: { addon: boolean; onBack: () =>
       {children}
     </div>
   );
+}
+
+/** How long the answer has run: gold past two minutes, red past three (most answers want two). */
+function AnswerClock({ ms }: { ms: number }) {
+  const tone = ms >= 180_000 ? ' long' : ms >= 120_000 ? ' warn' : '';
+  return <span className={'cv-clock mono' + tone} title="Aim for about two minutes">{clock(ms)}</span>;
 }

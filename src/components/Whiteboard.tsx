@@ -16,6 +16,10 @@ export interface WhiteboardProps {
   onEditNote: (id: string, text: string) => void;
   onRemoveNote: (id: string) => void;
   onClear: () => void;
+  /** Takes back your last stroke. */
+  onUndo?: () => void;
+  /** Saves the board as a picture. */
+  onSave?: () => void;
 }
 
 type Tool = 'pen' | 'move';
@@ -26,7 +30,7 @@ const path = (p: number[]): string => {
   return d;
 };
 
-export default function Whiteboard({ notes, strokes, readOnly, onStroke, onAddNote, onMoveNote, onEditNote, onRemoveNote, onClear }: WhiteboardProps) {
+export default function Whiteboard({ notes, strokes, readOnly, onStroke, onAddNote, onMoveNote, onEditNote, onRemoveNote, onClear, onUndo, onSave }: WhiteboardProps) {
   const box = useRef<HTMLDivElement>(null);
   const [tool, setTool] = useState<Tool>('pen');
   const [draft, setDraft] = useState<number[] | null>(null);
@@ -75,7 +79,9 @@ export default function Whiteboard({ notes, strokes, readOnly, onStroke, onAddNo
           <button type="button" className={'cv-tool' + (tool === 'pen' ? ' on' : '')} aria-pressed={tool === 'pen'} onClick={() => setTool('pen')}>Pen</button>
           <button type="button" className={'cv-tool' + (tool === 'move' ? ' on' : '')} aria-pressed={tool === 'move'} onClick={() => setTool('move')}>Select</button>
           <button type="button" className="cv-tool" onClick={() => onAddNote('New note')}>+ Note</button>
+          {onUndo && <button type="button" className="cv-tool" onClick={onUndo} disabled={!strokes.some((s) => s.by === 'me')}>Undo</button>}
           <span className="grow" />
+          {onSave && <button type="button" className="text-btn" onClick={onSave} disabled={!notes.length && !strokes.length}>Save image</button>}
           <button type="button" className="text-btn" onClick={onClear} disabled={!notes.length && !strokes.length}>Clear</button>
         </div>
       )}

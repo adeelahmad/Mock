@@ -180,6 +180,11 @@ export const moveNote = (s: CanvasState, id: string, x: number, y: number): Canv
 export const removeNote = (s: CanvasState, id: string): CanvasState => ({ ...s, notes: s.notes.filter((n) => n.id !== id) });
 export const addStroke = (s: CanvasState, points: number[], by: Who): CanvasState =>
   (points.length >= 4 ? { ...s, strokes: [...s.strokes, { id: newId('s'), points: points.map((v) => Math.round(v)), by }] } : s);
+/** Takes back the candidate's last pen stroke. */
+export function undoStroke(s: CanvasState): CanvasState {
+  for (let i = s.strokes.length - 1; i >= 0; i--) if (s.strokes[i].by === 'me') return { ...s, strokes: [...s.strokes.slice(0, i), ...s.strokes.slice(i + 1)] };
+  return s;
+}
 export const clearBoard = (s: CanvasState): CanvasState => ({ ...s, notes: [], strokes: [] });
 
 export const addChat = (s: CanvasState, who: Who, text: string, voice = false): CanvasState =>
