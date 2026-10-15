@@ -319,7 +319,9 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     if (missing && !(live && !gemini.hasKey)) toast(stackLabel(stack, prov.openai.model) + ' needs ' + missing + ' · Settings · Voice & model · running the demo');
     const inMeet = !demo && meet.inCall();
     inMeetRef.current = inMeet;
-    const audio = demo ? null : inMeet ? new MeetAudio(meet.client, new BrowserAudio({ mic: false, speakers: false })) : new BrowserAudio();
+    let media: ReturnType<typeof meet.mediaListener> = null;
+    if (inMeet) { try { media = meet.mediaListener(); } catch (err) { toast((err as Error).message + ' · hearing the call through the bot'); } }
+    const audio = demo ? null : inMeet ? new MeetAudio(meet.client, new BrowserAudio({ mic: false, speakers: false }), { media, onNotice: toast }) : new BrowserAudio();
     const transport = !audio
       ? new SimulatedTransport(DEMO_SCRIPT)
       : live

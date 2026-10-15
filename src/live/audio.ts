@@ -89,6 +89,7 @@ export class BrowserAudio implements AudioIO {
   private closed = false;
   private mic: boolean;
   private record: boolean;
+  private input: MediaStream | null = null;
 
   /** Create from a click handler: the AudioContext is resumed while the gesture is still live (iOS). */
   constructor(opts: BrowserAudioOptions = {}) {
@@ -120,15 +121,18 @@ export class BrowserAudio implements AudioIO {
       this.sink = this.ctx.createGain(); this.sink.gain.value = 0;
       this.node.connect(this.sink); this.sink.connect(this.ctx.destination);
       await this.attachMic();
-      navigator.mediaDevices?.addEventListener?.('devicechange', this.onDeviceChange);
+      if (!this.input) navigator.mediaDevices?.addEventListener?.('devicechange', this.onDeviceChange);
     }
     if (this.mix) this.startRecorder();
     await this.requestWake();
     await this.ctx.resume().catch(() => undefined);
   }
 
+  /** Capture this stream instead of the mic (a Meet call heard through the Media API). Call before start(). */
+  setInput(stream: MediaStream): void { this.input = stream; this.mic = true; }
+
   private async attachMic(): Promise<void> {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
+    const stream = this.input ?? await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 } });
     if (this.closed) { stream.getTracks().forEach((t) => t.stop()); return; }
     this.source?.disconnect();
     this.stream?.getTracks().forEach((t) => t.stop());
@@ -137,7 +141,7 @@ export class BrowserAudio implements AudioIO {
     if (this.node) this.source.connect(this.node);
     if (this.mix) this.source.connect(this.mix);
     // A track that ends (earbuds unplugged) is replaced by the new default device.
-    stream.getAudioTracks().forEach((t) => { t.onended = () => { if (!this.closed) void this.attachMic().catch(() => undefined); }; });
+    stream.getAudioTracks().forEach((t) => { t.onended = () => { if (!this.closed && !this.input) void this.attachMic().catch(() => undefined); }; });
   }
 
   private onDeviceChange = (): void => { if (!this.closed && this.mic) void this.attachMic().catch(() => undefined); };
