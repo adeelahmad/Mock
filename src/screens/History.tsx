@@ -46,6 +46,7 @@ function whoOf(t: TranscriptEvent, xs: Exchange[]): string {
   if (t.speaker === 'me') return 'You';
   if (t.speaker === 'coach') return 'Coach';
   const ex = t.exchangeId ? xs.find((e) => e.id === t.exchangeId) : xs.find((e) => t.tMs >= e.startMs && (e.endMs == null || t.tMs < e.endMs));
+  if (ex?.interviewer.role === 'Candidate') return 'Mock · as you';
   return (ex ? firstName(ex.interviewer.name) : 'Interviewer') + ' · interviewer';
 }
 

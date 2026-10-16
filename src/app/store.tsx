@@ -3,7 +3,7 @@
 // read what they need with `useApp()`; writes go through `repo` and then `refresh()`.
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { Exchange, Lp, PrepFile, Question, Session, Settings, Story, TranscriptEvent, UiPrefs } from '../domain/types.ts';
+import type { Exchange, Interviewer, Lp, PrepFile, Question, Session, Settings, Story, TranscriptEvent, UiPrefs } from '../domain/types.ts';
 import type { Repo, RepoMode } from '../db/repo.ts';
 import { MemoryRepo } from '../db/memory.ts';
 import { lpRows, storyRows, questionRows, coveredLpIds, heatmap, trend, weakestAnswer, type LpRow, type StoryRow, type QuestionRow } from '../domain/selectors.ts';
@@ -126,6 +126,9 @@ export interface AppStore {
 
 /** Keys kept in this browser and carried by passphrase sync. */
 const SECRETS = ['gemini.key', 'openai.key', 'elevenlabs.key'];
+
+/** Who answers in a role-swap session: Mock, speaking as the user. */
+export const REVERSE_CANDIDATE: Interviewer = { n: 1, name: 'Mock as you', role: 'Candidate', mono: 'AI' };
 
 const Ctx = createContext<AppStore | null>(null);
 export const useApp = (): AppStore => { const v = useContext(Ctx); if (!v) throw new Error('useApp outside AppProvider'); return v; };
@@ -331,7 +334,10 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     // falling back to the offline card / local report; the demo replays the script's cards.
     const llm = demo ? null : textLlm(stack, prov, providerKeys);
     const { analyzer, reporter } = analysisPipeline({ key: demo ? null : gemini.key || null, llm, textModel: s.textModel, lps: data.lps, stories: data.stories, script: demo ? DEMO_SCRIPT : null, onFallback: (what, err) => toast((what === 'analysis' ? (llm ? 'Coach card failed' : 'Flash card failed') : (llm ? 'Report failed' : 'Flash report failed')) + ' — used the offline one (' + err.message + ')') });
-    const c = new SessionController(transport, analyzer, repo, () => Date.now(), demo, { reporter });
+    // Role swap: the model answers as the user, so there is no answer of theirs to card or report.
+    const reverse = o.mode === 'reverse';
+    if (reverse && demo) toast('Role swap needs a live model · the demo plays a normal interview');
+    const c = new SessionController(transport, reverse ? null : analyzer, repo, () => Date.now(), demo, { reporter });
     controller.current = c;
     c.subscribe((st, meta) => { setLiveState(st); setLiveMeta(meta); if (inMeet) meet.mirror(st); });
     const focusLp = o.mode === 'lp' && o.focus ? data.lps.find((l) => l.id === o.focus) : null;
@@ -346,7 +352,7 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     // Show the connecting screen while the mic is granted and the connection opens.
     setSheet({ setup: false, answer: null, addQuestion: false, addStory: false });
     routerGo('/live');
-    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: live ? s.liveModel : stack.llm === 'openai' ? prov.openai.model : s.textModel, voice: s.voice, questionText: o.questionText ?? null, retriever: index.current ? searchIndex : null, tools: demo ? [] : contextTools(repo) });
+    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: reverse ? [REVERSE_CANDIDATE] : INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: live ? s.liveModel : stack.llm === 'openai' ? prov.openai.model : s.textModel, voice: s.voice, questionText: o.questionText ?? null, retriever: index.current ? searchIndex : null, tools: demo ? [] : contextTools(repo) });
   }, [data, gemini.hasKey, gemini.key, providerKeys, repo, exitLive, toast, searchIndex]);
 
   // Budget: every Gemini call's tokens go to the ledger, batched so a live session writes at

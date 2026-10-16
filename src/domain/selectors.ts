@@ -180,6 +180,7 @@ export function sessionModeLabel(session: Session, lps: Lp[], stories: Story[], 
     case 'deep_dive': return 'Deep dive' + (lp ? ' · ' + lp.name : '');
     case 'bar_raiser': return 'Bar raiser';
     case 'canvas': return session.focus === 'meet' ? 'Canvas · Meet call' : 'Canvas';
+    case 'reverse': return 'Role swap · you interview';
   }
 }
 

@@ -17,6 +17,14 @@ describe('context builder', () => {
     expect(ctx.estimatedTokens).toBe(estimateTokens(ctx.text));
   });
 
+  it('role swap fills prompts/candidate.md: the model answers as the user from their stories', () => {
+    const ctx = buildContext({ sessionNumber: 3, date: '2026-10-16', mode: 'reverse', focus: 'You interview', coaching: 'after_each', questionSource: 'bank', previous: [], lps: LPS, stories: STORIES, questions: QUESTIONS.slice(0, 2), files: FILES });
+    expect(ctx.text).not.toMatch(/\{\{\w+\}\}/);
+    expect(ctx.text).toContain('role-swap mode');
+    expect(ctx.text).toContain('<story id="payments" title="Payments outage">');
+    expect(ctx.text).not.toContain('You are Mock, a live voice interviewer and coach');
+  });
+
   it('wraps items in tags with ids', () => {
     const ctx = buildContext({ sessionNumber: 1, date: '2026-10-11', mode: 'loop', focus: '', coaching: 'recap_only', questionSource: 'bank', previous: [], lps: LPS, stories: STORIES, questions: QUESTIONS.slice(0, 2), files: FILES });
     expect(ctx.text).toContain('<lp id="deep">Dive Deep —');

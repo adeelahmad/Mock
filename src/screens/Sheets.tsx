@@ -50,7 +50,7 @@ function fileLoop(f: PrepFile): { title: string; rounds: number } {
 
 // ---------- Setup sheet ("3 decisions") ----------
 
-type Pick = 'focus' | 'loop' | 'lp' | 'story' | 'set' | 'replay' | 'deep' | 'bar';
+type Pick = 'focus' | 'loop' | 'lp' | 'story' | 'set' | 'replay' | 'deep' | 'bar' | 'reverse';
 type Picker = null | 'lp' | 'story' | 'set' | 'replay';
 interface QuestionSet { key: string; label: string; count: number }
 
@@ -108,6 +108,7 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
       case 'replay': return Math.max(filePick?.rounds ?? 1, 1) * 10;
       case 'deep': return 15;
       case 'bar': return 18;
+      case 'reverse': return 15;
     }
   };
   const minutes = Math.round(estimate(pick));
@@ -122,6 +123,7 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
       case 'replay': return filePick ? { mode: 'replay', focus: filePick.file.id, focusLabel: filePick.title, coaching } : null;
       case 'deep': return focus ? { mode: 'deep_dive', focus: focus.id, focusLabel: focus.name, coaching } : null;
       case 'bar': return { mode: 'bar_raiser', focus: null, focusLabel: 'Bar raiser · ' + barRaiser.name, coaching };
+      case 'reverse': return { mode: 'reverse', focus: null, focusLabel: 'You interview', coaching };
     }
   };
   const start = () => {
@@ -160,6 +162,11 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
             <div className="opt-text"><span className="opt-title">Full loop</span><span className="opt-sub">{settings.loopSize} interviewers · ~{settings.loopSize * 10} min</span></div>
             {pick === 'loop' && <span className="opt-check" aria-hidden="true">✓</span>}
           </button>
+          <button type="button" className={'opt' + (pick === 'reverse' ? ' on' : '')} onClick={() => setPick('reverse')} aria-pressed={pick === 'reverse'}>
+            <Tile plain>⇄</Tile>
+            <div className="opt-text"><span className="opt-title">Swap roles</span><span className="opt-sub">You interview · Mock answers as you, from your {storyRows.length === 1 ? 'story' : storyRows.length + ' stories'}</span></div>
+            {pick === 'reverse' && <span className="opt-check" aria-hidden="true">✓</span>}
+          </button>
           <button type="button" className={'opt' + (elseLabel() ? ' on' : '')} onClick={() => setPage(2)}>
             <Tile plain>…</Tile>
             <div className="opt-text"><span className="opt-title">Something else</span><span className="opt-sub">{elseLabel() ?? 'One area · one story · question set · replay · bar raiser'}</span></div>
@@ -168,9 +175,9 @@ export function SetupSheet({ open, onClose }: { open: boolean; onClose: () => vo
         </div>
       </div>
 
-      <div className="stack g8"><span className="label">2 · Coaching</span>
+      {pick !== 'reverse' && <div className="stack g8"><span className="label">2 · Coaching</span>
         <Seg<Coaching> className="tall" value={coaching} onChange={(c) => { setCoaching(c); void setSetting('coaching', c); }} options={[['after_each', 'After each answer'], ['recap_only', 'Recap only']]} />
-      </div>
+      </div>}
 
       <div className="stack g8">
         <button type="button" className="more-row" onClick={() => setMore((m) => !m)} aria-expanded={more}>

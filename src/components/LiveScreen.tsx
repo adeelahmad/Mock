@@ -167,14 +167,17 @@ export default function LiveScreen(p: LiveScreenProps) {
   const cue = p.answerSec >= 180;
   const ivKnown = p.interviewer.n > 0;
   const first = ivKnown ? p.interviewer.name.split(' ')[0] : 'your interviewer';
-  const timerNote = isThinking ? 'Still listening — coaching starts when you’re done' : cue ? '3:00 passed · start wrapping up' : 'Your answer';
+  // Role swap: the user asks, Mock answers as them.
+  const reverse = p.mode === 'reverse';
+  const timerNote = reverse ? (isThinking ? 'Your turn · ask a question' : 'You’re asking') : isThinking ? 'Still listening — coaching starts when you’re done' : cue ? '3:00 passed · start wrapping up' : 'Your answer';
   const listenDot = isThinking ? 'var(--m-fg3)' : who === 'me' ? 'var(--m-fg)' : 'var(--live-fg)';
-  const nowText = isInterviewer ? first + ' is speaking' : isThinking ? 'Still listening' : 'You’re answering';
+  const nowText = reverse ? (isInterviewer ? 'Mock is answering as you' : isThinking ? 'Your turn' : 'You’re asking') : isInterviewer ? first + ' is speaking' : isThinking ? 'Still listening' : 'You’re answering';
   const nowSub = isInterviewer ? p.interviewer.role : isThinking ? 'Pause detected · mic open' : 'Mic open';
   const mono = isCoaching ? 'Co' : isEnd ? 'M' : p.interviewer.mono;
   const roundLabel = isCoaching
     ? 'Coach · after ' + p.qLabel + (desktop && p.lpName ? ' · ' + p.lpName : '')
     : isEnd ? 'Session ' + p.sessionNumber + ' · complete'
+    : reverse ? 'Role swap · you interview'
     : ivKnown ? 'Interviewer ' + p.interviewer.n + ' of ' + p.loopSize + ' · ' + p.interviewer.role : 'Interviewer';
   const headName = isCoaching ? 'Coaching' : isEnd ? 'Mock' : ivKnown ? p.interviewer.name : 'Mock';
   const showLp = p.mode !== 'loop' && !isCoaching && !isEnd && !!p.lpName;
@@ -197,7 +200,7 @@ export default function LiveScreen(p: LiveScreenProps) {
       if (k === ' ') { if (isEnd || isConnecting) return; e.preventDefault(); p.onAction(paused ? 'resume' : 'pause'); }
       else if (k === 'r') { if (!isEnd && !isConnecting) p.onAction('redo'); }
       else if (k === 'n') { if (!isEnd && !isConnecting) p.onAction('next'); }
-      else if (k === 'h') { if (showHandles && !paused) p.onAction('hint'); }
+      else if (k === 'h') { if (showHandles && !paused && !reverse) p.onAction('hint'); }
       else if (k === 'escape') { if (aOpen) setAOpen(false); else if (tOpen) setTOpen(false); else if (!isEnd) p.onAction('end'); }
     };
     window.addEventListener('keydown', onKey);
@@ -256,7 +259,7 @@ export default function LiveScreen(p: LiveScreenProps) {
             <div className="live-fill live-center live-single" style={{ gap: 22 }}>
               {vizMain}
               <div className="stack g6">
-                <span className="live-connect-title">Connecting to {ivKnown ? p.interviewer.name : 'your interviewer'}…</span>
+                <span className="live-connect-title">{reverse ? 'Swapping roles…' : 'Connecting to ' + (ivKnown ? p.interviewer.name : 'your interviewer') + '…'}</span>
                 <span className="sub" style={{ fontSize: 14, lineHeight: 1.4 }}>Session {p.sessionNumber} · {p.modeLabel}{p.mode === 'loop' ? ' · ' + p.loopSize + ' interviewers' : ''}</span>
               </div>
               <div className="card live-checks">
@@ -272,7 +275,7 @@ export default function LiveScreen(p: LiveScreenProps) {
               <div className="live-q" aria-live="polite">{qShown}{revealing && caret}</div>
               <div className="live-centre">
                 <div className="live-viz">{vizMain}</div>
-                <div className="live-now"><span className="live-dot" />{first} is speaking</div>
+                <div className="live-now"><span className="live-dot" />{reverse ? 'Mock is answering as you' : first + ' is speaking'}</div>
               </div>
             </div>
           )}
@@ -396,13 +399,16 @@ export default function LiveScreen(p: LiveScreenProps) {
               <div className="live-handles">
                 <button type="button" className="live-handle grow" onClick={() => setTOpen(!tOpen)} aria-expanded={tOpen}><span className="live-handle-t">Transcript · {p.turns.length} {p.turns.length === 1 ? 'turn' : 'turns'}</span><Icon.Up size={14} /></button>
                 {p.notesAllowed && !nOpen && <button type="button" className="live-handle" onClick={() => setNOpen(true)}>Notes</button>}
-                <button type="button" className="live-handle" onClick={() => p.onAction('hint')}>Hint</button>
-                {isMine && <button type="button" className="live-handle" onClick={() => p.onAction('feedback')} title="Done — coach me now">Feedback</button>}
+                {!reverse && <button type="button" className="live-handle" onClick={() => p.onAction('hint')}>Hint</button>}
+                {reverse && <button type="button" className="live-handle" onClick={() => p.onAction('feedback')} title="Why Mock picked that story">Why that story?</button>}
+                {!reverse && isMine && <button type="button" className="live-handle" onClick={() => p.onAction('feedback')} title="Done — coach me now">Feedback</button>}
               </div>
             )}
-            <div className="live-hf">Hands-free: say “redo”, “next” or “hint”. Coaching starts when you stop talking.{desktop ? ' Keys: Space pause · R redo · N next · H hint · Esc end.' : ''}</div>
+            <div className="live-hf">{reverse
+              ? <>You’re the interviewer: ask a question and Mock answers as you, from your stories. Say “again”, “next” or “why that story?”.{desktop ? ' Keys: Space pause · R again · N next · Esc end.' : ''}</>
+              : <>Hands-free: say “redo”, “next” or “hint”. Coaching starts when you stop talking.{desktop ? ' Keys: Space pause · R redo · N next · H hint · Esc end.' : ''}</>}</div>
             <div className="live-controls">
-              {roundBtn(desktop ? 'Redo · R' : 'Redo', 'Redo this question', <Icon.Redo size={22} />, 'redo')}
+              {roundBtn(reverse ? (desktop ? 'Again · R' : 'Again') : desktop ? 'Redo · R' : 'Redo', reverse ? 'Answer again' : 'Redo this question', <Icon.Redo size={22} />, 'redo')}
               {roundBtn(desktop ? 'Pause · Space' : 'Pause', 'Pause', <Icon.Pause size={desktop ? 30 : 28} />, 'pause', true)}
               {roundBtn(desktop ? 'Next · N' : 'Next', 'Next question', <Icon.Next size={22} />, 'next')}
             </div>

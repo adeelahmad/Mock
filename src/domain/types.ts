@@ -8,7 +8,7 @@ export type Verdict = 'strong_hire' | 'inclined' | 'not_inclined' | 'strong_no_h
 /** Verdict as the design codes it: 0 = not yet, 1 = strong hire … 4 = strong no hire. */
 export type VerdictCode = 0 | 1 | 2 | 3 | 4;
 
-export type Mode = 'loop' | 'lp' | 'story' | 'question_set' | 'replay' | 'deep_dive' | 'bar_raiser' | 'canvas';
+export type Mode = 'loop' | 'lp' | 'story' | 'question_set' | 'replay' | 'deep_dive' | 'bar_raiser' | 'canvas' | 'reverse';
 export type Coaching = 'after_each' | 'recap_only';
 export type QuestionSource = 'previous' | 'common' | 'custom' | 'ai';
 export type QuestionSourceSetting = 'bank' | 'previous' | 'ai' | 'mix';
@@ -200,4 +200,4 @@ export interface UiPrefs {
 export const VERDICT_CODE: Record<Verdict, VerdictCode> = { strong_hire: 1, inclined: 2, not_inclined: 3, strong_no_hire: 4 };
 export const CODE_VERDICT: Record<Exclude<VerdictCode, 0>, Verdict> = { 1: 'strong_hire', 2: 'inclined', 3: 'not_inclined', 4: 'strong_no_hire' };
 export const verdictCode = (v: Verdict | null | undefined): VerdictCode => (v ? VERDICT_CODE[v] : 0);
-export const MODE_LABEL: Record<Mode, string> = { loop: 'Full loop', lp: 'One area', story: 'One story', question_set: 'Question set', replay: 'Replay', deep_dive: 'Deep dive', bar_raiser: 'Bar raiser', canvas: 'Canvas' };
+export const MODE_LABEL: Record<Mode, string> = { loop: 'Full loop', lp: 'One area', story: 'One story', question_set: 'Question set', replay: 'Replay', deep_dive: 'Deep dive', bar_raiser: 'Bar raiser', canvas: 'Canvas', reverse: 'Role swap' };
