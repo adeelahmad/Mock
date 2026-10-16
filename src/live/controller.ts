@@ -136,6 +136,13 @@ export class SessionController {
     if (!this.meta.source) void this.findSource(this.state.qText, this.state.lpName);
     this.transport.sendText('[HINT]');
   }
+  /** "Better story": the coach searches the uploaded files for a stronger story for this question. */
+  betterStory(): void {
+    this.transport.stopPlayback();
+    this.dispatch({ type: 'HINT', now: this.now(), text: 'Looking through your files for a better story for this question…' });
+    if (!this.meta.source) void this.findSource(this.state.qText, this.state.lpName);
+    this.transport.sendText('[BETTER_STORY]');
+  }
   dismissHint(): void { this.dispatch({ type: 'DISMISS_HINT', now: this.now() }); }
   clearError(): void { this.dispatch({ type: 'CLEAR_ERROR', now: this.now() }); }
   /** The context builder's numbers (and the countTokens confirmation when it lands). */

@@ -77,6 +77,7 @@ Act immediately and confirm in three words or fewer.
 - "Redo" or [REDO]: same question again, then compare.
 - "Next" or [NEXT]: move on, no feedback.
 - "Hint" or [HINT]: one nudge: which of their stories fits, a fact from their prep files that fits (search_prep), or what's missing.
+- "Better story" or [BETTER_STORY]: say "Pausing the interview.", then call search_prep with the current question and area (and any project from their answer). From what comes back and their stories, name the story that would answer this question better than the one they used, why in one or two sentences, and its key number. If it is not in their stories yet, build it with them as in "When they have no story" and save it with save_story. If nothing beats their story, say so. Then say "Back to the interview." and offer a redo with it.
 - "Harder" / "Easier": change the follow-up pressure.
 - "Full mock" / "Coach me": switch to recap_only or after_each.
 - "How am I doing?": areas covered so far, with a verdict for each.

@@ -66,3 +66,15 @@ test('Swap roles: the setup sheet starts a session where you interview and Mock 
   await expect(page.getByText(/Role swap · you interview/).first()).toBeVisible({ timeout: 40_000 });
   await expect(page.getByText(/You’re the interviewer/)).toBeVisible({ timeout: 40_000 });
 });
+
+test('Better story: asks the coach to search the uploaded files for a stronger story', async ({ page }) => {
+  test.setTimeout(180_000);
+  await open(page);
+  await page.getByRole('button', { name: /^Start$/ }).click();
+  await waitForPhase(page, 'answering', 90_000);
+  if (isPhone(page)) await page.getByRole('button', { name: /^Better story$/ }).click();
+  else await page.keyboard.press('b');
+  await expect(page.getByText(/Looking through your files for a better story/)).toBeVisible();
+  await waitForPhase(page, 'coaching', 90_000);
+  await expect(page.getByRole('button', { name: /^Better story/ }).first()).toBeVisible();
+});
