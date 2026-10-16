@@ -90,12 +90,11 @@ test.describe('pluggable voice and model', () => {
     await page.getByRole('button', { name: 'Change' }).first().click();
     await page.getByRole('button', { name: /More · remembered/ }).click();
     const sheet = page.locator('.more-box');
-    await expect(sheet.getByText('Gemini Live').first()).toBeVisible();
-    await sheet.getByRole('combobox', { name: /^Speech to text/ }).selectOption('browser');
+    await expect(sheet.getByText(/Chrome → Gemini → Chrome/).first()).toBeVisible();
     await sheet.getByRole('combobox', { name: /^Text to speech/ }).selectOption('elevenlabs');
     await expect(sheet.getByText(/Chrome → Gemini → ElevenLabs/)).toBeVisible();
     await open(page, '#/practice/settings');
-    await expect(page.getByRole('combobox', { name: /^Speech to text/ })).toHaveValue('gemini');
-    await expect(page.getByText(/All Gemini runs on Gemini Live/)).toBeVisible();
+    await expect(page.getByRole('combobox', { name: /^Speech to text/ })).toHaveValue('browser');
+    await expect(page.getByRole('combobox', { name: /^Text to speech/ })).toHaveValue('browser');
   });
 });

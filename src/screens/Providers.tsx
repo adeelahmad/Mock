@@ -101,7 +101,7 @@ export function ProvidersSection() {
       <div className="card pad r12 stack g12">
         <span className="srow-sub">
           {isLiveStack(stack)
-            ? 'All Gemini runs on Gemini Live: the most natural conversation, and the default.'
+            ? 'All Gemini runs on Gemini Live: the most natural conversation.'
             : 'Now: ' + stackLabel(stack, p.openai.model) + '. Sessions run turn by turn: you speak, the model writes, the voice reads it out. Chrome and local models cost nothing.'}
           {' '}You can pick another for one session under More when you start.
         </span>

@@ -1,7 +1,9 @@
 # Voice and model
 
-By default a session runs on **Gemini Live**: one connection that listens, thinks and speaks.
-It is the most natural conversation, and it needs a Gemini key.
+By default Chrome's built-in speech (free) hears you and reads the replies aloud, and Gemini
+writes them. In a browser without Web Speech (Firefox, some Safari builds) Gemini fills in.
+Pick Gemini for all three to run on **Gemini Live**: one connection that listens, thinks and
+speaks, the most natural conversation. Both need a Gemini key.
 
 You can swap each part on its own:
 
