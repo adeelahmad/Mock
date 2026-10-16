@@ -122,6 +122,29 @@ export const SAVE_STORY_TOOL: ToolDeclaration = {
   },
 };
 
+/** Role swap: the story Mock is telling as the candidate, written on the screen while it speaks. */
+export const SHOW_STORY_TOOL: ToolDeclaration = {
+  name: 'show_story',
+  description: "Role swap only. Call this right after new_question and before you speak your answer: the app writes the story you are about to tell on the screen, with its key numbers large. Use only facts from the candidate's stories and files.",
+  behavior: 'NON_BLOCKING',
+  parameters: {
+    type: 'OBJECT',
+    properties: {
+      title: { type: 'STRING', description: 'The story title, e.g. "Payments outage rollback"' },
+      lp: { type: 'STRING', description: 'The area it answers, by its full name' },
+      story_id: { type: 'STRING', description: 'The id of the story from the list, if it came from there' },
+      headline: { type: 'STRING', description: 'One decisive sentence: the answer in a nutshell, result first' },
+      situation: { type: 'STRING', description: 'Situation and task, one or two short sentences' },
+      action: { type: 'STRING', description: 'What I did: the key decisions, one to three short sentences' },
+      result: { type: 'STRING', description: 'The result, with numbers' },
+      learning: { type: 'STRING', description: 'The learning, one sentence' },
+      numbers: { type: 'ARRAY', items: { type: 'STRING' }, description: 'Key numbers as "label: value", e.g. "time to mitigate: 41 min"' },
+      source: { type: 'STRING', description: 'Where it came from: the story library or the file name' },
+    },
+    required: ['title', 'headline', 'result'],
+  },
+};
+
 /** Tiny typed emitter shared by both transports. */
 export class Emitter {
   private listeners = new Set<TransportListener>();

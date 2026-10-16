@@ -9,7 +9,7 @@ import { initialState, reduce, type SessionEvent, type SessionState } from '../d
 import type { Analysis, Coaching, Exchange, Interviewer, KeyNumber, Lp, Mode, QuestionSourceSetting, Session, Story, TranscriptEvent } from '../domain/types.ts';
 import type { Repo } from '../db/repo.ts';
 import { newId } from '../db/repo.ts';
-import { NEW_QUESTION_TOOL, SAVE_STORY_TOOL, SEARCH_PREP_TOOL, type LiveTransport, type ToolCall, type TransportEvent } from './transport.ts';
+import { NEW_QUESTION_TOOL, SAVE_STORY_TOOL, SEARCH_PREP_TOOL, SHOW_STORY_TOOL, type LiveTransport, type ToolCall, type TransportEvent } from './transport.ts';
 import type { Hit } from '../rag/knowledge.ts';
 import type { Analyzer } from './analyzer.ts';
 import { LocalReporter, reportInput, type Reporter } from './reporter.ts';
@@ -53,7 +53,12 @@ export interface ControllerMeta {
   source: Hit | null;
   /** The last story the coach saved with the candidate (save_story). */
   savedStory: { id: string; title: string } | null;
+  /** Role swap: the story Mock is telling as the candidate (show_story, or the library's best fit until it calls it). */
+  answer: StoryCard | null;
 }
+
+/** A story written on the live screen: decisive headline, STAR lines, big numbers. */
+export interface StoryCard { title: string; lp: string; headline: string; situation: string; action: string; result: string; learning: string; numbers: KeyNumber[]; source: string }
 
 export interface ContextInfo { estimated: number; counted: number | null; budget: number; trimmed: string[] }
 
@@ -64,7 +69,7 @@ const SPEECH_ON = 0.05, SPEECH_OFF = 0.025; // mic level hysteresis
 
 export class SessionController {
   state: SessionState = initialState(0);
-  meta: ControllerMeta = { sessionId: null, sessionNumber: 0, storyNotes: true, notes: [], demo: false, interviewer: null, mode: 'loop', context: null, source: null, savedStory: null };
+  meta: ControllerMeta = { sessionId: null, sessionNumber: 0, storyNotes: true, notes: [], demo: false, interviewer: null, mode: 'loop', context: null, source: null, savedStory: null, answer: null };
   private listeners = new Set<Listener>();
   private off: (() => void) | null = null;
   private tick: ReturnType<typeof setInterval> | null = null;
@@ -111,12 +116,12 @@ export class SessionController {
     };
     this.session = session;
     const first = opts.interviewers.find((i) => i.role === 'Bar Raiser') ?? opts.interviewers[0] ?? null;
-    this.meta = { ...this.meta, sessionId: session.id, sessionNumber: number, storyNotes: opts.storyNotes, notes: [], interviewer: first, mode: opts.mode, source: null, savedStory: null };
+    this.meta = { ...this.meta, sessionId: session.id, sessionNumber: number, storyNotes: opts.storyNotes, notes: [], interviewer: first, mode: opts.mode, source: null, savedStory: null, answer: null };
     await this.repo.insertSession(session);
     this.dispatch({ type: 'CONNECT', now: this.now() });
     this.off = this.transport.on((e) => this.onTransport(e));
     try {
-      await this.transport.connect({ model: opts.model, voice: opts.voice, systemInstruction: opts.systemInstruction, tools: [NEW_QUESTION_TOOL, ...(opts.retriever ? [SEARCH_PREP_TOOL] : []), SAVE_STORY_TOOL, ...(opts.tools ?? []).map((t) => t.declaration)], silenceDurationMs: opts.pauseMs, resumptionHandle: null, seed: opts.seed });
+      await this.transport.connect({ model: opts.model, voice: opts.voice, systemInstruction: opts.systemInstruction, tools: [NEW_QUESTION_TOOL, ...(opts.retriever ? [SEARCH_PREP_TOOL] : []), SAVE_STORY_TOOL, ...(opts.mode === 'reverse' ? [SHOW_STORY_TOOL] : []), ...(opts.tools ?? []).map((t) => t.declaration)], silenceDurationMs: opts.pauseMs, resumptionHandle: null, seed: opts.seed });
     } catch (err) {
       this.dispatch({ type: 'ERROR', now: this.now(), message: (err as Error).message || 'Could not connect' });
       await this.end('');
@@ -251,7 +256,7 @@ export class SessionController {
         await this.closeExchange(now);
         this.dispatch({ type: 'NEW_QUESTION', now, interviewer: iv, question: a.question ?? '', lp: a.lp ?? '', questionId: a.question_id ?? null, hint: this.hintFor(a.lp ?? '') });
         this.openExchange(a.question ?? '', a.lp ?? '', a.question_id ?? null, iv, now);
-        this.meta = { ...this.meta, notes: this.notesFor(a.lp ?? ''), source: null };
+        this.meta = { ...this.meta, notes: this.notesFor(a.lp ?? ''), source: null, answer: this.opts?.mode === 'reverse' ? this.libraryCard(a.lp ?? '') : null };
         this.emit();
         void this.findSource(a.question ?? '', a.lp ?? '');
         responses.push({ id: c.id, name: c.name, response: { ok: true, scheduling: 'SILENT' } });
@@ -264,6 +269,10 @@ export class SessionController {
         } catch (err) {
           responses.push({ id: c.id, name: c.name, response: { ok: false, error: (err as Error).message || 'search failed' } });
         }
+      } else if (c.name === 'show_story') {
+        this.meta = { ...this.meta, answer: this.storyCard(c.args ?? {}) };
+        this.emit();
+        responses.push({ id: c.id, name: c.name, response: { ok: true, scheduling: 'SILENT' } });
       } else if (c.name === 'save_story') {
         try {
           const story = await this.saveStory(c.args);
@@ -314,6 +323,26 @@ export class SessionController {
     this.meta = { ...this.meta, savedStory: { id: story.id, title: story.title }, notes: this.notesFor(this.state.lpName) };
     this.emit();
     return story;
+  }
+
+  /** show_story's arguments as a card; numbers fall back to the library story's when the model sent none. */
+  private storyCard(args: Record<string, unknown>): StoryCard {
+    const s = (k: string): string => (typeof args[k] === 'string' ? (args[k] as string).trim() : '');
+    const lib = this.opts?.stories.find((x) => x.id === s('story_id') || x.title.toLowerCase() === s('title').toLowerCase());
+    const raw = Array.isArray(args.numbers) ? (args.numbers as unknown[]) : typeof args.numbers === 'string' ? String(args.numbers).split(/[;\n]/) : [];
+    const numbers = raw.map((x) => String(x).trim()).filter(Boolean).map(splitNumber);
+    return {
+      title: s('title') || lib?.title || 'Story', lp: s('lp') || this.state.lpName, headline: s('headline') || lib?.summary || '',
+      situation: s('situation') || lib?.situation || '', action: s('action') || lib?.action || '', result: s('result') || lib?.result || '', learning: s('learning') || lib?.learning || '',
+      numbers: numbers.length ? numbers : lib?.numbers ?? [], source: s('source') || (lib ? 'Your stories' : ''),
+    };
+  }
+
+  /** Before show_story arrives: the library's strongest story for the area. */
+  private libraryCard(lp: string): StoryCard | null {
+    const st = this.storiesFor(lp)[0];
+    if (!st) return null;
+    return { title: st.title, lp, headline: st.summary, situation: st.situation, action: st.action, result: st.result, learning: st.learning, numbers: st.numbers, source: 'Your stories' };
   }
 
   /** Chunks land in storage as they arrive, so a crash loses at most a second of audio. */
@@ -445,3 +474,5 @@ export class SessionController {
     return this.storiesFor(lp).slice(0, 3).map((s) => ({ t: s.title, n: s.numbers.slice(0, 2).map((n) => n.value).join(' · ') }));
   }
 }
+
+const splitNumber = (x: string): KeyNumber => { const i = x.indexOf(':'); return i > 0 ? { label: x.slice(0, i).trim(), value: x.slice(i + 1).trim() } : { label: '', value: x }; };

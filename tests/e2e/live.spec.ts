@@ -57,6 +57,7 @@ test.describe('live session on the simulated transport', () => {
 });
 
 test('Swap roles: the setup sheet starts a session where you interview and Mock answers as you', async ({ page }) => {
+  test.setTimeout(120_000);
   await open(page);
   await page.getByRole('button', { name: /^Change$/ }).first().click();
   await page.getByRole('button', { name: /Swap roles/ }).click();
@@ -65,6 +66,10 @@ test('Swap roles: the setup sheet starts a session where you interview and Mock 
   await expect(page).toHaveURL(/#\/live$/);
   await expect(page.getByText(/Role swap · you interview/).first()).toBeVisible({ timeout: 40_000 });
   await expect(page.getByText(/You’re the interviewer/)).toBeVisible({ timeout: 40_000 });
+  // Once a question lands, the story Mock tells as you is written on the screen, numbers large.
+  const board = page.getByRole('region', { name: /story Mock is telling/ });
+  await expect(board).toBeVisible({ timeout: 60_000 });
+  await expect(board.locator('.live-story-num .v').first()).toBeVisible();
 });
 
 test('Better story: asks the coach to search the uploaded files for a stronger story', async ({ page }) => {
