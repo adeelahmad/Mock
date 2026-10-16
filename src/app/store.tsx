@@ -24,7 +24,7 @@ import { KnowledgeIndex, type Hit, type IndexStatus } from '../rag/knowledge.ts'
 import { geminiEmbedder, type Embedder } from '../rag/embed.ts';
 import { readPrefs, writePrefs, readFlag, writeFlag } from './prefs.ts';
 import { DEFAULT_PRICING } from '../domain/budget.ts';
-import { DEFAULT_PROVIDERS, isLiveStack, missingFor, stackLabel, stackOf, withProviderDefaults, type ProviderSettings, type VoiceStack } from '../domain/providers.ts';
+import { DEFAULT_PROVIDERS, isLiveStack, missingFor, resolveStack, stackLabel, stackOf, withProviderDefaults, type ProviderSettings, type VoiceStack } from '../domain/providers.ts';
 import { makePipeline, textLlm, type ProviderKeys } from '../live/make-pipeline.ts';
 import { SYSTEM_PROMPT_BUDGET } from '../live/context.ts';
 import { setUsageSink } from '../gemini/usage.ts';
@@ -306,10 +306,10 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     setLastStart(o);
     const s = data.settings;
     const prov = withProviderDefaults(s.providers);
-    // All Gemini (the default): one Gemini Live connection. Anything else: speech → model → voice,
-    // turn by turn. Without what the choice needs (no key at all, by default), the scripted
+    // All Gemini: one Gemini Live connection. Anything else (the default: Chrome speech around
+    // Gemini, or Gemini where the browser has no Web Speech): speech → model → voice, turn by turn. Without what the choice needs (no key at all, by default), the scripted
     // demo. The audio engine is created before the first await so iOS sees the Start tap as its gesture.
-    let stack = o.stack ?? stackOf(prov);
+    let stack = resolveStack(o.stack ?? stackOf(prov));
     // With Mock in a Google Meet call, the session runs there: meeting audio in, the bot's
     // microphone out (docs/meet.md). Chrome's speech engines cannot reach the call.
     if (meet.inCall() && (stack.stt === 'browser' || stack.tts === 'browser')) {

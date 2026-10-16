@@ -43,8 +43,8 @@ feedback you need is specific: *you said "significant" when your notes say $1.2M
 - **A live interviewer.** Gemini Live asks questions on the areas the loop assesses
   (competencies, values, a company's principles), probes with follow-ups, and hears you out.
   Hands-free: say "redo", "next" or "hint".
-- **Pick your engines, or pay nothing.** Gemini Live is the default. Swap speech to text,
-  the model and the voice separately, in Settings or per session: Chrome's free speech engines,
+- **Pick your engines, or pay nothing.** Chrome's free speech engines are the default, around Gemini. Swap speech to text,
+  the model and the voice separately, in Settings or per session: Gemini Live,
   ElevenLabs, and any OpenAI-compatible endpoint (Ollama, LM Studio, OpenAI) with your own
   model name and context size.
 - **A coach that knows your prep.** After each answer: a short spoken verdict and up to three

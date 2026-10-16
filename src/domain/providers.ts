@@ -1,5 +1,6 @@
-// Mock — who listens, thinks and speaks. Gemini Live does all three in one connection and is
-// the default. Any other choice runs a turn-by-turn pipeline (live/pipeline.ts): speech to
+// Mock — who listens, thinks and speaks. By default Chrome's built-in speech listens and speaks
+// (free) and Gemini thinks; where the browser lacks Web Speech, Gemini fills in (resolveStack).
+// Gemini Live does all three in one connection. Any other choice runs a turn-by-turn pipeline (live/pipeline.ts): speech to
 // text → a language model → text to speech, each picked separately, globally in Settings and
 // per session in the setup sheet. Chrome's built-in speech and a local model (Ollama, LM Studio,
 // llama.cpp…) cost nothing; ElevenLabs bills your ElevenLabs account.
@@ -31,7 +32,7 @@ export interface ProviderSettings extends VoiceStack {
 }
 
 export const DEFAULT_PROVIDERS: ProviderSettings = {
-  stt: 'gemini', llm: 'gemini', tts: 'gemini',
+  stt: 'browser', llm: 'gemini', tts: 'browser',
   openai: { baseUrl: 'http://localhost:11434/v1', model: 'llama3.2', contextTokens: 32_768, maxOutputTokens: 1024 },
   elevenlabs: { voiceId: '21m00Tcm4TlvDq8ikWAM', ttsModel: 'eleven_flash_v2_5', sttModel: 'scribe_v1' },
   browser: { voice: '', rate: 1, lang: '' },
@@ -77,3 +78,8 @@ export function missingFor(s: VoiceStack, c: Credentials): string | null {
 /** Chrome's speech engines, when this browser has them. */
 export const browserStt = (): boolean => typeof window !== 'undefined' && !!((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
 export const browserTts = (): boolean => typeof window !== 'undefined' && 'speechSynthesis' in window && typeof (window as any).SpeechSynthesisUtterance === 'function';
+
+/** Chrome's speech where this browser has it; otherwise Gemini (Live, when nothing else is left). */
+export function resolveStack(s: VoiceStack, has = { stt: browserStt(), tts: browserTts() }): VoiceStack {
+  return { stt: s.stt === 'browser' && !has.stt ? 'gemini' : s.stt, llm: s.llm, tts: s.tts === 'browser' && !has.tts ? 'gemini' : s.tts };
+}
