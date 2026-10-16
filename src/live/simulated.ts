@@ -57,7 +57,7 @@ export class SimulatedTransport implements LiveTransport {
     else if (tag === 'REDO') this.redo();
     else if (tag === 'NEXT') this.next();
     else if (tag === 'FEEDBACK') this.feedback();
-    else if (tag === 'HINT' || tag === 'BETTER_STORY') this.hint();
+    else if (tag === 'HINT' || tag === 'BETTER_STORY' || tag === 'MODEL_ANSWER') this.hint();
     else if (tag === 'END') this.end();
     else if (tag === 'PAUSE') { this.paused = true; this.setSpeaking(false); }
   }

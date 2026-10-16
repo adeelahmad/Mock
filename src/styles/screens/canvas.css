@@ -181,3 +181,9 @@ textarea.wb-note-text::placeholder { color: rgba(0,0,0,.35); }
 .cv-keys { font-size: 12px; margin: 0; }
 .cv-keys kbd { font: 700 11px/1 var(--font-mono, ui-monospace, monospace); padding: 2px 5px; border-radius: 4px; border: 1px solid var(--m-line); background: var(--m-card); }
 @media (max-width: 899px) { .cv-keys { display: none; } }
+
+/* Who answers: Mock asks (the drill) or swap roles (you ask, Mock answers from your files) */
+.cv-roles { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; border-radius: 14px; background: var(--m-card); border: 1px solid var(--m-line); }
+.cv-role { min-height: 44px; padding: 8px 12px; border: none; border-radius: 10px; background: transparent; color: var(--m-fg2); font: 700 14px/1.2 var(--font-sans); cursor: pointer; }
+.cv-role.on { background: var(--m-warm-fill); color: var(--m-on-warm); }
+.cv-answer-btn { min-height: 44px; font-weight: 700; }

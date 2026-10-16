@@ -23,6 +23,9 @@ import { ADDON, SharedCanvas, mainStage, meetingLink, sidePanel } from '../canva
 import { CanvasLog } from '../canvas/session.ts';
 import { boardPng } from '../canvas/board-image.ts';
 import { sessionMarkdown } from './History.tsx';
+import StoryBoard from '../components/StoryBoard.tsx';
+import { answerAs } from '../live/answer-as.ts';
+import { BrowserTts, speakable, sentences } from '../speech/tts.ts';
 import type { Session } from '../domain/types.ts';
 import { BrowserStt, SegmentedStt, elevenLabsTranscriber, geminiTranscriber } from '../speech/stt.ts';
 import { meet } from '../meet/meet.ts';
@@ -51,7 +54,7 @@ const MARK_LABEL: Record<Phrase['mark'], string> = { match: 'on track', drift: '
 
 /** `addon`: inside Meet, in the add-on's side panel (just this person) or on the main stage (the whole call). `extra`: shown under the header. */
 export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; extra?: React.ReactNode }) {
-  const { data, repo, refresh, gemini, setGemini, providers, toast, go } = useApp();
+  const { data, repo, refresh, gemini, setGemini, providers, toast, go, knowledge } = useApp();
   const { lps, stories, questions, settings } = data;
   const [s, setS] = useState<CanvasState>(emptyCanvas);
   const sRef = useRef(s);
@@ -77,7 +80,7 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
     seen.current.add(q.id);
     update((x) => withQuestion({ ...x, done: x.done + (countDone ? 1 : 0) }, q));
   }, [pool, update]);
-  useEffect(() => { if (!sRef.current.questionId && pool.length) deal(false); }, [pool, deal]);
+  useEffect(() => { if (!sRef.current.questionId && !sRef.current.swap && pool.length) deal(false); }, [pool, deal]);
 
   // ---------- The AI ----------
   const prov = providers.settings;
@@ -121,18 +124,79 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
     });
   }, [toast, update]);
 
+  // ---------- Answer it for me / swap roles ----------
+  const [answering, setAnswering] = useState(false);
+  const [voiceOn, setVoiceOn] = useState(true);
+  const tts = useRef<BrowserTts | null>(null);
+  const [speaking, setSpeaking] = useState(false);
+  const stopVoice = useCallback(() => { tts.current?.stop(); }, []);
+  const say = useCallback((text: string) => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    if (!tts.current) {
+      const t = new BrowserTts({ lang: providers.settings.browser.lang });
+      // Mock should not hear itself: the ear pauses while the voice plays.
+      t.onSpeaking = (on) => { setSpeaking(on); ear.current?.setListening(!on && earRef.current === 'on'); };
+      t.onError = () => undefined;
+      tts.current = t;
+    }
+    tts.current.stop();
+    for (const line of sentences(speakable(text))) tts.current.speak(line);
+  }, [providers.settings.browser.lang]);
+  useEffect(() => () => tts.current?.close(), []);
+  const voiceRef = useRef(voiceOn); voiceRef.current = voiceOn;
+
+  /** Mock answers the question on the canvas as the candidate, from their files and stories. */
+  const answerIt = useCallback(async (questionText?: string) => {
+    const cur = sRef.current;
+    const q = (questionText ?? cur.questionText).trim();
+    if (!q) return;
+    const lpName = lps.find((l) => l.id === (cur.areaId ?? questions.find((x) => x.id === cur.questionId)?.lpIds[0]))?.name;
+    setAnswering(true);
+    try {
+      const r = await answerAs({ question: q, lp: cur.swap ? undefined : lpName, lps, stories, model: live.current.model, search: knowledge.search });
+      if (sRef.current.questionText.trim() !== q && !questionText) return;
+      if (!r) { toast('No story to answer with yet · add one in the Library'); return; }
+      if (r.error && !warned.current) { warned.current = true; toast('The AI is unavailable (' + r.error + ') · used your closest story'); }
+      update((x) => ({ ...x, answer: { card: r.card, spoken: r.spoken, by: r.by } }));
+      log.current?.say('coach', r.spoken);
+      if (voiceRef.current) say(r.spoken);
+    } finally { setAnswering(false); }
+  }, [lps, stories, questions, knowledge.search, toast, update, say]);
+
+  // Swap roles: what the mic hears becomes the question; after a short quiet, Mock answers it.
+  const askTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const heardQuestion = useCallback((text: string) => {
+    const cur = sRef.current;
+    const fresh = !!cur.answer || !cur.questionText || cur.questionId !== '';
+    const questionText = (fresh ? text : cur.questionText + ' ' + text).trim();
+    stopVoice();
+    update((x) => ({ ...x, questionId: '', questionText, phase: 'pick', misses: [], areaId: null, role: null, phrases: [], partial: '', answer: null }));
+    if (askTimer.current) clearTimeout(askTimer.current);
+    askTimer.current = setTimeout(() => { askTimer.current = null; log.current?.startAnswer({ questionId: null, questionText, lpId: null }); void answerIt(questionText); }, 1600);
+  }, [answerIt, stopVoice, update]);
+  useEffect(() => () => { if (askTimer.current) clearTimeout(askTimer.current); }, []);
+  const setSwap = (on: boolean) => {
+    stopVoice();
+    if (askTimer.current) { clearTimeout(askTimer.current); askTimer.current = null; }
+    if (on) update((x) => ({ ...x, swap: true, questionId: '', questionText: '', phase: 'pick', misses: [], areaId: null, role: null, phrases: [], partial: '', answer: null }));
+    else { update((x) => ({ ...x, swap: false, answer: null })); deal(false); }
+  };
+
   // ---------- Hearing ----------
   const [hearing, setHearing] = useState<Hearing>(addon ? 'meet' : 'mic');
-  const [earState, setEarState] = useState<EarState>('off');
+  const [earState, setEarStateRaw] = useState<EarState>('off');
+  const setEarState = (e: EarState) => { earRef.current = e; setEarStateRaw(e); };
   const [level, setLevel] = useState(0);
   const [meetCode, setMeetCode] = useState('');
   const ear = useRef<Ear | null>(null);
+  const earRef = useRef<EarState>('off');
   const listener = useRef<MeetMediaListener | null>(null);
   const callUrl = meetCode ? meetingLink(meetCode) : meet.meetingUrl;
 
   const heard = useCallback((text: string) => {
     const cur = sRef.current;
     log.current?.say('me', text);
+    if (cur.swap) { heardQuestion(text); return; }
     if (cur.phase === 'answer') {
       const { state, added } = addPhrases(cur, splitPhrases(text));
       sRef.current = state; setS(state);
@@ -141,7 +205,7 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
       update((x) => addChat({ ...x, partial: '' }, 'me', text, true));
       askAi();
     }
-  }, [judge, askAi, update]);
+  }, [judge, askAi, update, heardQuestion]);
 
   const micRec = useRef<MediaStream | null>(null);
   const finishLog = useCallback(async (): Promise<Saved | null> => {
@@ -331,6 +395,7 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
     e.preventDefault();
     const t = typed.trim(); if (!t) return;
     setTyped('');
+    if (sRef.current.swap) { heardQuestion(t); return; }
     update((x) => addChat(x, 'me', t));
     log.current?.say('me', t);
     askAi();
@@ -433,15 +498,48 @@ export default function Canvas({ addon, extra }: { addon?: 'side' | 'stage'; ext
 
       <div className="cv-body">
         <main className="cv-stage">
+          {!readOnly && (
+            <div className="cv-roles" role="group" aria-label="Who answers">
+              <button type="button" className={'cv-role' + (!s.swap ? ' on' : '')} aria-pressed={!s.swap} onClick={() => s.swap && setSwap(false)}>Mock asks · you answer</button>
+              <button type="button" className={'cv-role' + (s.swap ? ' on' : '')} aria-pressed={!!s.swap} onClick={() => !s.swap && setSwap(true)}>⇄ Swap roles · you ask, Mock answers</button>
+            </div>
+          )}
+
           <section className="card pad-lg cv-q" aria-label="Question">
             <div className="hstack between">
-              <span className="label">Question {s.done + 1}</span>
-              {!readOnly && <button className="text-btn" onClick={() => deal(false)}>Skip</button>}
+              <span className="label">{s.swap ? 'Your question' : 'Question ' + (s.done + 1)}</span>
+              {!readOnly && !s.swap && <button className="text-btn" onClick={() => deal(false)}>Skip</button>}
             </div>
-            <p className="cv-q-text">{s.questionText}</p>
+            {s.swap
+              ? <p className="cv-q-text">{s.questionText || (s.partial ? '' : <span className="cv-hint">{earState === 'on' ? 'Listening… ask your question out loud.' : 'Press Listen and ask a question out loud, or type it in the chat.'}</span>)}{s.partial && <span className="cv-ph live"> {s.partial}</span>}</p>
+              : <p className="cv-q-text">{s.questionText}</p>}
+            {!readOnly && s.questionText && !s.answer && (
+              <div className="hstack wrap">
+                <button className="btn primary cv-answer-btn" disabled={answering} onClick={() => void answerIt()}>{answering ? 'Finding your best story…' : '⇄ Answer it for me'}</button>
+                {!s.swap && <span className="sub">Mock answers as you, from your stories and files</span>}
+              </div>
+            )}
           </section>
 
-          {s.phase === 'pick' ? (
+          {s.answer ? (
+            <section className="stack g8" aria-label="Mock's answer">
+              <StoryBoard card={s.answer.card} label={s.swap ? 'The story Mock is telling as you' : 'How you could answer it'} />
+              {!readOnly && (
+                <div className="hstack wrap">
+                  {speaking
+                    ? <button className="btn sm" onClick={stopVoice}><Icon.Pause size={16} />Stop voice</button>
+                    : <button className="btn sm" onClick={() => say(s.answer!.spoken)}><Icon.Play size={16} />Say it</button>}
+                  <label className="hstack sub" style={{ gap: 6 }}><input type="checkbox" checked={voiceOn} onChange={(e) => { setVoiceOn(e.target.checked); if (!e.target.checked) stopVoice(); }} />Read answers aloud</label>
+                  {s.swap
+                    ? <span className="sub">Ask the next question out loud.</span>
+                    : <>
+                        <button className="btn sm primary" onClick={() => { stopVoice(); update((x) => ({ ...x, answer: null })); }}>My turn: try it</button>
+                        <button className="text-btn" onClick={() => { stopVoice(); deal(true); }}>Next question</button>
+                      </>}
+                </div>
+              )}
+            </section>
+          ) : s.swap ? null : s.phase === 'pick' ? (
             <section className="stack g8" aria-label="Pick the area">
               <div className="hstack between"><span className="label">Which area does it test?</span>{s.misses.length >= 2 && !readOnly && <button className="text-btn" onClick={reveal}>Show me</button>}</div>
               <div className="cv-areas" role="group" aria-label="Areas">

@@ -60,7 +60,7 @@ test('Swap roles: the setup sheet starts a session where you interview and Mock 
   test.setTimeout(120_000);
   await open(page);
   await page.getByRole('button', { name: /^Change$/ }).first().click();
-  await page.getByRole('button', { name: /Swap roles/ }).click();
+  await page.getByRole('button', { name: /^Swap roles/ }).click();
   await expect(page.getByText('2 · Coaching')).toBeHidden();
   await page.getByRole('button', { name: /^Start/ }).last().click();
   await expect(page).toHaveURL(/#\/live$/);
@@ -82,4 +82,24 @@ test('Better story: asks the coach to search the uploaded files for a stronger s
   await expect(page.getByText(/Looking through your files for a better story/)).toBeVisible();
   await waitForPhase(page, 'coaching', 90_000);
   await expect(page.getByRole('button', { name: /^Better story/ }).first()).toBeVisible();
+});
+
+test('Answer it for me: Mock answers the question it just asked, the story written large', async ({ page }) => {
+  test.setTimeout(180_000);
+  await open(page);
+  await page.getByRole('button', { name: /^Start$/ }).click();
+  await waitForPhase(page, 'answering', 90_000);
+  await page.getByRole('button', { name: /Answer it for me/ }).click();
+  const board = page.getByRole('region', { name: 'How you could answer it' });
+  await expect(board).toBeVisible();
+  await expect(board.locator('.live-story-num .v').first()).toBeVisible();
+  await page.getByRole('button', { name: /Hide · my turn/ }).click();
+  await expect(board).toBeHidden();
+});
+
+test('Home has a Swap roles button that starts a role-swap session', async ({ page }) => {
+  await open(page);
+  await page.getByRole('button', { name: /⇄ Swap roles/ }).click();
+  await expect(page).toHaveURL(/#\/live$/);
+  await expect(page.getByText(/Role swap · you interview/).first()).toBeVisible({ timeout: 40_000 });
 });

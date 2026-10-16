@@ -71,6 +71,7 @@ export default function Home() {
 
   const startFocus = () => { if (focus) void live.start({ mode: 'lp', focus: focus.id, focusLabel: focus.name }); };
   const startLoop = () => { void live.start({ mode: 'loop' }); };
+  const startSwap = () => { void live.start({ mode: 'reverse', focusLabel: 'You interview' }); };
   const startWeak = () => { if (weakest) void live.start({ mode: 'question_set', focus: weakest.questionId ?? null, questionText: weakest.questionText, focusLabel: weakLp?.name ?? 'Weakest answer' }); };
   const startLp = (lp: LpRow) => { void live.start({ mode: 'lp', focus: lp.id, focusLabel: lp.name }); };
   const [meetOpen, setMeetOpen] = useState(false);
@@ -107,6 +108,7 @@ export default function Home() {
                 <span style={{ color: 'var(--m-line2)' }}>·</span>
                 <button className="text-btn" onClick={startLoop} disabled={blocked}>Full loop · {settings.loopSize * 10} min</button>
               </div>
+              <button className="btn" onClick={startSwap} disabled={blocked} title="You ask the questions; Mock answers as you from your stories and files">⇄ Swap roles · you interview, Mock answers</button>
               <span className="muted" style={{ textAlign: 'center', font: '400 11px/1.3 var(--font-sans)' }}>{liveHint}</span>
             </div>
 

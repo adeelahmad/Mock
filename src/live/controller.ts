@@ -14,6 +14,7 @@ import type { Hit } from '../rag/knowledge.ts';
 import type { Analyzer } from './analyzer.ts';
 import { LocalReporter, reportInput, type Reporter } from './reporter.ts';
 import type { ToolHandler } from './context-tools.ts';
+import { cardOf, closestStory, type Answered } from './answer-as.ts';
 import { reportUsage } from '../gemini/usage.ts';
 
 export interface StartOptions {
@@ -37,6 +38,8 @@ export interface StartOptions {
   retriever?: Retriever | null;
   /** Extra tools next to the built-in ones (the library lookups in context-tools.ts). */
   tools?: ToolHandler[];
+  /** "Answer it for me": the best story for a question from the files and library (answer-as.ts). */
+  answerer?: ((question: string, lp: string) => Promise<Answered | null>) | null;
 }
 
 export type Retriever = (query: string, k: number) => Promise<Hit[]>;
@@ -55,6 +58,8 @@ export interface ControllerMeta {
   savedStory: { id: string; title: string } | null;
   /** Role swap: the story Mock is telling as the candidate (show_story, or the library's best fit until it calls it). */
   answer: StoryCard | null;
+  /** "Answer it for me" is finding the story. */
+  answering: boolean;
 }
 
 /** A story written on the live screen: decisive headline, STAR lines, big numbers. */
@@ -69,7 +74,7 @@ const SPEECH_ON = 0.05, SPEECH_OFF = 0.025; // mic level hysteresis
 
 export class SessionController {
   state: SessionState = initialState(0);
-  meta: ControllerMeta = { sessionId: null, sessionNumber: 0, storyNotes: true, notes: [], demo: false, interviewer: null, mode: 'loop', context: null, source: null, savedStory: null, answer: null };
+  meta: ControllerMeta = { sessionId: null, sessionNumber: 0, storyNotes: true, notes: [], demo: false, interviewer: null, mode: 'loop', context: null, source: null, savedStory: null, answer: null, answering: false };
   private listeners = new Set<Listener>();
   private off: (() => void) | null = null;
   private tick: ReturnType<typeof setInterval> | null = null;
@@ -116,7 +121,7 @@ export class SessionController {
     };
     this.session = session;
     const first = opts.interviewers.find((i) => i.role === 'Bar Raiser') ?? opts.interviewers[0] ?? null;
-    this.meta = { ...this.meta, sessionId: session.id, sessionNumber: number, storyNotes: opts.storyNotes, notes: [], interviewer: first, mode: opts.mode, source: null, savedStory: null, answer: null };
+    this.meta = { ...this.meta, sessionId: session.id, sessionNumber: number, storyNotes: opts.storyNotes, notes: [], interviewer: first, mode: opts.mode, source: null, savedStory: null, answer: null, answering: false };
     await this.repo.insertSession(session);
     this.dispatch({ type: 'CONNECT', now: this.now() });
     this.off = this.transport.on((e) => this.onTransport(e));
@@ -141,6 +146,29 @@ export class SessionController {
     if (!this.meta.source) void this.findSource(this.state.qText, this.state.lpName);
     this.transport.sendText('[HINT]');
   }
+  /**
+   * "Answer it for me": Mock answers the question it just asked, as the candidate, from their
+   * files and stories. The story goes on the screen at once (the library's closest, then the
+   * model's pick) and the voice tells it, then hands the question back.
+   */
+  async answerForMe(): Promise<void> {
+    const q = this.state.qText, lp = this.state.lpName;
+    if (!q || !this.opts || this.meta.answering) return;
+    this.transport.stopPlayback();
+    const lib = closestStory(q, lp, this.opts.lps, this.opts.stories);
+    this.meta = { ...this.meta, answer: lib ? cardOf(lib, lp, this.opts.lps) : this.meta.answer, answering: true };
+    this.emit();
+    let r: Answered | null = null;
+    try { r = this.opts.answerer ? await this.opts.answerer(q, lp) : null; } catch { r = null; }
+    if (this.state.qText !== q || this.ended) return;
+    const spoken = r?.spoken ?? (lib ? [lib.situation, lib.action, lib.result, lib.learning].filter(Boolean).join(' ') : '');
+    this.meta = { ...this.meta, answer: r?.card ?? this.meta.answer, answering: false };
+    this.emit();
+    this.transport.sendText('[MODEL_ANSWER] Answer the current question yourself, as the candidate, in the first person, so they hear a strong answer. ' +
+      (spoken ? 'Tell this story, keeping its numbers exact: ' + spoken : 'Use their strongest story for it (search_prep if needed).'));
+  }
+  hideAnswer(): void { this.meta = { ...this.meta, answer: null }; this.emit(); }
+
   /** "Better story": the coach searches the uploaded files for a stronger story for this question. */
   betterStory(): void {
     this.transport.stopPlayback();
@@ -256,7 +284,7 @@ export class SessionController {
         await this.closeExchange(now);
         this.dispatch({ type: 'NEW_QUESTION', now, interviewer: iv, question: a.question ?? '', lp: a.lp ?? '', questionId: a.question_id ?? null, hint: this.hintFor(a.lp ?? '') });
         this.openExchange(a.question ?? '', a.lp ?? '', a.question_id ?? null, iv, now);
-        this.meta = { ...this.meta, notes: this.notesFor(a.lp ?? ''), source: null, answer: this.opts?.mode === 'reverse' ? this.libraryCard(a.lp ?? '') : null };
+        this.meta = { ...this.meta, notes: this.notesFor(a.lp ?? ''), source: null, answer: this.opts?.mode === 'reverse' ? this.libraryCard(a.lp ?? '') : null, answering: false };
         this.emit();
         void this.findSource(a.question ?? '', a.lp ?? '');
         responses.push({ id: c.id, name: c.name, response: { ok: true, scheduling: 'SILENT' } });
