@@ -4,6 +4,7 @@
 // with the API's countTokens when a key is available.
 
 import coachTemplate from '../../prompts/coach.md?raw';
+import candidateTemplate from '../../prompts/candidate.md?raw';
 import type { Coaching, Lp, Mode, PrepFile, Question, QuestionSourceSetting, Report, Session, Story } from '../domain/types.ts';
 
 export interface ContextInput {
@@ -99,7 +100,9 @@ function render(input: ContextInput): string {
     SESSION_NUMBER: String(input.sessionNumber), DATE: input.date, MODE: input.mode, FOCUS: input.focus || 'none', COACHING: input.coaching, QUESTION_SOURCE: input.questionSource,
     PREVIOUS_SESSIONS: renderPrevious(input.previous), AREAS: renderLps(input.lps), STORIES: renderStories(input.stories, input.lps), QUESTIONS: renderQuestions(input.questions, input.lps), FILES: renderFiles(input.files),
   };
-  let text = coachTemplate.replace(/\{\{(\w+)\}\}/g, (_m, k: string) => fill[k] ?? '');
+  // Role swap: the user interviews and the model answers as them (prompts/candidate.md).
+  const template = input.mode === 'reverse' ? candidateTemplate : coachTemplate;
+  let text = template.replace(/\{\{(\w+)\}\}/g, (_m, k: string) => fill[k] ?? '');
   if (input.userInstruction?.trim()) text += '\n\n## Candidate’s own instruction\n' + input.userInstruction.trim() + '\n';
   return text;
 }

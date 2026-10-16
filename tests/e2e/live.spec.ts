@@ -55,3 +55,14 @@ test.describe('live session on the simulated transport', () => {
     await waitForPhase(page, ['ended', 'end'], 20_000);
   });
 });
+
+test('Swap roles: the setup sheet starts a session where you interview and Mock answers as you', async ({ page }) => {
+  await open(page);
+  await page.getByRole('button', { name: /^Change$/ }).first().click();
+  await page.getByRole('button', { name: /Swap roles/ }).click();
+  await expect(page.getByText('2 · Coaching')).toBeHidden();
+  await page.getByRole('button', { name: /^Start/ }).last().click();
+  await expect(page).toHaveURL(/#\/live$/);
+  await expect(page.getByText(/Role swap · you interview/).first()).toBeVisible({ timeout: 40_000 });
+  await expect(page.getByText(/You’re the interviewer/)).toBeVisible({ timeout: 40_000 });
+});
