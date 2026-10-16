@@ -18,7 +18,7 @@ import '../styles/screens/live.css';
 export type LivePhase = 'connecting' | 'interviewer' | 'answering' | 'thinking' | 'coaching' | 'end';
 export type LiveLayout = UiPrefs['liveLayout'];
 export type LiveVoice = UiPrefs['voiceVisual'];
-export type LiveAction = 'pause' | 'resume' | 'redo' | 'next' | 'hint' | 'dismissHint' | 'feedback' | 'end' | 'restart' | 'review';
+export type LiveAction = 'pause' | 'resume' | 'redo' | 'next' | 'hint' | 'betterStory' | 'dismissHint' | 'feedback' | 'end' | 'restart' | 'review';
 
 export interface LiveTurn { speaker: 'interviewer' | 'coach' | 'me'; text: string; mono: string }
 export interface LiveNote { t: string; n: string }
@@ -200,6 +200,7 @@ export default function LiveScreen(p: LiveScreenProps) {
       if (k === ' ') { if (isEnd || isConnecting) return; e.preventDefault(); p.onAction(paused ? 'resume' : 'pause'); }
       else if (k === 'r') { if (!isEnd && !isConnecting) p.onAction('redo'); }
       else if (k === 'n') { if (!isEnd && !isConnecting) p.onAction('next'); }
+      else if (k === 'b') { if ((showHandles || isCoaching) && !paused && !reverse) p.onAction('betterStory'); }
       else if (k === 'h') { if (showHandles && !paused && !reverse) p.onAction('hint'); }
       else if (k === 'escape') { if (aOpen) setAOpen(false); else if (tOpen) setTOpen(false); else if (!isEnd) p.onAction('end'); }
     };
@@ -400,13 +401,14 @@ export default function LiveScreen(p: LiveScreenProps) {
                 <button type="button" className="live-handle grow" onClick={() => setTOpen(!tOpen)} aria-expanded={tOpen}><span className="live-handle-t">Transcript · {p.turns.length} {p.turns.length === 1 ? 'turn' : 'turns'}</span><Icon.Up size={14} /></button>
                 {p.notesAllowed && !nOpen && <button type="button" className="live-handle" onClick={() => setNOpen(true)}>Notes</button>}
                 {!reverse && <button type="button" className="live-handle" onClick={() => p.onAction('hint')}>Hint</button>}
+                {!reverse && <button type="button" className="live-handle" onClick={() => p.onAction('betterStory')} title="Search your files for a stronger story">Better story</button>}
                 {reverse && <button type="button" className="live-handle" onClick={() => p.onAction('feedback')} title="Why Mock picked that story">Why that story?</button>}
                 {!reverse && isMine && <button type="button" className="live-handle" onClick={() => p.onAction('feedback')} title="Done — coach me now">Feedback</button>}
               </div>
             )}
             <div className="live-hf">{reverse
               ? <>You’re the interviewer: ask a question and Mock answers as you, from your stories. Say “again”, “next” or “why that story?”.{desktop ? ' Keys: Space pause · R again · N next · Esc end.' : ''}</>
-              : <>Hands-free: say “redo”, “next” or “hint”. Coaching starts when you stop talking.{desktop ? ' Keys: Space pause · R redo · N next · H hint · Esc end.' : ''}</>}</div>
+              : <>Hands-free: say “redo”, “next” or “hint”. Coaching starts when you stop talking.{desktop ? ' Keys: Space pause · R redo · N next · H hint · B better story · Esc end.' : ''}</>}</div>
             <div className="live-controls">
               {roundBtn(reverse ? (desktop ? 'Again · R' : 'Again') : desktop ? 'Redo · R' : 'Redo', reverse ? 'Answer again' : 'Redo this question', <Icon.Redo size={22} />, 'redo')}
               {roundBtn(desktop ? 'Pause · Space' : 'Pause', 'Pause', <Icon.Pause size={desktop ? 30 : 28} />, 'pause', true)}
@@ -417,7 +419,8 @@ export default function LiveScreen(p: LiveScreenProps) {
 
         {isCoaching && (
           <div className="live-coach-btns">
-            <button type="button" className="btn lg cool" onClick={() => p.onAction('redo')}><Icon.Redo size={18} />Redo answer{desktop ? ' · R' : ''}</button>
+            <button type="button" className="btn lg cool" onClick={() => p.onAction('redo')}><Icon.Redo size={18} />{desktop ? 'Redo answer · R' : 'Redo'}</button>
+            {!reverse && <button type="button" className="btn lg" onClick={() => p.onAction('betterStory')} title="Search your files for a stronger story">Better story{desktop ? ' · B' : ''}</button>}
             <button type="button" className="btn lg" style={{ flexDirection: 'column', gap: 3 }} onClick={() => p.onAction('next')}>Next question{desktop ? ' · N' : ''}{!desktop && <span className="live-next-sub">{c.nextAuto}</span>}</button>
           </div>
         )}
@@ -436,6 +439,7 @@ export default function LiveScreen(p: LiveScreenProps) {
             <button type="button" role="tab" aria-selected={sideTab === 'transcript'} className={'live-tab' + (sideTab === 'transcript' ? ' on' : '')} onClick={() => setSideTab('transcript')}>Transcript</button>
             {p.notesAllowed && <button type="button" role="tab" aria-selected={sideTab === 'notes'} className={'live-tab' + (sideTab === 'notes' ? ' on' : '')} onClick={() => setSideTab('notes')}>Story notes</button>}
             <span style={{ flex: 1 }} />
+            {!reverse && <button type="button" className="live-tab" onClick={() => p.onAction('betterStory')} title="Search your files for a stronger story">Better story · B</button>}
             <span className="live-side-count">Live · {p.turns.length} turns</span>
           </div>
           {!sideNotes && (

@@ -197,6 +197,7 @@ export default function Live() {
       case 'next': controller.next(); break;
       case 'feedback': controller.feedback(); break;
       case 'hint': controller.hint(); break;
+      case 'betterStory': controller.betterStory(); break;
       case 'dismissHint': controller.dismissHint(); break;
       case 'end': void controller.end(); break;
       case 'restart':
