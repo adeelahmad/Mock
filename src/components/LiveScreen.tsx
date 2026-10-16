@@ -13,6 +13,7 @@ import AnalysisCard, { type AnalysisCardData } from './AnalysisCard.tsx';
 import { Icon, Sheet, VerdictChip, fmt } from './ui.tsx';
 import type { Interviewer, Mode, UiPrefs, Verdict } from '../domain/types.ts';
 import type { Speaker } from '../domain/session-machine.ts';
+import type { StoryCard } from '../live/controller.ts';
 import '../styles/screens/live.css';
 
 export type LivePhase = 'connecting' | 'interviewer' | 'answering' | 'thinking' | 'coaching' | 'end';
@@ -46,6 +47,8 @@ export interface LiveCoaching {
 }
 
 export interface LiveScreenProps {
+  /** Role swap: the story Mock is telling as you, written large on the screen. */
+  answer?: StoryCard | null;
   /** The Gemini spend pill, shown in the header next to End. */
   spend?: React.ReactNode;
   phase: LivePhase;
@@ -142,6 +145,40 @@ function NoteRows({ notes, source }: { notes: LiveNote[]; source?: LiveSource | 
   );
 }
 
+/** "41 min to mitigate" → 41 min, big · "to mitigate", small. A labelled number stays as it is. */
+export function bigNumber(n: { label: string; value: string }): { value: string; label: string } {
+  if (n.label) return n;
+  const m = /^([~≈<>+\-−]?[$€£]?\d[\d,.]*\s?(?:%|×|x\b|[kKmMbB]\b|TB\b|GB\b|ms\b|min\b|hrs?\b|h\b|s\b|days?\b|weeks?\b|months?\b|yrs?\b|years?\b)?)\s+(.+)$/.exec(n.value.trim());
+  return m ? { value: m[1].trim(), label: m[2] } : n;
+}
+
+/** Role swap: the story on screen, decisive headline first and the numbers large. */
+function StoryBoard({ card }: { card: StoryCard }) {
+  const rows: [string, string][] = ([['Situation', card.situation], ['What I did', card.action], ['Result', card.result], ['Learning', card.learning]] as [string, string][]).filter(([, t]) => t);
+  return (
+    <section className="live-story" aria-label="The story Mock is telling as you">
+      <div className="stack g4">
+        <span className="label">{[card.lp, card.source].filter(Boolean).join(' · ') || 'Your story'}</span>
+        <h2 className="live-story-title">{card.title}</h2>
+      </div>
+      {card.headline && <p className="live-story-headline">{card.headline}</p>}
+      {card.numbers.length > 0 && (
+        <div className="live-story-nums">
+          {card.numbers.slice(0, 4).map((n, i) => {
+            const m = bigNumber(n);
+            return <div key={i} className={'live-story-num' + (m.value.length > 9 ? ' long' : '')}><span className="v">{m.value}</span>{m.label && <span className="l">{m.label}</span>}</div>;
+          })}
+        </div>
+      )}
+      {rows.length > 0 && (
+        <dl className="live-story-star">
+          {rows.map(([k, t]) => <div key={k}><dt>{k}</dt><dd>{t}</dd></div>)}
+        </dl>
+      )}
+    </section>
+  );
+}
+
 export default function LiveScreen(p: LiveScreenProps) {
   const desktop = useDesktop();
   const [tOpen, setTOpen] = useState(false);
@@ -182,6 +219,7 @@ export default function LiveScreen(p: LiveScreenProps) {
   const headName = isCoaching ? 'Coaching' : isEnd ? 'Mock' : ivKnown ? p.interviewer.name : 'Mock';
   const showLp = p.mode !== 'loop' && !isCoaching && !isEnd && !!p.lpName;
   const showHandles = isInterviewer || isMine;
+  const storyMode = reverse && !!p.answer && showHandles;
   const notesVisible = nOpen && p.notesAllowed && showHandles;
   const sideNotes = p.notesAllowed && sideTab === 'notes';
 
@@ -271,7 +309,18 @@ export default function LiveScreen(p: LiveScreenProps) {
             </div>
           )}
 
-          {layout === 'stage' && isInterviewer && (
+          {storyMode && p.answer && (
+            <div className="live-fill live-story-fill">
+              {p.qText && <div className="live-q answering">{p.qText}</div>}
+              <StoryBoard card={p.answer} />
+              <div className="live-nowrow">
+                {vizSmall}
+                <div className="stack g2 grow"><span className="live-nowrow-t">{nowText}</span><span className="sub" style={{ fontSize: 12 }}>{isInterviewer ? 'From your stories and files' : 'Ask the next question, or a follow-up'}</span></div>
+              </div>
+            </div>
+          )}
+
+          {!storyMode && layout === 'stage' && isInterviewer && (
             <div className="live-fill" style={{ gap: 16 }}>
               <div className="live-q" aria-live="polite">{qShown}{revealing && caret}</div>
               <div className="live-centre">
@@ -281,7 +330,7 @@ export default function LiveScreen(p: LiveScreenProps) {
             </div>
           )}
 
-          {layout === 'stage' && isMine && (
+          {!storyMode && layout === 'stage' && isMine && (
             <div className="live-fill" style={{ gap: 14 }}>
               <div className="live-q answering">{p.qText}</div>
               <div className="live-centre">
@@ -294,7 +343,7 @@ export default function LiveScreen(p: LiveScreenProps) {
             </div>
           )}
 
-          {layout === 'transcript' && showHandles && (
+          {!storyMode && layout === 'transcript' && showHandles && (
             <div className="live-fill" style={{ gap: 12 }}>
               <div className="live-pinned"><div className="label">{p.qLabel} · pinned</div><div className="live-pinned-q">{p.qText}</div></div>
               <Turns turns={p.turns} />
@@ -306,7 +355,7 @@ export default function LiveScreen(p: LiveScreenProps) {
             </div>
           )}
 
-          {layout === 'split' && showHandles && (
+          {!storyMode && layout === 'split' && showHandles && (
             <div className="live-fill" style={{ gap: 18 }}>
               <div className="card pad stack g12">
                 <div className="hstack between" style={{ gap: 10 }}>

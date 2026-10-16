@@ -273,6 +273,7 @@ export default function Live() {
       hintText={state.hintText}
       source={meta.source ? { file: meta.source.fileName, heading: meta.source.heading, text: meta.source.text } : null}
       notes={meta.storyNotes ? meta.notes : []}
+      answer={meta.answer}
       notesAllowed={meta.storyNotes}
       coaching={coaching}
       recap={recap}

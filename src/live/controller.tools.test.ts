@@ -74,3 +74,20 @@ describe('controller tools: search_prep, save_story, the hint source', () => {
     c.destroy();
   });
 });
+
+describe('role swap: the story on screen', () => {
+  it('declares show_story, prefills the library story on new_question, then shows what the model sends', async () => {
+    const repo = new MemoryRepo(sampleData());
+    const t = new ToolTransport();
+    const c = new SessionController(t, null, repo, () => Date.now(), false, { tickMs: 50 });
+    await c.start({ mode: 'reverse', focus: null, focusLabel: '', coaching: 'after_each', questionSource: 'mix', storyNotes: true, seed: 1, systemInstruction: '', interviewers: INTERVIEWERS, lps: LPS, stories: STORIES, pauseMs: 8, model: 'sim', voice: 'sim', retriever: null });
+    expect(t.config?.tools.map((x) => x.name)).toContain('show_story');
+    t.fire({ type: 'toolCall', calls: [{ id: 'q', name: 'new_question', args: { interviewer: 'You', question: 'Tell me about a problem others missed', lp: 'Dive Deep' } }] });
+    await until(() => !!c.meta.answer);
+    expect(c.meta.answer?.title).toBe('Payments outage');
+    t.fire({ type: 'toolCall', calls: [{ id: 's', name: 'show_story', args: { title: 'Billing migration', headline: 'Moved 14 TB with zero downtime.', result: 'Zero downtime', numbers: ['data: 14 TB', 'downtime: 0'] } }] });
+    await until(() => c.meta.answer?.title === 'Billing migration');
+    expect(c.meta.answer?.numbers).toEqual([{ label: 'data', value: '14 TB' }, { label: 'downtime', value: '0' }]);
+    c.destroy();
+  });
+});
