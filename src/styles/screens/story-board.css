@@ -1,0 +1,22 @@
+/* StoryBoard (components/StoryBoard.tsx): a story written large, numbers biggest. */
+.live-story { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 16px; padding: 18px; border-radius: 16px; background: var(--m-card); border: 1px solid var(--m-line); border-left: 4px solid var(--live-fg); scrollbar-width: none; }
+.live-story::-webkit-scrollbar { display: none; }
+.live-story-title { margin: 0; font: 700 24px/1.15 var(--font-sans); letter-spacing: -.02em; text-wrap: balance; }
+.live-story-headline { margin: 0; font: 700 21px/1.3 var(--font-sans); letter-spacing: -.015em; color: var(--m-fg); text-wrap: pretty; }
+.live-story-nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.live-story-num { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 12px; background: var(--m-warm-fill); color: var(--m-on-warm); }
+.live-story-num .v { font: 800 34px/1 var(--font-sans); letter-spacing: -.03em; font-variant-numeric: tabular-nums; overflow-wrap: break-word; }
+.live-story-num.long .v { font-size: 22px; line-height: 1.1; letter-spacing: -.01em; }
+.live-story-num .l { font: 600 12px/1.2 var(--font-sans); text-transform: uppercase; letter-spacing: .06em; opacity: .85; }
+.live-story-star { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.live-story-star dt { font: 600 11px/1.2 var(--font-sans); text-transform: uppercase; letter-spacing: .08em; color: var(--m-fg3); margin-bottom: 2px; }
+.live-story-star dd { margin: 0; font: 500 17px/1.4 var(--font-sans); color: var(--m-fg2); text-wrap: pretty; }
+
+@media (min-width: 900px) {
+  .live-story { padding: 26px 30px; gap: 20px; max-width: 900px; }
+  .live-story-title { font-size: 34px; }
+  .live-story-headline { font-size: 28px; }
+  .live-story-num .v { font-size: 52px; }
+  .live-story-num.long .v { font-size: 30px; }
+  .live-story-star dd { font-size: 20px; }
+}

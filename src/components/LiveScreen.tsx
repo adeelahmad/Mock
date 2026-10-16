@@ -14,12 +14,13 @@ import { Icon, Sheet, VerdictChip, fmt } from './ui.tsx';
 import type { Interviewer, Mode, UiPrefs, Verdict } from '../domain/types.ts';
 import type { Speaker } from '../domain/session-machine.ts';
 import type { StoryCard } from '../live/controller.ts';
+import StoryBoard from './StoryBoard.tsx';
 import '../styles/screens/live.css';
 
 export type LivePhase = 'connecting' | 'interviewer' | 'answering' | 'thinking' | 'coaching' | 'end';
 export type LiveLayout = UiPrefs['liveLayout'];
 export type LiveVoice = UiPrefs['voiceVisual'];
-export type LiveAction = 'pause' | 'resume' | 'redo' | 'next' | 'hint' | 'betterStory' | 'dismissHint' | 'feedback' | 'end' | 'restart' | 'review';
+export type LiveAction = 'pause' | 'resume' | 'redo' | 'next' | 'hint' | 'betterStory' | 'answerForMe' | 'hideAnswer' | 'dismissHint' | 'feedback' | 'end' | 'restart' | 'review';
 
 export interface LiveTurn { speaker: 'interviewer' | 'coach' | 'me'; text: string; mono: string }
 export interface LiveNote { t: string; n: string }
@@ -49,6 +50,8 @@ export interface LiveCoaching {
 export interface LiveScreenProps {
   /** Role swap: the story Mock is telling as you, written large on the screen. */
   answer?: StoryCard | null;
+  /** "Answer it for me" is finding the story. */
+  answering?: boolean;
   /** The Gemini spend pill, shown in the header next to End. */
   spend?: React.ReactNode;
   phase: LivePhase;
@@ -145,39 +148,7 @@ function NoteRows({ notes, source }: { notes: LiveNote[]; source?: LiveSource | 
   );
 }
 
-/** "41 min to mitigate" → 41 min, big · "to mitigate", small. A labelled number stays as it is. */
-export function bigNumber(n: { label: string; value: string }): { value: string; label: string } {
-  if (n.label) return n;
-  const m = /^([~≈<>+\-−]?[$€£]?\d[\d,.]*\s?(?:%|×|x\b|[kKmMbB]\b|TB\b|GB\b|ms\b|min\b|hrs?\b|h\b|s\b|days?\b|weeks?\b|months?\b|yrs?\b|years?\b)?)\s+(.+)$/.exec(n.value.trim());
-  return m ? { value: m[1].trim(), label: m[2] } : n;
-}
-
-/** Role swap: the story on screen, decisive headline first and the numbers large. */
-function StoryBoard({ card }: { card: StoryCard }) {
-  const rows: [string, string][] = ([['Situation', card.situation], ['What I did', card.action], ['Result', card.result], ['Learning', card.learning]] as [string, string][]).filter(([, t]) => t);
-  return (
-    <section className="live-story" aria-label="The story Mock is telling as you">
-      <div className="stack g4">
-        <span className="label">{[card.lp, card.source].filter(Boolean).join(' · ') || 'Your story'}</span>
-        <h2 className="live-story-title">{card.title}</h2>
-      </div>
-      {card.headline && <p className="live-story-headline">{card.headline}</p>}
-      {card.numbers.length > 0 && (
-        <div className="live-story-nums">
-          {card.numbers.slice(0, 4).map((n, i) => {
-            const m = bigNumber(n);
-            return <div key={i} className={'live-story-num' + (m.value.length > 9 ? ' long' : '')}><span className="v">{m.value}</span>{m.label && <span className="l">{m.label}</span>}</div>;
-          })}
-        </div>
-      )}
-      {rows.length > 0 && (
-        <dl className="live-story-star">
-          {rows.map(([k, t]) => <div key={k}><dt>{k}</dt><dd>{t}</dd></div>)}
-        </dl>
-      )}
-    </section>
-  );
-}
+const storyModeOf = (p: LiveScreenProps): boolean => !!p.answer;
 
 export default function LiveScreen(p: LiveScreenProps) {
   const desktop = useDesktop();
@@ -208,7 +179,7 @@ export default function LiveScreen(p: LiveScreenProps) {
   const reverse = p.mode === 'reverse';
   const timerNote = reverse ? (isThinking ? 'Your turn · ask a question' : 'You’re asking') : isThinking ? 'Still listening — coaching starts when you’re done' : cue ? '3:00 passed · start wrapping up' : 'Your answer';
   const listenDot = isThinking ? 'var(--m-fg3)' : who === 'me' ? 'var(--m-fg)' : 'var(--live-fg)';
-  const nowText = reverse ? (isInterviewer ? 'Mock is answering as you' : isThinking ? 'Your turn' : 'You’re asking') : isInterviewer ? first + ' is speaking' : isThinking ? 'Still listening' : 'You’re answering';
+  const nowText = storyModeOf(p) && !reverse ? (p.speaker === 'ai' ? 'Mock is answering for you' : 'Your turn: try it') : reverse ? (isInterviewer ? 'Mock is answering as you' : isThinking ? 'Your turn' : 'You’re asking') : isInterviewer ? first + ' is speaking' : isThinking ? 'Still listening' : 'You’re answering';
   const nowSub = isInterviewer ? p.interviewer.role : isThinking ? 'Pause detected · mic open' : 'Mic open';
   const mono = isCoaching ? 'Co' : isEnd ? 'M' : p.interviewer.mono;
   const roundLabel = isCoaching
@@ -219,7 +190,8 @@ export default function LiveScreen(p: LiveScreenProps) {
   const headName = isCoaching ? 'Coaching' : isEnd ? 'Mock' : ivKnown ? p.interviewer.name : 'Mock';
   const showLp = p.mode !== 'loop' && !isCoaching && !isEnd && !!p.lpName;
   const showHandles = isInterviewer || isMine;
-  const storyMode = reverse && !!p.answer && showHandles;
+  // The story on screen: role swap, or "Answer it for me" in any session.
+  const storyMode = !!p.answer && showHandles;
   const notesVisible = nOpen && p.notesAllowed && showHandles;
   const sideNotes = p.notesAllowed && sideTab === 'notes';
 
@@ -238,6 +210,7 @@ export default function LiveScreen(p: LiveScreenProps) {
       if (k === ' ') { if (isEnd || isConnecting) return; e.preventDefault(); p.onAction(paused ? 'resume' : 'pause'); }
       else if (k === 'r') { if (!isEnd && !isConnecting) p.onAction('redo'); }
       else if (k === 'n') { if (!isEnd && !isConnecting) p.onAction('next'); }
+      else if (k === 'a') { if (showHandles && !paused && !reverse && p.qText) p.onAction('answerForMe'); }
       else if (k === 'b') { if ((showHandles || isCoaching) && !paused && !reverse) p.onAction('betterStory'); }
       else if (k === 'h') { if (showHandles && !paused && !reverse) p.onAction('hint'); }
       else if (k === 'escape') { if (aOpen) setAOpen(false); else if (tOpen) setTOpen(false); else if (!isEnd) p.onAction('end'); }
@@ -312,10 +285,11 @@ export default function LiveScreen(p: LiveScreenProps) {
           {storyMode && p.answer && (
             <div className="live-fill live-story-fill">
               {p.qText && <div className="live-q answering">{p.qText}</div>}
-              <StoryBoard card={p.answer} />
+              <StoryBoard card={p.answer} label={reverse ? undefined : 'How you could answer it'} />
+              {!reverse && <div className="hstack" style={{ justifyContent: 'center' }}>{p.answering ? <span className="sub"><span className="spinner gold" style={{ width: 12, height: 12 }} /> Finding the best story in your files…</span> : <button type="button" className="btn sm" onClick={() => p.onAction('hideAnswer')}>Hide · my turn</button>}</div>}
               <div className="live-nowrow">
                 {vizSmall}
-                <div className="stack g2 grow"><span className="live-nowrow-t">{nowText}</span><span className="sub" style={{ fontSize: 12 }}>{isInterviewer ? 'From your stories and files' : 'Ask the next question, or a follow-up'}</span></div>
+                <div className="stack g2 grow"><span className="live-nowrow-t">{nowText}</span><span className="sub" style={{ fontSize: 12 }}>{reverse ? (isInterviewer ? 'From your stories and files' : 'Ask the next question, or a follow-up') : 'Mock answers this one for you · then your turn'}</span></div>
               </div>
             </div>
           )}
@@ -445,6 +419,9 @@ export default function LiveScreen(p: LiveScreenProps) {
 
         {showHandles && (
           <>
+            {!reverse && !storyMode && p.qText && (
+              <button type="button" className="btn live-answer-btn" onClick={() => p.onAction('answerForMe')} title="Mock answers this question as you, from your stories and files">⇄ Answer it for me{desktop ? ' · A' : ''}</button>
+            )}
             {!desktop && (
               <div className="live-handles">
                 <button type="button" className="live-handle grow" onClick={() => setTOpen(!tOpen)} aria-expanded={tOpen}><span className="live-handle-t">Transcript · {p.turns.length} {p.turns.length === 1 ? 'turn' : 'turns'}</span><Icon.Up size={14} /></button>
@@ -457,7 +434,7 @@ export default function LiveScreen(p: LiveScreenProps) {
             )}
             <div className="live-hf">{reverse
               ? <>You’re the interviewer: ask a question and Mock answers as you, from your stories. Say “again”, “next” or “why that story?”.{desktop ? ' Keys: Space pause · R again · N next · Esc end.' : ''}</>
-              : <>Hands-free: say “redo”, “next” or “hint”. Coaching starts when you stop talking.{desktop ? ' Keys: Space pause · R redo · N next · H hint · B better story · Esc end.' : ''}</>}</div>
+              : <>Hands-free: say “redo”, “next” or “hint”. Coaching starts when you stop talking.{desktop ? ' Keys: Space pause · R redo · N next · H hint · A answer it for me · B better story · Esc end.' : ''}</>}</div>
             <div className="live-controls">
               {roundBtn(reverse ? (desktop ? 'Again · R' : 'Again') : desktop ? 'Redo · R' : 'Redo', reverse ? 'Answer again' : 'Redo this question', <Icon.Redo size={22} />, 'redo')}
               {roundBtn(desktop ? 'Pause · Space' : 'Pause', 'Pause', <Icon.Pause size={desktop ? 30 : 28} />, 'pause', true)}

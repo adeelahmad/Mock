@@ -25,7 +25,8 @@ import { geminiEmbedder, type Embedder } from '../rag/embed.ts';
 import { readPrefs, writePrefs, readFlag, writeFlag } from './prefs.ts';
 import { DEFAULT_PRICING } from '../domain/budget.ts';
 import { DEFAULT_PROVIDERS, isLiveStack, missingFor, resolveStack, stackLabel, stackOf, withProviderDefaults, type ProviderSettings, type VoiceStack } from '../domain/providers.ts';
-import { makePipeline, textLlm, type ProviderKeys } from '../live/make-pipeline.ts';
+import { chatModel, makePipeline, textLlm, type ProviderKeys } from '../live/make-pipeline.ts';
+import { answerAs } from '../live/answer-as.ts';
 import { SYSTEM_PROMPT_BUDGET } from '../live/context.ts';
 import { setUsageSink } from '../gemini/usage.ts';
 import type { UsageEntry } from '../db/repo.ts';
@@ -336,6 +337,8 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     const { analyzer, reporter } = analysisPipeline({ key: demo ? null : gemini.key || null, llm, textModel: s.textModel, lps: data.lps, stories: data.stories, script: demo ? DEMO_SCRIPT : null, onFallback: (what, err) => toast((what === 'analysis' ? (llm ? 'Coach card failed' : 'Flash card failed') : (llm ? 'Report failed' : 'Flash report failed')) + ' — used the offline one (' + err.message + ')') });
     // Role swap: the model answers as the user, so there is no answer of theirs to card or report.
     const reverse = o.mode === 'reverse';
+    // "Answer it for me" writes the story with the text model (Gemini Flash, or the OpenAI-compatible one).
+    const storyModel = demo ? null : stack.llm === 'openai' ? (prov.openai.baseUrl.trim() ? chatModel(stack, prov, providerKeys, gemini.key, s.textModel) : null) : gemini.key ? chatModel(stack, prov, providerKeys, gemini.key, s.textModel) : null;
     if (reverse && demo) toast('Role swap needs a live model · the demo plays a normal interview');
     const c = new SessionController(transport, reverse ? null : analyzer, repo, () => Date.now(), demo, { reporter });
     controller.current = c;
@@ -352,7 +355,7 @@ export function AppProvider({ repo: given, children }: { repo?: Repo; children: 
     // Show the connecting screen while the mic is granted and the connection opens.
     setSheet({ setup: false, answer: null, addQuestion: false, addStory: false });
     routerGo('/live');
-    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: reverse ? [REVERSE_CANDIDATE] : INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: live ? s.liveModel : stack.llm === 'openai' ? prov.openai.model : s.textModel, voice: s.voice, questionText: o.questionText ?? null, retriever: index.current ? searchIndex : null, tools: demo ? [] : contextTools(repo) });
+    await c.start({ mode: o.mode, focus: o.focus ?? null, focusLabel: o.focusLabel ?? focusLp?.name ?? '', coaching: o.coaching ?? s.coaching, questionSource: s.questionSource, storyNotes: s.storyNotes, seed: s.seed, systemInstruction: ctx.text, interviewers: reverse ? [REVERSE_CANDIDATE] : INTERVIEWERS, lps: data.lps, stories: data.stories, pauseMs: s.pauseMs, model: live ? s.liveModel : stack.llm === 'openai' ? prov.openai.model : s.textModel, voice: s.voice, questionText: o.questionText ?? null, retriever: index.current ? searchIndex : null, tools: demo ? [] : contextTools(repo), answerer: (q, lp) => answerAs({ question: q, lp, lps: data.lps, stories: data.stories, model: storyModel, search: index.current ? searchIndex : null }) });
   }, [data, gemini.hasKey, gemini.key, providerKeys, repo, exitLive, toast, searchIndex]);
 
   // Budget: every Gemini call's tokens go to the ledger, batched so a live session writes at

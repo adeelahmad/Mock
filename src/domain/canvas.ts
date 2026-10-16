@@ -6,6 +6,7 @@
 // notes, written by the candidate or the AI) and the chat with the AI. Everything here is plain
 // data so a Meet call's other participants can be sent the same canvas (see canvas/addon.ts).
 
+import type { StoryCard } from '../live/controller.ts';
 import { roleOf, type AreaRole } from './game.ts';
 import type { Lp, Question, Story } from './types.ts';
 import { emptyBoard, mergeBoards, newId, type Board, type Who } from './board.ts';
@@ -38,15 +39,21 @@ export interface CanvasState extends Board {
   chat: ChatMsg[];
   /** Questions done this sitting. */
   done: number;
+  /** "Answer it for me" / swap roles: the story Mock tells as the candidate, written large. */
+  answer?: CanvasAnswer | null;
+  /** Swap roles: the candidate asks out loud, Mock answers from their files. */
+  swap?: boolean;
 }
 
+export interface CanvasAnswer { card: StoryCard; spoken: string; by: 'ai' | 'local' }
+
 export function emptyCanvas(): CanvasState {
-  return { questionId: '', questionText: '', phase: 'pick', misses: [], areaId: null, role: null, phrases: [], partial: '', chat: [], done: 0, ...emptyBoard() };
+  return { questionId: '', questionText: '', phase: 'pick', misses: [], areaId: null, role: null, phrases: [], partial: '', chat: [], done: 0, answer: null, swap: false, ...emptyBoard() };
 }
 
 /** Starts a question: keeps the board and the chat, clears the answer. */
 export function withQuestion(s: CanvasState, q: Pick<Question, 'id' | 'text'>): CanvasState {
-  return { ...s, questionId: q.id, questionText: q.text, phase: 'pick', misses: [], areaId: null, role: null, phrases: [], partial: '' };
+  return { ...s, questionId: q.id, questionText: q.text, phase: 'pick', misses: [], areaId: null, role: null, phrases: [], partial: '', answer: null };
 }
 
 /** A pick: right (the question is tagged with it) moves on to the answer; wrong is remembered. */

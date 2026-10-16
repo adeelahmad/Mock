@@ -166,3 +166,35 @@ test.describe('prep canvas', () => {
     await expect(page.locator('.wb-note.ai')).toHaveText(/S · T · A · R: lead with the 40% number/);
   });
 });
+
+test.describe('canvas: Mock answers as you', () => {
+  test.setTimeout(90_000);
+
+  test('Answer it for me writes the best story large; swap roles answers the question you ask out loud', async ({ page }) => {
+    await page.addInitScript(CHROME_SPEECH);
+    await open(page, '#/canvas');
+    await expect(page.getByText('Question 1')).toBeVisible();
+    // Answer the drill's question as you, before even picking the area.
+    await page.getByRole('button', { name: /Answer it for me/ }).click();
+    const board = page.getByRole('region', { name: 'How you could answer it' });
+    await expect(board).toBeVisible();
+    await expect(board.locator('.live-story-num .v').first()).toBeVisible();
+    await page.getByRole('button', { name: 'My turn: try it' }).click();
+    await expect(board).toBeHidden();
+
+    // Swap roles: ask out loud; after a short quiet Mock answers from your stories.
+    await page.getByRole('button', { name: /Swap roles/ }).click();
+    await expect(page.getByText('Your question')).toBeVisible();
+    await page.getByRole('button', { name: 'Listen' }).click();
+    await say(page, 'Tell me about a time you dove deep into an outage.');
+    await expect(page.locator('.cv-q-text')).toHaveText(/dove deep into an outage/);
+    const told = page.getByRole('region', { name: 'The story Mock is telling as you' });
+    await expect(told).toBeVisible({ timeout: 10_000 });
+    await expect(told.locator('.live-story-title')).toHaveText(/\S/);
+    // Typing a question works too.
+    await page.getByRole('textbox', { name: 'Message the AI' }).fill('How did you cut costs?');
+    await page.getByRole('button', { name: 'Send' }).click();
+    await expect(page.locator('.cv-q-text')).toHaveText('How did you cut costs?');
+    await expect(told).toBeVisible({ timeout: 10_000 });
+  });
+});

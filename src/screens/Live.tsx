@@ -198,6 +198,8 @@ export default function Live() {
       case 'feedback': controller.feedback(); break;
       case 'hint': controller.hint(); break;
       case 'betterStory': controller.betterStory(); break;
+      case 'answerForMe': void controller.answerForMe(); break;
+      case 'hideAnswer': controller.hideAnswer(); break;
       case 'dismissHint': controller.dismissHint(); break;
       case 'end': void controller.end(); break;
       case 'restart':
@@ -274,6 +276,7 @@ export default function Live() {
       source={meta.source ? { file: meta.source.fileName, heading: meta.source.heading, text: meta.source.text } : null}
       notes={meta.storyNotes ? meta.notes : []}
       answer={meta.answer}
+      answering={meta.answering}
       notesAllowed={meta.storyNotes}
       coaching={coaching}
       recap={recap}
